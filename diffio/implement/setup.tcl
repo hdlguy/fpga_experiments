@@ -2,8 +2,7 @@
 close_project -quiet
 file delete -force proj.xpr *.os *.jou *.log proj.srcs proj.cache proj.runs
 #
-create_project -force proj 
-set_property part xc7a100ticsg324-1 [current_project]
+create_project -part xc7a100tcsg324-1 -force proj 
 set_property target_language verilog [current_project]
 set_property default_lib work [current_project]
 
