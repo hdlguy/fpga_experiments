@@ -8,6 +8,9 @@ update_compile_order -fileset sources_1
 reset_run synth_1
 launch_runs synth_1 -jobs 8
 wait_on_run synth_1
+
+#source add_ila.tcl
+
 launch_runs impl_1 -jobs 8
 wait_on_run impl_1
 

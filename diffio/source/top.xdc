@@ -1,9 +1,9 @@
 
-create_clock -period 10.0 [get_ports clkin100]
-create_clock -period 25.0 [get_ports synclk_p[3]]
-create_clock -period 25.0 [get_ports synclk_p[2]]
-create_clock -period 25.0 [get_ports synclk_p[1]]
-create_clock -period 25.0 [get_ports synclk_p[0]]
+create_clock -name clk100  -period 10.0 [get_ports clkin100]
+create_clock -name synclk3 -period 25.0 [get_ports synclk_p[3]]
+create_clock -name synclk2 -period 25.0 [get_ports synclk_p[2]]
+create_clock -name synclk1 -period 25.0 [get_ports synclk_p[1]]
+create_clock -name synclk0 -period 25.0 [get_ports synclk_p[0]]
 #create_generated_clock -name d_p_1 -source [get_pins {ODDR_inst/C}] -divide_by 1 -add -master_clock [get_clocks -of [get_pins ODDR_inst/C] -filter {IS_GENERATED && MASTER_CLOCK == clkin100}] [get_ports {d_p}]
 
 

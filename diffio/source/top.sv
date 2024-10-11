@@ -25,12 +25,10 @@ module top(
     end
     
     // flash some leds with the received clocks
-    logic[3:0][27:0] led_count;
-    generate for (genvar i=0; i<4; i++) begin  
-        always_ff @(posedge rxclk[i]) begin 
-            led_count[i] <= led_count[i] + 1;
-            led[i] <= led_count[i][24];
-        end   
-    end endgenerate     
+    logic [27:0] led_count3, led_count2, led_count1, led_count0;
+    always_ff @(posedge rxclk[3]) begin led_count3 <= led_count3 + 1; led[3] <= led_count3[24]; end   
+    always_ff @(posedge rxclk[2]) begin led_count2 <= led_count2 + 1; led[2] <= led_count2[24]; end   
+    always_ff @(posedge rxclk[1]) begin led_count1 <= led_count1 + 1; led[1] <= led_count1[24]; end   
+    always_ff @(posedge rxclk[0]) begin led_count0 <= led_count0 + 1; led[0] <= led_count0[24]; end   
 
 endmodule
