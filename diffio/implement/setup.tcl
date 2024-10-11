@@ -16,7 +16,7 @@ read_verilog -sv    ../source/top.sv
 read_xdc            ../source/top.xdc  
 
 read_xdc            ../source/add_ila.xdc  
-set_property used_in_synthesis false ../source/add_ila.xdc
+set_property used_in_synthesis false [get_files ../source/add_ila.xdc]
 
 
 close_project
