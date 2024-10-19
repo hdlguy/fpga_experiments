@@ -74,12 +74,16 @@ module top (
         .m_axi_wvalid   (m_axi_wvalid)
     );
 
+    localparam logic[31:0] VERSION = 32'h00_01_02_03;
+    localparam logic[31:0] ID      = 32'hDEADBEEF;
     localparam integer LOG2_NREGS = 4;
     localparam integer NREGS = 2**LOG2_NREGS;
     logic [NREGS-1:0][31:0] slv_reg, slv_read, slv_wr_pulse;
     
-//    assign led = slv_reg[15][7:0];
-    assign slv_read = slv_reg;
+    assign slv_read[0] = VERSION;
+    assign slv_read[1] = ID;
+    assign led = slv_reg[2][7:0];
+    assign slv_read[NREGS-1:2] = slv_reg[NREGS-1:2];
 
 	axi_regfile_v1_0_S00_AXI #	(
 		.C_S_AXI_DATA_WIDTH (32),
@@ -113,13 +117,13 @@ module top (
 		.S_AXI_WVALID  (m_axi_wvalid )
 	);
 	
-	logic[31:0] led_count=0;
-	always_ff @(posedge clk) begin
-	   led_count <= led_count + 1;
-	   led <= led_count[27:20];
-	end
+//	logic[31:0] led_count=0;
+//	always_ff @(posedge clk) begin
+//	   led_count <= led_count + 1;
+//	   led <= led_count[27:20];
+//	end
 	
-	top_ila ila_inst (.clk(clk), .probe0(led_count));
+//	top_ila ila_inst (.clk(clk), .probe0(led_count));
 
 endmodule
 
