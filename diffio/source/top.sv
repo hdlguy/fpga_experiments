@@ -24,7 +24,7 @@ module top(
         led[7] <= clk_count[24];
     end
     
-    // flash some leds with the received clocks
+    // flash some leds with the four received clocks
     logic [27:0] led_count3, led_count2, led_count1, led_count0;
     always_ff @(posedge rxclk[3]) begin led_count3 <= led_count3 + 1; led[3] <= led_count3[24]; end   
     always_ff @(posedge rxclk[2]) begin led_count2 <= led_count2 + 1; led[2] <= led_count2[24]; end   
