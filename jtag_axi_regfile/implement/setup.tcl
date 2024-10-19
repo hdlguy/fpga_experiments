@@ -13,6 +13,7 @@ tclapp::install ultrafast -quiet
 set_property CUSTOMIZED_DEFAULT_IP_LOCATION ./ [current_project]
 
 read_ip ../source/clkwiz/clkwiz.xci
+read_ip ../source/top_ila/top_ila.xci
 upgrade_ip -quiet  [get_ips *]
 generate_target {all} [get_ips *]
 

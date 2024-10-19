@@ -197,7 +197,7 @@ proc create_root_design { parentCell } {
   set_property -dict [ list \
    CONFIG.ADDR_WIDTH {32} \
    CONFIG.DATA_WIDTH {32} \
-   CONFIG.FREQ_HZ {40000000} \
+   CONFIG.FREQ_HZ {100000000} \
    CONFIG.HAS_BURST {0} \
    CONFIG.HAS_CACHE {0} \
    CONFIG.HAS_LOCK {0} \
@@ -210,7 +210,7 @@ proc create_root_design { parentCell } {
 
 
   # Create ports
-  set clk [ create_bd_port -dir I -type clk -freq_hz 40000000 clk ]
+  set clk [ create_bd_port -dir I -type clk -freq_hz 100000000 clk ]
   set resetn [ create_bd_port -dir I -type rst resetn ]
   set_property -dict [ list \
    CONFIG.POLARITY {ACTIVE_LOW} \

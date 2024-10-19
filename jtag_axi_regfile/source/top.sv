@@ -7,8 +7,23 @@ module top (
     logic clk;
     
     logic locked;
-    clkwiz clkwiz_inst (.clk_out1(clk), .clk_in1(clkin100), .locked(locked));
-    assign resetn = ~locked;
+//    clkwiz clkwiz_inst (.clk_out1(clk), .clk_in1(clkin100), .locked(locked));
+//    assign resetn = ~locked;
+    assign clk = clkin100;
+
+    // generate the power up reset.
+    logic reset;
+    logic[7:0] reset_count = 255;
+    always_ff @(posedge clk) begin
+        if (reset_count != 0) begin
+            reset_count <= reset_count - 1;
+            reset <= 1;
+        end else begin
+            reset <= 0;
+        end
+    end
+    assign resetn = ~reset;
+
 
     logic           axi_aresetn;
     logic           axi_aclk;
@@ -63,7 +78,7 @@ module top (
     localparam integer NREGS = 2**LOG2_NREGS;
     logic [NREGS-1:0][31:0] slv_reg, slv_read, slv_wr_pulse;
     
-    assign led = slv_reg[15][7:0];
+//    assign led = slv_reg[15][7:0];
     assign slv_read = slv_reg;
 
 	axi_regfile_v1_0_S00_AXI #	(
@@ -97,6 +112,14 @@ module top (
 		.S_AXI_WSTRB   (m_axi_wstrb  ),
 		.S_AXI_WVALID  (m_axi_wvalid )
 	);
+	
+	logic[31:0] led_count=0;
+	always_ff @(posedge clk) begin
+	   led_count <= led_count + 1;
+	   led <= led_count[27:20];
+	end
+	
+	top_ila ila_inst (.clk(clk), .probe0(led_count));
 
 endmodule
 
