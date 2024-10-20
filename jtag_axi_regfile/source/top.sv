@@ -1,4 +1,5 @@
 module top (
+    input   logic       rstn,
     input   logic       clkin100,
     output  logic[7:0]  led
 );
@@ -15,11 +16,15 @@ module top (
     logic reset;
     logic[7:0] reset_count = 255;
     always_ff @(posedge clk) begin
-        if (reset_count != 0) begin
-            reset_count <= reset_count - 1;
-            reset <= 1;
+        if (rstn == 0) begin
+            reset_count <= 255;
         end else begin
-            reset <= 0;
+            if (reset_count != 0) begin
+                reset_count <= reset_count - 1;
+                reset <= 1;
+            end else begin
+                reset <= 0;
+            end
         end
     end
     assign resetn = ~reset;
@@ -82,7 +87,7 @@ module top (
     
     assign slv_read[0] = VERSION;
     assign slv_read[1] = ID;
-    assign led = slv_reg[2][7:0];
+    assign led[3:0] = slv_reg[3][3:0];
     assign slv_read[NREGS-1:2] = slv_reg[NREGS-1:2];
 
 	axi_regfile_v1_0_S00_AXI #	(
@@ -117,13 +122,13 @@ module top (
 		.S_AXI_WVALID  (m_axi_wvalid )
 	);
 	
-//	logic[31:0] led_count=0;
-//	always_ff @(posedge clk) begin
-//	   led_count <= led_count + 1;
-//	   led <= led_count[27:20];
-//	end
+	logic[31:0] led_count=0;
+	always_ff @(posedge clk) begin
+	   led_count <= led_count + 1;
+	   led[7:4] <= led_count[27:24];
+	end
 	
-//	top_ila ila_inst (.clk(clk), .probe0(led_count));
+	top_ila ila_inst (.clk(axi_aclk), .probe0({axi_aresetn, m_axi_arvalid, m_axi_araddr, m_axi_awvalid, m_axi_awaddr, m_axi_rvalid, m_axi_rdata, m_axi_wvalid, m_axi_wdata})); // 4*32+5=133
 
 endmodule
 
