@@ -106,8 +106,8 @@ module top (
         .qspi_ss_o      (qspi_ss_o),
         .qspi_ss_t      (qspi_ss_t),       
         //
-        .uart_rxd       (uart_rxd),
-        .uart_txd       (uart_txd)
+        .usb_uart_rxd   (uart_rxd),
+        .usb_uart_txd   (uart_txd)
     );
     IOBUF qspi_io0_iobuf (.I(qspi_io_o[0]), .IO(qspi_io_io[0]), .O(qspi_io_i[0]), .T(qspi_io_t[0]));
     IOBUF qspi_io1_iobuf (.I(qspi_io_o[1]), .IO(qspi_io_io[1]), .O(qspi_io_i[1]), .T(qspi_io_t[1]));
