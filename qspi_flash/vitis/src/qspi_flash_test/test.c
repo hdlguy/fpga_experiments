@@ -4,6 +4,7 @@
 #include "xil_exception.h"
 #include "xintc.h"
 #include <xil_printf.h>
+#include <stdlib.h>
 #include "fpga.h"
 
 #define SPI_DEVICE_ID	XPAR_SPI_0_DEVICE_ID
@@ -91,6 +92,8 @@ int main(void)
 	u32 Address;
 	XSpi_Config *ConfigPtr;	/* Pointer to Configuration data */
 
+	/////////////////////// Setup ///////////////////////////////
+
 	// Initialize the SPI driver so that it's ready to use, specify the device ID that is generated in xparameters.h.
 	ConfigPtr = XSpi_LookupConfig(SPI_DEVICE_ID);
 	if (ConfigPtr == NULL) {
@@ -175,9 +178,15 @@ int main(void)
 
 		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
 
-		// Fill WriteBuffer with address
-		for (int j=0; j<PAGE_SIZE; j++) {
-			WriteBuffer[j] = (u8)(j);
+
+		//	for (u32 Index = 4; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES; Index++) {
+		//		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
+		//	}
+
+		// Fill WriteBuffer
+		srand(Address);
+		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
+			WriteBuffer[j] = (u8)rand();
 		}
 
 		// Enable writes
@@ -186,7 +195,7 @@ int main(void)
 			return XST_FAILURE;
 		}
 
-		/* Write the data using Quad Fast Write command. Erase is not required since we are writing to next page with in the same erased sector */
+		// Write the data using Quad Fast Write command.
 		Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
 		if (Status != XST_SUCCESS) {
 			return XST_FAILURE;
@@ -213,6 +222,12 @@ int main(void)
 		Status = SpiFlashWaitForFlashReady();
 		if (Status != XST_SUCCESS) {
 			return XST_FAILURE;
+		}
+
+		// Fill WriteBuffer
+		srand(Address);
+		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
+			WriteBuffer[j] = (u8)rand();
 		}
 
 		/* Clear the read Buffer. */
