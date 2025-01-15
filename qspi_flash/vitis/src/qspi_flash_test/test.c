@@ -4,6 +4,7 @@
 #include "xil_exception.h"
 #include "xintc.h"
 #include <xil_printf.h>
+#include "fpga.h"
 
 #define SPI_DEVICE_ID	XPAR_SPI_0_DEVICE_ID
 #define INTC_DEVICE_ID	XPAR_INTC_0_DEVICE_ID
@@ -22,7 +23,7 @@
 #define COMMAND_QUAD_READ		0x6B /* Quad Output Fast Read */
 #define COMMAND_QUAD_IO_READ	0xEB /* Quad IO Fast Read */
 #define	COMMAND_WRITE_ENABLE	0x06 /* Write Enable command */
-#define COMMAND_SECTOR_ERASE	0xD8 /* Sector Erase command */
+#define COMMAND_SECTOR_ERASE	0xD8 /* Sector Erase command (64KB) */
 #define COMMAND_BULK_ERASE		0xC7 /* Bulk Erase command */
 #define COMMAND_STATUSREG_READ	0x05 /* Status read command */
 
@@ -35,10 +36,14 @@
 
 #define FLASH_SR_IS_READY_MASK		0x01 /* Ready mask */
 
-#define PAGE_SIZE			256
+#define PAGE_SIZE			256	// fixed by flash chip
+#define IMAGE_SIZE			0x400000
+#define NUM_PAGES			(IMAGE_SIZE/PAGE_SIZE)
+#define SECTOR_SIZE			0x10000
+#define NUM_SECTORS			(IMAGE_SIZE/SECTOR_SIZE)
 
 //#define FLASH_TEST_ADDRESS		0x00
-#define FLASH_TEST_ADDRESS		0x200000
+#define FLASH_TEST_ADDRESS		0x400000
 
 #define BYTE1				0 /* Byte 1 position */
 #define BYTE2				1 /* Byte 2 position */
@@ -77,7 +82,7 @@ static int ErrorCount;
 static u8 ReadBuffer[PAGE_SIZE + READ_WRITE_EXTRA_BYTES + 4];
 static u8 WriteBuffer[PAGE_SIZE + READ_WRITE_EXTRA_BYTES];
 
-static u8 TestByte = 0x20;
+//static u8 TestByte = 0x20;
 
 int main(void)
 {
@@ -124,30 +129,78 @@ int main(void)
 
 	// Specify address in the Quad Serial Flash for the Erase/Write/Read operations.
 	Address = FLASH_TEST_ADDRESS;
+	
+	uint32_t* regptr = (uint32_t *)REG_BASEADDR;
 
-	// Perform the Write Enable operation.
-	Status = SpiFlashWriteEnable(&Spi);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	xil_printf("\r\nqspi_flash_test\r\n");
+	xil_printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\r\n", regptr[FPGA_VERSION], regptr[FPGA_VERSION]);
 
-	/* Perform the Sector Erase operation. */
-	Status = SpiFlashSectorErase(&Spi, Address);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	////////////////////////// Erase ///////////////////////
 
-	Status = SpiFlashWriteEnable(&Spi);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	xil_printf("** Erase\r\n");
 
-	/* Write the data to the next Page using Quad Fast Write command. Erase is not required since we are writing to next page with in the same erased sector */
-	TestByte = 0x09;
-	Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
+	for (int i=0; i<NUM_SECTORS; i++) {
+
+		xil_printf("Sector %d/%d\r", i+1, NUM_SECTORS);
+		regptr[LED_CONTROL] = i/4;
+
+		Address = FLASH_TEST_ADDRESS + i * SECTOR_SIZE;
+
+		// Perform the Write Enable operation.
+		Status = SpiFlashWriteEnable(&Spi);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/* Perform the Sector Erase operation. */
+		Status = SpiFlashSectorErase(&Spi, Address);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
 	}
+	xil_printf("Sector %d/%d\r\n", NUM_SECTORS, NUM_SECTORS);
+
+
+	///////////////////////// Write //////////////////////////////
+
+	xil_printf("** Write\r\n");
+
+	for (int i=0; i<NUM_PAGES; i++){
+
+		if ((i%1024)==0) {
+			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+			regptr[LED_CONTROL] = i/1024;
+		}
+
+		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
+
+		// Fill WriteBuffer with address
+		for (int j=0; j<PAGE_SIZE; j++) {
+			WriteBuffer[j] = (u8)(j);
+		}
+
+		// Enable writes
+		Status = SpiFlashWriteEnable(&Spi);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/* Write the data using Quad Fast Write command. Erase is not required since we are writing to next page with in the same erased sector */
+		Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+	}
+	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+
+
+	//////////////////////////// read and check///////////////////////////
+
+	xil_printf("** Verify\r\n");
+
+	Address = FLASH_TEST_ADDRESS;
 
 	/* Wait while the Flash is busy. */
 	Status = SpiFlashWaitForFlashReady();
@@ -161,11 +214,13 @@ int main(void)
 		ReadBuffer[Index] = 0x0;
 	}
 
+
 	/* Read the data from the Page using Quad IO Fast Read command. */
 	Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
+
 
 	/* Compare the data read against the data written. */
 	u8 wval, rval;
@@ -173,24 +228,22 @@ int main(void)
 		rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
 		wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
 		if (rval != wval) {
-			xil_printf("error: %02x  %02x\r\n", rval, wval);
+			xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
 			return XST_FAILURE;
 		}
 	}
-	
 
-//	for (Index = 0; Index < PAGE_SIZE; Index++) {
-//		xil_printf("%d 0x%02x\r\n", Index,  ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES]);
-//	}
+	xil_printf("data compare complete\r\n");
+
 	
-	char printstr[200];
-	for (int i = 0; i < 200; i++) {
+	char printstr[PAGE_SIZE];
+	for (int i = 0; i < PAGE_SIZE; i++) {
 		printstr[i] = ReadBuffer[i + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
 	}
-	printstr[200-1] = '\0';
+	printstr[PAGE_SIZE-1] = '\0';
 	xil_printf("%s\r\n", printstr);
 
-	xil_printf("Successfully ran Spi numonyx flash quad Example\r\n");
+	xil_printf("Success!\r\n");
 
 	while(1);
 
@@ -247,7 +300,6 @@ int SpiFlashWriteEnable(XSpi *SpiPtr)
 * @note		None */
 int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd)
 {
-	u32 Index;
 	int Status;
 
 	Status = SpiFlashWaitForFlashReady();
@@ -255,37 +307,26 @@ int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd)
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Prepare the WriteBuffer.
-	 */
+	/* Prepare the WriteBuffer. */
 	WriteBuffer[BYTE1] = WriteCmd;
 	WriteBuffer[BYTE2] = (u8) (Addr >> 16);
 	WriteBuffer[BYTE3] = (u8) (Addr >> 8);
 	WriteBuffer[BYTE4] = (u8) Addr;
 
 
-	/*
-	 * Fill in the TEST data that is to be written into the Numonyx Serial
-	 * Flash device.
-	 */
-	for (Index = 4; Index < ByteCount + READ_WRITE_EXTRA_BYTES; Index++) {
-		//WriteBuffer[Index] = (u8)((Index - 4) + TestByte);
-		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
-	}
+//	/* Fill in the TEST data that is to be written into the Numonyx Serial Flash device. */
+//	for (u32 Index = 4; Index < ByteCount + READ_WRITE_EXTRA_BYTES; Index++) {
+//		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
+//	}
 
-	/*
-	 * Initiate the Transfer.
-	 */
+	/* Initiate the Transfer. */
 	TransferInProgress = TRUE;
 	Status = XSpi_Transfer(SpiPtr, WriteBuffer, NULL, (ByteCount + READ_WRITE_EXTRA_BYTES));
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Wait till the Transfer is complete and check if there are any errors
-	 * in the transaction.
-	 */
+	 // Wait till the Transfer is complete and check if there are any errors in the transaction.
 	while (TransferInProgress);
 	if (ErrorCount != 0) {
 		ErrorCount = 0;
@@ -395,21 +436,15 @@ int SpiFlashBulkErase(XSpi *SpiPtr)
 	return XST_SUCCESS;
 }
 
-/*****************************************************************************/
-/**
-*
-* This function erases the contents of the specified Sector in the Numonyx
-* Serial Flash device.
+/* 
+* This function erases the contents of the specified Sector in the Numonyx Serial Flash device.
 *
 * @param	SpiPtr is a pointer to the instance of the Spi device.
-* @param	Addr is the address within a sector of the Buffer, which is to
-*		be erased.
+* @param	Addr is the address within a sector of the Buffer, which is to be erased.
 *
 * @return	XST_SUCCESS if successful else XST_FAILURE.
 *
-* @note		The erased bytes will be read back as 0xFF.
-*
-******************************************************************************/
+* @note		The erased bytes will be read back as 0xFF. */
 int SpiFlashSectorErase(XSpi *SpiPtr, u32 Addr)
 {
 	int Status;
@@ -422,9 +457,7 @@ int SpiFlashSectorErase(XSpi *SpiPtr, u32 Addr)
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Prepare the WriteBuffer.
-	 */
+	// Prepare the WriteBuffer.
 	WriteBuffer[BYTE1] = COMMAND_SECTOR_ERASE;
 	WriteBuffer[BYTE2] = (u8) (Addr >> 16);
 	WriteBuffer[BYTE3] = (u8) (Addr >> 8);
@@ -434,16 +467,12 @@ int SpiFlashSectorErase(XSpi *SpiPtr, u32 Addr)
 	 * Initiate the Transfer.
 	 */
 	TransferInProgress = TRUE;
-	Status = XSpi_Transfer(SpiPtr, WriteBuffer, NULL,
-			       SECTOR_ERASE_BYTES);
+	Status = XSpi_Transfer(SpiPtr, WriteBuffer, NULL, SECTOR_ERASE_BYTES);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Wait till the Transfer is complete and check if there are any errors
-	 * in the transaction..
-	 */
+	/* Wait till the Transfer is complete and check if there are any errors in the transaction.. */
 	while (TransferInProgress);
 	if (ErrorCount != 0) {
 		ErrorCount = 0;
@@ -479,8 +508,7 @@ int SpiFlashGetStatus(XSpi *SpiPtr)
 	 * Initiate the Transfer.
 	 */
 	TransferInProgress = TRUE;
-	Status = XSpi_Transfer(SpiPtr, WriteBuffer, ReadBuffer,
-			       STATUS_READ_BYTES);
+	Status = XSpi_Transfer(SpiPtr, WriteBuffer, ReadBuffer, STATUS_READ_BYTES);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
