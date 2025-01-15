@@ -132,7 +132,7 @@ int main(void)
 	
 	uint32_t* regptr = (uint32_t *)REG_BASEADDR;
 
-	xil_printf("\r\nqspi_flash_test\r\n");
+	xil_printf("\r\n**** qspi_flash_test ****\r\n");
 	xil_printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\r\n", regptr[FPGA_VERSION], regptr[FPGA_VERSION]);
 
 	////////////////////////// Erase ///////////////////////
@@ -200,48 +200,46 @@ int main(void)
 
 	xil_printf("** Verify\r\n");
 
-	Address = FLASH_TEST_ADDRESS;
+	for (int i=0; i<NUM_PAGES; i++){
 
-	/* Wait while the Flash is busy. */
-	Status = SpiFlashWaitForFlashReady();
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+		if ((i%1024)==0) {
+			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+			regptr[LED_CONTROL] = i/1024;
+		}
 
+		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
 
-	/* Clear the read Buffer. */
-	for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
-		ReadBuffer[Index] = 0x0;
-	}
-
-
-	/* Read the data from the Page using Quad IO Fast Read command. */
-	Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-
-	/* Compare the data read against the data written. */
-	u8 wval, rval;
-	for (Index = 0; Index < PAGE_SIZE; Index++) {
-		rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
-		wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
-		if (rval != wval) {
-			xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
+		/* Wait while the Flash is busy. */
+		Status = SpiFlashWaitForFlashReady();
+		if (Status != XST_SUCCESS) {
 			return XST_FAILURE;
 		}
-	}
 
-	xil_printf("data compare complete\r\n");
+		/* Clear the read Buffer. */
+		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+			ReadBuffer[Index] = 0x0;
+		}
 
-	
-	char printstr[PAGE_SIZE];
-	for (int i = 0; i < PAGE_SIZE; i++) {
-		printstr[i] = ReadBuffer[i + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+		/* Read the data from the Page using Quad IO Fast Read command. */
+		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/* Compare the data read against the data written. */
+		u8 wval, rval;
+		for (Index = 0; Index < PAGE_SIZE; Index++) {
+			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
+			if (rval != wval) {
+				xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
+				return XST_FAILURE;
+			}
+		}
+
 	}
-	printstr[PAGE_SIZE-1] = '\0';
-	xil_printf("%s\r\n", printstr);
+	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+
 
 	xil_printf("Success!\r\n");
 
