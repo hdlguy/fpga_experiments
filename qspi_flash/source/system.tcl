@@ -457,7 +457,7 @@ proc create_root_design { parentCell } {
   set_property -dict [list \
     CONFIG.C_SPI_MEMORY {2} \
     CONFIG.C_SPI_MODE {2} \
-    CONFIG.C_USE_STARTUP {0} \
+    CONFIG.C_USE_STARTUP {1} \
   ] $axi_quad_spi_0
 
 

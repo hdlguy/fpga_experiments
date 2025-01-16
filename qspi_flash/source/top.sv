@@ -5,8 +5,8 @@ module top (
     output  logic       uart_txd,
     input   logic       uart_rxd,
     inout   logic       qspi_io_io[3:0],
-    inout   logic       qspi_sck_io,
-    inout   logic       qspi_ss_io    
+    //output  logic       qspi_sck_io,
+    inout   logic       qspi_ss_io
 );
 
     logic clk;
@@ -95,12 +95,12 @@ module top (
         .qspi_io3_i     (qspi_io_i[3]),
         .qspi_io3_o     (qspi_io_o[3]),
         .qspi_io3_t     (qspi_io_t[3]),
-        .qspi_sck_i     (qspi_sck_i),
-        .qspi_sck_o     (qspi_sck_o),
-        .qspi_sck_t     (qspi_sck_t),
+//        .qspi_sck_i     (qspi_sck_i),
+//        .qspi_sck_o     (qspi_sck_o),
+//        .qspi_sck_t     (qspi_sck_t),
         .qspi_ss_i      (qspi_ss_i),
         .qspi_ss_o      (qspi_ss_o),
-        .qspi_ss_t      (qspi_ss_t),       
+        .qspi_ss_t      (qspi_ss_t),              
         //
         .usb_uart_rxd   (uart_rxd),
         .usb_uart_txd   (uart_txd)
@@ -108,9 +108,9 @@ module top (
     IOBUF qspi_io0_iobuf (.I(qspi_io_o[0]), .IO(qspi_io_io[0]), .O(qspi_io_i[0]), .T(qspi_io_t[0]));
     IOBUF qspi_io1_iobuf (.I(qspi_io_o[1]), .IO(qspi_io_io[1]), .O(qspi_io_i[1]), .T(qspi_io_t[1]));
     IOBUF qspi_io2_iobuf (.I(qspi_io_o[2]), .IO(qspi_io_io[2]), .O(qspi_io_i[2]), .T(qspi_io_t[2]));
-    IOBUF qspi_io3_iobuf (.I(qspi_io_o[3]), .IO(qspi_io_io[3]), .O(qspi_io_i[3]), .T(qspi_io_t[3]));
-    IOBUF qspi_sck_iobuf (.I(qspi_sck_o),   .IO(qspi_sck_io),   .O(qspi_sck_i),   .T(qspi_sck_t));     
+    IOBUF qspi_io3_iobuf (.I(qspi_io_o[3]), .IO(qspi_io_io[3]), .O(qspi_io_i[3]), .T(qspi_io_t[3])); 
     IOBUF qspi_ss_iobuf  (.I(qspi_ss_o),    .IO(qspi_ss_io),    .O(qspi_ss_i),    .T(qspi_ss_t));    
+//    IOBUF qspi_sck_iobuf (.I(qspi_sck_o),   .IO(qspi_sck_io),   .O(qspi_sck_i),   .T(qspi_sck_t));    
     
 
     localparam logic[31:0] VERSION = 32'h00_01_02_03;
