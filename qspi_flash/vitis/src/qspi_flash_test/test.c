@@ -256,7 +256,7 @@ int main(void)
 	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
 
 
-	xil_printf("Success!\r\n");
+	xil_printf("********** Success! ***********\r\n");
 
 	while(1);
 
