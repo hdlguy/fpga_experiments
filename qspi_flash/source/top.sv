@@ -1,5 +1,5 @@
 module top (
-    input   logic       rstn,
+    //input   logic       rstn,
     input   logic       clkin100,
     output  logic[7:0]  led,
     output  logic       uart_txd,
@@ -15,15 +15,11 @@ module top (
     logic reset;
     logic[7:0] reset_count = 255;
     always_ff @(posedge clk) begin
-        if (rstn == 0) begin
-            reset_count <= 255;
+        if (reset_count != 0) begin
+            reset_count <= reset_count - 1;
+            reset <= 1;
         end else begin
-            if (reset_count != 0) begin
-                reset_count <= reset_count - 1;
-                reset <= 1;
-            end else begin
-                reset <= 0;
-            end
+            reset <= 0;
         end
     end
     assign resetn = ~reset;
@@ -62,7 +58,7 @@ module top (
     logic qspi_ss_t;
 
     system system_i (
-        .resetn         (rstn),
+        .resetn         (resetn),
         .clkin          (clkin100),
         //
         .axi_aclk       (axi_aclk),

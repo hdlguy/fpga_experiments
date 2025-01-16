@@ -5,7 +5,8 @@
 close_project -quiet
 file delete -force proj.xpr *.os *.jou *.log proj.srcs proj.cache proj.runs
 #
-create_project -part xc7a35tcsg324-1 -force proj 
+create_project -part xc7a100tcsg324-2 -force proj
+#create_project -part xc7a35tcsg324-1 -force proj 
 #create_project -part xc7a100tcsg324-1 -force proj 
 set_property target_language verilog [current_project]
 set_property default_lib work [current_project]
@@ -24,7 +25,7 @@ set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/syst
 
 read_verilog -sv ../source/axi_regfile/axi_regfile_v1_0_S00_AXI.sv
 read_verilog -sv ../source/top.sv
-read_xdc         ../source/top.xdc
+read_xdc         ../source/neso_top.xdc
 
 add_files -norecurse ../vitis/release/production.elf
 set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]

@@ -7,8 +7,12 @@ set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 
 create_clock -name clk100  -period 10.0 [get_ports clkin100]
 
-set_property IOSTANDARD LVCMOS33    [get_ports clkin100]
-set_property PACKAGE_PIN xxx        [get_ports clkin100]
+set_property IOSTANDARD LVCMOS25    [get_ports {clkin100}]; # Vadj is 2.5V
+set_property PACKAGE_PIN F4         [get_ports {clkin100}]
+
+set_property IOSTANDARD LVCMOS33    [get_ports {uart_*}]
+set_property PACKAGE_PIN A18        [get_ports {uart_rxd}]
+set_property PACKAGE_PIN B18        [get_ports {uart_txd}]
 
 set_property IOSTANDARD LVCMOS33    [get_ports rstn]
 set_property PACKAGE_PIN xxx        [get_ports rstn]
@@ -32,6 +36,3 @@ set_property PACKAGE_PIN xxx [get_ports {qspi_io_io[0]}]
 set_property PACKAGE_PIN xxx [get_ports {qspi_sck_io}]
 set_property PACKAGE_PIN xxx [get_ports {qspi_ss_io}]
 
-set_property IOSTANDARD LVCMOS33 [get_ports {uart_*}]
-set_property PACKAGE_PIN xxx [get_ports {uart_txd}]
-set_property PACKAGE_PIN xxx [get_ports {uart_rxd}]
