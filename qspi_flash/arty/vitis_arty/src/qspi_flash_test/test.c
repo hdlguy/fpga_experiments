@@ -16,6 +16,7 @@
 
 #define SPI_SELECT 			0x01
 
+#define COMMAND_READ_JEDIC_ID	0x9F // read jedic ID
 #define COMMAND_PAGE_PROGRAM	0x02 /* Page Program command */
 #define COMMAND_QUAD_WRITE		0x32 /* Quad Input Fast Program */
 #define COMMAND_RANDOM_READ		0x03 /* Random read command */
@@ -61,6 +62,8 @@
 #define DUAL_IO_READ_DUMMY_BYTES	2
 #define QUAD_IO_READ_DUMMY_BYTES	5
 
+
+int SpiReadID(XSpi *SpiPtr, int n);
 int SpiFlashWriteEnable(XSpi *SpiPtr);
 int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd);
 int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd);
@@ -138,122 +141,139 @@ int main(void)
 	xil_printf("\r\n**** qspi_flash_test ****\r\n");
 	xil_printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\r\n", regptr[FPGA_VERSION], regptr[FPGA_VERSION]);
 
-	////////////////////////// Erase ///////////////////////
+	///////////////////////// Read ID /////////////////////
 
-	xil_printf("** Erase\r\n");
+	xil_printf("** ID Bytes\r\n");
 
-	for (int i=0; i<NUM_SECTORS; i++) {
-
-		xil_printf("Sector %d/%d\r", i+1, NUM_SECTORS);
-		regptr[LED_CONTROL] = i/4;
-
-		Address = FLASH_TEST_ADDRESS + i * SECTOR_SIZE;
-
-		// Perform the Write Enable operation.
-		Status = SpiFlashWriteEnable(&Spi);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
-		/* Perform the Sector Erase operation. */
-		Status = SpiFlashSectorErase(&Spi, Address);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
+	/* Clear the read Buffer. */
+	for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		ReadBuffer[Index] = 0x0;
 	}
-	xil_printf("Sector %d/%d\r\n", NUM_SECTORS, NUM_SECTORS);
 
-
-	///////////////////////// Write //////////////////////////////
-
-	xil_printf("** Write\r\n");
-
-	for (int i=0; i<NUM_PAGES; i++){
-
-		if ((i%1024)==0) {
-			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
-			regptr[LED_CONTROL] = i/1024;
-		}
-
-		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
-
-
-		//	for (u32 Index = 4; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES; Index++) {
-		//		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
-		//	}
-
-		// Fill WriteBuffer
-		srand(Address);
-		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
-			WriteBuffer[j] = (u8)rand();
-		}
-
-		// Enable writes
-		Status = SpiFlashWriteEnable(&Spi);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
-		// Write the data using Quad Fast Write command.
-		Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
+	int num_id_bytes = 24;
+	Status = SpiReadID(&Spi, num_id_bytes);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
 	}
-	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
 
+	for (int i=0; i<num_id_bytes; i++) { xil_printf("%02x ", ReadBuffer[i]); } xil_printf("\r\n");
 
-	//////////////////////////// read and check///////////////////////////
-
-	xil_printf("** Verify\r\n");
-
-	for (int i=0; i<NUM_PAGES; i++){
-
-		if ((i%1024)==0) {
-			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
-			regptr[LED_CONTROL] = i/1024;
-		}
-
-		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
-
-		/* Wait while the Flash is busy. */
-		Status = SpiFlashWaitForFlashReady();
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
-		// Fill WriteBuffer
-		srand(Address);
-		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
-			WriteBuffer[j] = (u8)rand();
-		}
-
-		/* Clear the read Buffer. */
-		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
-			ReadBuffer[Index] = 0x0;
-		}
-
-		/* Read the data from the Page using Quad IO Fast Read command. */
-		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
-		/* Compare the data read against the data written. */
-		u8 wval, rval;
-		for (Index = 0; Index < PAGE_SIZE; Index++) {
-			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
-			wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
-			if (rval != wval) {
-				xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
-				return XST_FAILURE;
-			}
-		}
-
-	}
-	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+//	////////////////////////// Erase ///////////////////////
+//
+//	xil_printf("** Erase\r\n");
+//
+//	for (int i=0; i<NUM_SECTORS; i++) {
+//
+//		xil_printf("Sector %d/%d\r", i+1, NUM_SECTORS);
+//		regptr[LED_CONTROL] = i/4;
+//
+//		Address = FLASH_TEST_ADDRESS + i * SECTOR_SIZE;
+//
+//		// Perform the Write Enable operation.
+//		Status = SpiFlashWriteEnable(&Spi);
+//		if (Status != XST_SUCCESS) {
+//			return XST_FAILURE;
+//		}
+//
+//		/* Perform the Sector Erase operation. */
+//		Status = SpiFlashSectorErase(&Spi, Address);
+//		if (Status != XST_SUCCESS) {
+//			return XST_FAILURE;
+//		}
+//
+//	}
+//	xil_printf("Sector %d/%d\r\n", NUM_SECTORS, NUM_SECTORS);
+//
+//
+//	///////////////////////// Write //////////////////////////////
+//
+//	xil_printf("** Write\r\n");
+//
+//	for (int i=0; i<NUM_PAGES; i++){
+//
+//		if ((i%1024)==0) {
+//			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+//			regptr[LED_CONTROL] = i/1024;
+//		}
+//
+//		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
+//
+//
+//		//	for (u32 Index = 4; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES; Index++) {
+//		//		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
+//		//	}
+//
+//		// Fill WriteBuffer
+//		srand(Address);
+//		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
+//			WriteBuffer[j] = (u8)rand();
+//		}
+//
+//		// Enable writes
+//		Status = SpiFlashWriteEnable(&Spi);
+//		if (Status != XST_SUCCESS) {
+//			return XST_FAILURE;
+//		}
+//
+//		// Write the data using Quad Fast Write command.
+//		Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
+//		if (Status != XST_SUCCESS) {
+//			return XST_FAILURE;
+//		}
+//
+//	}
+//	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+//
+//
+//	//////////////////////////// read and check///////////////////////////
+//
+//	xil_printf("** Verify\r\n");
+//
+//	for (int i=0; i<NUM_PAGES; i++){
+//
+//		if ((i%1024)==0) {
+//			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+//			regptr[LED_CONTROL] = i/1024;
+//		}
+//
+//		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
+//
+//		/* Wait while the Flash is busy. */
+//		Status = SpiFlashWaitForFlashReady();
+//		if (Status != XST_SUCCESS) {
+//			return XST_FAILURE;
+//		}
+//
+//		// Fill WriteBuffer
+//		srand(Address);
+//		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
+//			WriteBuffer[j] = (u8)rand();
+//		}
+//
+//		/* Clear the read Buffer. */
+//		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+//			ReadBuffer[Index] = 0x0;
+//		}
+//
+//		/* Read the data from the Page using Quad IO Fast Read command. */
+//		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
+//		if (Status != XST_SUCCESS) {
+//			return XST_FAILURE;
+//		}
+//
+//		/* Compare the data read against the data written. */
+//		u8 wval, rval;
+//		for (Index = 0; Index < PAGE_SIZE; Index++) {
+//			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+//			wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
+//			if (rval != wval) {
+//				xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
+//				return XST_FAILURE;
+//			}
+//		}
+//
+//	}
+//	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
 
 
 	xil_printf("********** Success! ***********\r\n");
@@ -274,24 +294,18 @@ int SpiFlashWriteEnable(XSpi *SpiPtr)
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Prepare the WriteBuffer.
-	 */
+	// Prepare the WriteBuffer.
 	WriteBuffer[BYTE1] = COMMAND_WRITE_ENABLE;
 
-	/*
-	 * Initiate the Transfer.
-	 */
+	// Initiate the Transfer.
 	TransferInProgress = TRUE;
 	Status = XSpi_Transfer(SpiPtr, WriteBuffer, NULL, WRITE_ENABLE_BYTES);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Wait till the Transfer is complete and check if there are any errors
-	 * in the transaction..
-	 */
+
+	// Wait until the transfer is complete and check if there are any errors in the transaction.
 	while (TransferInProgress);
 	if (ErrorCount != 0) {
 		ErrorCount = 0;
@@ -348,6 +362,36 @@ int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd)
 
 	return XST_SUCCESS;
 }
+
+
+int SpiReadID(XSpi *SpiPtr, int n)
+{
+	int Status;
+
+	Status = SpiFlashWaitForFlashReady();
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	WriteBuffer[BYTE1] = COMMAND_READ_JEDIC_ID;
+
+	TransferInProgress = TRUE;
+	Status = XSpi_Transfer( SpiPtr, WriteBuffer, ReadBuffer, n);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	while (TransferInProgress);
+	if (ErrorCount != 0) {
+		ErrorCount = 0;
+		return XST_FAILURE;
+	}
+
+	return XST_SUCCESS;
+}
+
 
 /**
 *

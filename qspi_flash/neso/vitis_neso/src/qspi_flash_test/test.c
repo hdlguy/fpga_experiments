@@ -16,6 +16,7 @@
 
 #define SPI_SELECT 			0x01
 
+#define COMMAND_READ_JEDIC_ID	0x9F // read jedic ID
 #define COMMAND_PAGE_PROGRAM	0x02 /* Page Program command */
 #define COMMAND_QUAD_WRITE		0x32 /* Quad Input Fast Program */
 #define COMMAND_RANDOM_READ		0x03 /* Random read command */
@@ -61,6 +62,7 @@
 #define DUAL_IO_READ_DUMMY_BYTES	2
 #define QUAD_IO_READ_DUMMY_BYTES	5
 
+int SpiReadID(XSpi *SpiPtr, int n);
 int SpiFlashWriteEnable(XSpi *SpiPtr);
 int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd);
 int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd);
@@ -137,6 +139,23 @@ int main(void)
 
 	xil_printf("\r\n**** qspi_flash_test ****\r\n");
 	xil_printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\r\n", regptr[FPGA_VERSION], regptr[FPGA_VERSION]);
+
+	///////////////////////// Read ID /////////////////////
+
+	xil_printf("** ID Bytes\r\n");
+
+	/* Clear the read Buffer. */
+	for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		ReadBuffer[Index] = 0x0;
+	}
+
+	int num_id_bytes = 24;
+	Status = SpiReadID(&Spi, num_id_bytes);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	for (int i=0; i<num_id_bytes; i++) { xil_printf("%02x ", ReadBuffer[i]); } xil_printf("\r\n");
 
 	////////////////////////// Erase ///////////////////////
 
@@ -259,6 +278,34 @@ int main(void)
 	xil_printf("********** Success! ***********\r\n");
 
 	while(1);
+
+	return XST_SUCCESS;
+}
+
+int SpiReadID(XSpi *SpiPtr, int n)
+{
+	int Status;
+
+	Status = SpiFlashWaitForFlashReady();
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	WriteBuffer[BYTE1] = COMMAND_READ_JEDIC_ID;
+
+	TransferInProgress = TRUE;
+	Status = XSpi_Transfer( SpiPtr, WriteBuffer, ReadBuffer, n);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	while (TransferInProgress);
+	if (ErrorCount != 0) {
+		ErrorCount = 0;
+		return XST_FAILURE;
+	}
 
 	return XST_SUCCESS;
 }
