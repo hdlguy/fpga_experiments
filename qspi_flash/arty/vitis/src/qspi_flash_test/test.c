@@ -158,31 +158,74 @@ int main(void)
 
 	for (int i=0; i<num_id_bytes; i++) { xil_printf("%02x ", ReadBuffer[i]); } xil_printf("\r\n");
 
-//	////////////////////////// Erase ///////////////////////
-//
-//	xil_printf("** Erase\r\n");
-//
-//	for (int i=0; i<NUM_SECTORS; i++) {
-//
-//		xil_printf("Sector %d/%d\r", i+1, NUM_SECTORS);
-//		regptr[LED_CONTROL] = i/4;
-//
-//		Address = FLASH_TEST_ADDRESS + i * SECTOR_SIZE;
-//
-//		// Perform the Write Enable operation.
-//		Status = SpiFlashWriteEnable(&Spi);
-//		if (Status != XST_SUCCESS) {
-//			return XST_FAILURE;
-//		}
-//
-//		/* Perform the Sector Erase operation. */
-//		Status = SpiFlashSectorErase(&Spi, Address);
-//		if (Status != XST_SUCCESS) {
-//			return XST_FAILURE;
-//		}
-//
-//	}
-//	xil_printf("Sector %d/%d\r\n", NUM_SECTORS, NUM_SECTORS);
+	////////////////////////// Erase ///////////////////////
+
+	xil_printf("** Erase\r\n");
+
+	for (int i=0; i<NUM_SECTORS; i++) {
+
+		xil_printf("Sector %d/%d\r", i+1, NUM_SECTORS);
+		regptr[LED_CONTROL] = i/4;
+
+		Address = FLASH_TEST_ADDRESS + i * SECTOR_SIZE;
+
+		// Perform the Write Enable operation.
+		Status = SpiFlashWriteEnable(&Spi);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/* Perform the Sector Erase operation. */
+		Status = SpiFlashSectorErase(&Spi, Address);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+	}
+	xil_printf("Sector %d/%d\r\n", NUM_SECTORS, NUM_SECTORS);
+	
+	/////////// Blank Check ///////////////////
+	
+	xil_printf("** Blank Check\r\n");
+
+	for (int i=0; i<NUM_PAGES; i++){
+
+		if ((i%1024)==0) {
+			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+			regptr[LED_CONTROL] = i/1024;
+		}
+
+		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
+
+		/* Wait while the Flash is busy. */
+		Status = SpiFlashWaitForFlashReady();
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/* Clear the read Buffer. */
+		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+			ReadBuffer[Index] = 0x0;
+		}
+
+		/* Read the data from the Page using Quad IO Fast Read command. */
+		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		// check that page is erased
+		u8 wval, rval;
+		for (Index = 0; Index < PAGE_SIZE; Index++) {
+			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			if (rval != 0xff) {
+				xil_printf("error: %d 0x%02x  \r\n", Index, rval);
+				return XST_FAILURE;
+			}
+		}
+
+	}
+	
 //
 //
 //	///////////////////////// Write //////////////////////////////
