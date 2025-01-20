@@ -4,15 +4,15 @@
 #
 file delete -force ./workspace
 
-set hw ../implement_neso/results/top.xsa
+set hw ../implement/results/top.xsa
 set proc "microblaze_0"
 
 setws ./workspace
 
 
 platform create -name "standalone_plat" -hw $hw -proc $proc -os standalone
-bsp config stdout "usb_uartlite"
-bsp config stdin  "usb_uartlite"
+#bsp config stdout "usb_uartlite"
+#bsp config stdin  "usb_uartlite"
 
 app create -name qspi_flash_test -platform standalone_plat -domain standalone_domain -template "Empty Application(C)"
 file link -symbolic ./workspace/qspi_flash_test/src/test.c               ../../../src/qspi_flash_test/test.c

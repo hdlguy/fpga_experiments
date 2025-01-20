@@ -1,9 +1,9 @@
 module top (
     //input   logic       rstn,
     input   logic       clkin100,
-    output  logic[7:0]  led,
-    output  logic       uart_txd,
-    input   logic       uart_rxd,
+    output  logic[3:0]  led,
+//    output  logic       uart_txd,
+//    input   logic       uart_rxd,
     inout   logic       qspi_io_io[3:0],
     //output  logic       qspi_sck_io,
     inout   logic       qspi_ss_io
@@ -100,10 +100,10 @@ module top (
 //        .qspi_sck_t     (qspi_sck_t),
         .qspi_ss_i      (qspi_ss_i),
         .qspi_ss_o      (qspi_ss_o),
-        .qspi_ss_t      (qspi_ss_t),              
-        //
-        .usb_uart_rxd   (uart_rxd),
-        .usb_uart_txd   (uart_txd)
+        .qspi_ss_t      (qspi_ss_t)              
+//        //
+//        .usb_uart_rxd   (uart_rxd),
+//        .usb_uart_txd   (uart_txd)
     );
     IOBUF qspi_io0_iobuf (.I(qspi_io_o[0]), .IO(qspi_io_io[0]), .O(qspi_io_i[0]), .T(qspi_io_t[0]));
     IOBUF qspi_io1_iobuf (.I(qspi_io_o[1]), .IO(qspi_io_io[1]), .O(qspi_io_i[1]), .T(qspi_io_t[1]));
@@ -156,11 +156,11 @@ module top (
 		.S_AXI_WVALID  (m_axi_wvalid )
 	);
 	
-	logic[31:0] led_count=0;
-	always_ff @(posedge axi_aclk) begin
-	   led_count <= led_count + 1;
-	   led[7:4] <= led_count[27:24];
-	end
+	//logic[31:0] led_count=0;
+	//always_ff @(posedge axi_aclk) begin
+	   //led_count <= led_count + 1;
+	   //led[7:4] <= led_count[27:24];
+	//end
 	
 	top_ila ila_inst (.clk(axi_aclk), .probe0({axi_aresetn, m_axi_arvalid, m_axi_araddr, m_axi_awvalid, m_axi_awaddr, m_axi_rvalid, m_axi_rdata, m_axi_wvalid, m_axi_wdata})); // 4*32+5=133
 

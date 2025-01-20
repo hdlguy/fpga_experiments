@@ -25,9 +25,9 @@ set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/syst
 
 read_verilog -sv ../source/axi_regfile/axi_regfile_v1_0_S00_AXI.sv
 read_verilog -sv ../source/top.sv
-read_xdc         ../source/neso_top.xdc
+read_xdc         ../source/custom_top.xdc
 
-add_files -norecurse ../vitis_neso/release/production.elf
+add_files -norecurse ../vitis/release/production.elf
 set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
 set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
 

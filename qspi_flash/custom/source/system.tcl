@@ -49,7 +49,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
-   create_project project_1 myproj -part xc7a35tcsg324-1
+   create_project project_1 myproj -part xc7a100tcsg324-2
 }
 
 
@@ -135,7 +135,6 @@ xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:mdm:3.2\
 xilinx.com:ip:microblaze:11.0\
 xilinx.com:ip:proc_sys_reset:5.0\
-xilinx.com:ip:axi_uartlite:2.0\
 xilinx.com:ip:xlconcat:2.1\
 xilinx.com:ip:axi_quad_spi:3.2\
 xilinx.com:ip:lmb_bram_if_cntlr:4.0\
@@ -315,8 +314,6 @@ proc create_root_design { parentCell } {
    CONFIG.PROTOCOL {AXI4LITE} \
    ] $m_axi
 
-  set usb_uart [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 usb_uart ]
-
   set qspi [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:spi_rtl:1.0 qspi ]
 
 
@@ -438,24 +435,15 @@ proc create_root_design { parentCell } {
   # Create instance: rst_clk_wiz_0_100M, and set properties
   set rst_clk_wiz_0_100M [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 rst_clk_wiz_0_100M ]
 
-  # Create instance: usb_uartlite, and set properties
-  set usb_uartlite [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_uartlite:2.0 usb_uartlite ]
-  set_property -dict [list \
-    CONFIG.C_BAUDRATE {115200} \
-    CONFIG.UARTLITE_BOARD_INTERFACE {Custom} \
-    CONFIG.USE_BOARD_FLOW {true} \
-  ] $usb_uartlite
-
-
   # Create instance: xlconcat_0, and set properties
   set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
-  set_property CONFIG.NUM_PORTS {4} $xlconcat_0
+  set_property CONFIG.NUM_PORTS {3} $xlconcat_0
 
 
   # Create instance: axi_quad_spi_0, and set properties
   set axi_quad_spi_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_quad_spi:3.2 axi_quad_spi_0 ]
   set_property -dict [list \
-    CONFIG.C_SPI_MEMORY {2} \
+    CONFIG.C_SPI_MEMORY {3} \
     CONFIG.C_SPI_MODE {2} \
     CONFIG.C_USE_STARTUP {1} \
   ] $axi_quad_spi_0
@@ -464,10 +452,8 @@ proc create_root_design { parentCell } {
   # Create interface connections
   connect_bd_intf_net -intf_net axi_intc_0_interrupt [get_bd_intf_pins axi_intc_0/interrupt] [get_bd_intf_pins microblaze_0/INTERRUPT]
   connect_bd_intf_net -intf_net axi_quad_spi_0_SPI_0 [get_bd_intf_ports qspi] [get_bd_intf_pins axi_quad_spi_0/SPI_0]
-  connect_bd_intf_net -intf_net axi_uartlite_0_UART [get_bd_intf_ports usb_uart] [get_bd_intf_pins usb_uartlite/UART]
   connect_bd_intf_net -intf_net microblaze_0_M_AXI_DP [get_bd_intf_pins microblaze_0/M_AXI_DP] [get_bd_intf_pins microblaze_0_axi_periph/S00_AXI]
   connect_bd_intf_net -intf_net microblaze_0_axi_periph_M00_AXI [get_bd_intf_ports m_axi] [get_bd_intf_pins microblaze_0_axi_periph/M00_AXI]
-  connect_bd_intf_net -intf_net microblaze_0_axi_periph_M01_AXI [get_bd_intf_pins microblaze_0_axi_periph/M01_AXI] [get_bd_intf_pins usb_uartlite/S_AXI]
   connect_bd_intf_net -intf_net microblaze_0_axi_periph_M02_AXI [get_bd_intf_pins axi_intc_0/s_axi] [get_bd_intf_pins microblaze_0_axi_periph/M02_AXI]
   connect_bd_intf_net -intf_net microblaze_0_axi_periph_M03_AXI [get_bd_intf_pins axi_timer_0/S_AXI] [get_bd_intf_pins microblaze_0_axi_periph/M03_AXI]
   connect_bd_intf_net -intf_net microblaze_0_axi_periph_M04_AXI [get_bd_intf_pins axi_quad_spi_0/AXI_LITE] [get_bd_intf_pins microblaze_0_axi_periph/M04_AXI]
@@ -480,13 +466,13 @@ proc create_root_design { parentCell } {
   connect_bd_net -net axi_quad_spi_0_ip2intc_irpt  [get_bd_pins axi_quad_spi_0/ip2intc_irpt] \
   [get_bd_pins xlconcat_0/In2]
   connect_bd_net -net axi_timer_0_interrupt  [get_bd_pins axi_timer_0/interrupt] \
-  [get_bd_pins xlconcat_0/In1]
+  [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net clk_wiz_0_locked  [get_bd_pins clk_wiz_0/locked] \
   [get_bd_pins rst_clk_wiz_0_100M/dcm_locked]
   connect_bd_net -net clkin_1  [get_bd_ports clkin] \
   [get_bd_pins clk_wiz_0/clk_in1]
   connect_bd_net -net mdm_1_Interrupt  [get_bd_pins mdm_1/Interrupt] \
-  [get_bd_pins xlconcat_0/In3]
+  [get_bd_pins xlconcat_0/In1]
   connect_bd_net -net mdm_1_debug_sys_rst  [get_bd_pins mdm_1/Debug_SYS_Rst] \
   [get_bd_pins rst_clk_wiz_0_100M/mb_debug_sys_rst]
   connect_bd_net -net microblaze_0_Clk  [get_bd_pins clk_wiz_0/clkout100] \
@@ -505,7 +491,6 @@ proc create_root_design { parentCell } {
   [get_bd_pins microblaze_0_axi_periph/S00_ACLK] \
   [get_bd_pins microblaze_0_local_memory/LMB_Clk] \
   [get_bd_pins rst_clk_wiz_0_100M/slowest_sync_clk] \
-  [get_bd_pins usb_uartlite/s_axi_aclk] \
   [get_bd_pins axi_quad_spi_0/s_axi_aclk] \
   [get_bd_pins axi_quad_spi_0/ext_spi_clk]
   connect_bd_net -net reset_1  [get_bd_ports resetn] \
@@ -528,10 +513,7 @@ proc create_root_design { parentCell } {
   [get_bd_pins microblaze_0_axi_periph/M04_ARESETN] \
   [get_bd_pins microblaze_0_axi_periph/M05_ARESETN] \
   [get_bd_pins microblaze_0_axi_periph/S00_ARESETN] \
-  [get_bd_pins usb_uartlite/s_axi_aresetn] \
   [get_bd_pins axi_quad_spi_0/s_axi_aresetn]
-  connect_bd_net -net usb_uartlite_interrupt  [get_bd_pins usb_uartlite/interrupt] \
-  [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net xlconcat_0_dout  [get_bd_pins xlconcat_0/dout] \
   [get_bd_pins axi_intc_0/intr]
 
@@ -542,7 +524,6 @@ proc create_root_design { parentCell } {
   assign_bd_address -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_timer_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x00000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs microblaze_0_local_memory/dlmb_bram_if_cntlr/SLMB/Mem] -force
   assign_bd_address -offset 0x41400000 -range 0x00001000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs mdm_1/S_AXI/Reg] -force
-  assign_bd_address -offset 0x40010000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs usb_uartlite/S_AXI/Reg] -force
   assign_bd_address -offset 0x00000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Instruction] [get_bd_addr_segs microblaze_0_local_memory/ilmb_bram_if_cntlr/SLMB/Mem] -force
 
 
