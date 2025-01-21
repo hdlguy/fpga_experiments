@@ -19,3 +19,20 @@ A Microblaze CPU is used to access the flash through a Xilinx AXI QSPI Controlle
 ## Conclusion
 The only significant difference between the operation of these flash chips turned out to be the number of dummy bytes between the read command and the start of valid data.  This code reads the JEDEC ID register and adjusts the number of dummy bytes to make the same code work for Spansion, Micron and ISSI flash.
 
+Console output: 
+
+**** qspi_flash_test ****
+FPGA_ID = 0x00010203, FPGA_VERSION = 0x00010203
+** ID Bytes
+FF 9D 60 18 9D 60 18 9D 60 18 9D 60 18 9D 60 18 9D 60 18 9D 60 18 9D 60
+flash = ISSI
+**** Erase ****
+Sector 64/64
+**** Blank Check ****
+Page 16384/16384
+**** Write ****
+Page 16384/16384
+** Verify
+Page 16384/16384
+********** Success! ***********
+
