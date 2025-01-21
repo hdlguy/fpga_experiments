@@ -16,3 +16,6 @@ A Microblaze CPU is used to access the flash through a Xilinx AXI QSPI Controlle
     - neso - same for the Numato Neso
     - custom - same for a custom FPGA module with A7-100T and Spansion flash
 
+## Conclusion
+The only significant difference between the operation of these flash chips turned out to be the number of dummy bytes between the read command and the start of valid data.  This code reads the JEDEC ID register and adjusts the number of dummy bytes to make the same code work for Spansion, Micron and ISSI flash.
+
