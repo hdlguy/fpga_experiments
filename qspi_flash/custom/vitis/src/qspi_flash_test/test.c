@@ -16,6 +16,7 @@
 
 #define SPI_SELECT 			0x01
 
+#define COMMAND_READ_JEDIC_ID	0x9F // read jedic ID
 #define COMMAND_PAGE_PROGRAM	0x02 /* Page Program command */
 #define COMMAND_QUAD_WRITE		0x32 /* Quad Input Fast Program */
 #define COMMAND_RANDOM_READ		0x03 /* Random read command */
@@ -59,11 +60,15 @@
 #define QUAD_READ_DUMMY_BYTES		4
 
 #define DUAL_IO_READ_DUMMY_BYTES	2
-#define QUAD_IO_READ_DUMMY_BYTES	5
+//#define QUAD_IO_READ_DUMMY_BYTES	5 // micron
+//#define QUAD_IO_READ_DUMMY_BYTES	3 // spansion
 
+
+
+int SpiReadID(XSpi *SpiPtr, int n);
 int SpiFlashWriteEnable(XSpi *SpiPtr);
 int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd);
-int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd);
+int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd, u32 dummy_bytes);
 int SpiFlashBulkErase(XSpi *SpiPtr);
 int SpiFlashSectorErase(XSpi *SpiPtr, u32 Addr);
 int SpiFlashGetStatus(XSpi *SpiPtr);
@@ -138,9 +143,36 @@ int main(void)
 	xil_printf("\r\n**** qspi_flash_test ****\r\n");
 	xil_printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\r\n", regptr[FPGA_VERSION], regptr[FPGA_VERSION]);
 
+	///////////////////////// Read ID /////////////////////
+
+	xil_printf("** ID Bytes\r\n");
+
+	int num_id_bytes = 24;
+
+	/* Clear the read Buffer. */
+	for (Index = 0; Index < num_id_bytes; Index++) ReadBuffer[Index] = 0x0;
+
+	Status = SpiReadID(&Spi, num_id_bytes);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	for (int i=0; i<num_id_bytes; i++) { xil_printf("%02x ", ReadBuffer[i]); } xil_printf("\r\n");
+	u32 flashtype = 0;
+    if (ReadBuffer[1] == 0x20) { xil_printf("flash = Micron\r\n"); flashtype=1; }
+    if (ReadBuffer[1] == 0x01) { xil_printf("flash = Spansion\r\n"); flashtype=2; }
+    if (ReadBuffer[1] == 0x9D) { xil_printf("flash = ISSI\r\n"); flashtype=3; }
+    u32 quad_io_read_dummy_bytes;
+    switch (flashtype) {
+      case 1: quad_io_read_dummy_bytes=5; break;
+      case 2: quad_io_read_dummy_bytes=3; break;
+      case 3: quad_io_read_dummy_bytes=5; break;
+      default: quad_io_read_dummy_bytes=5; break;
+    }
+
 	////////////////////////// Erase ///////////////////////
 
-	xil_printf("** Erase\r\n");
+	xil_printf("**** Erase ****\r\n");
 
 	for (int i=0; i<NUM_SECTORS; i++) {
 
@@ -163,11 +195,10 @@ int main(void)
 
 	}
 	xil_printf("Sector %d/%d\r\n", NUM_SECTORS, NUM_SECTORS);
-
-
-	///////////////////////// Write //////////////////////////////
-
-	xil_printf("** Write\r\n");
+	
+	/////////// Blank Check ///////////////////
+	
+	xil_printf("**** Blank Check ****\r\n");
 
 	for (int i=0; i<NUM_PAGES; i++){
 
@@ -178,10 +209,51 @@ int main(void)
 
 		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
 
+		/* Wait while the Flash is busy. */
+		Status = SpiFlashWaitForFlashReady();
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
 
-		//	for (u32 Index = 4; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES; Index++) {
-		//		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
-		//	}
+		/* Clear the read Buffer. */
+		//for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes; Index++) {
+			ReadBuffer[Index] = 0x0;
+		}
+
+		/* Read the data from the Page using Quad IO Fast Read command. */
+		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ, quad_io_read_dummy_bytes);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		// check that page is erased
+		u8 rval;
+		for (Index = 0; Index < PAGE_SIZE; Index++) {
+			//rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes];
+			if (rval != 0xff) {
+				xil_printf("error: %d 0x%02x  \r\n", Index, rval);
+				return XST_FAILURE;
+			}
+		}
+
+	}
+	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+	
+
+	///////////////////////// Write //////////////////////////////
+
+	xil_printf("**** Write ****\r\n");
+
+	for (int i=0; i<NUM_PAGES; i++){
+
+		if ((i%1024)==0) {
+			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+			regptr[LED_CONTROL] = i/1024;
+		}
+
+		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
 
 		// Fill WriteBuffer
 		srand(Address);
@@ -224,33 +296,37 @@ int main(void)
 			return XST_FAILURE;
 		}
 
+		/* Clear the read Buffer. */
+		//for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes; Index++) {
+			ReadBuffer[Index] = 0x0;
+		}
+
+		/* Read the data from the Page using Quad IO Fast Read command. */
+		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ, quad_io_read_dummy_bytes);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
 		// Fill WriteBuffer
 		srand(Address);
 		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
 			WriteBuffer[j] = (u8)rand();
 		}
-
-		/* Clear the read Buffer. */
-		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
-			ReadBuffer[Index] = 0x0;
-		}
-
-		/* Read the data from the Page using Quad IO Fast Read command. */
-		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
-		if (Status != XST_SUCCESS) {
-			return XST_FAILURE;
-		}
-
+		
 		/* Compare the data read against the data written. */
 		u8 wval, rval;
+		uint32_t errors = 0;
 		for (Index = 0; Index < PAGE_SIZE; Index++) {
-			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			//rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes];
 			wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
 			if (rval != wval) {
-				xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
-				return XST_FAILURE;
+				errors ++;
+				if (errors < 20) xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
 			}
 		}
+		if (errors != 0) return XST_FAILURE;
 
 	}
 	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
@@ -274,24 +350,18 @@ int SpiFlashWriteEnable(XSpi *SpiPtr)
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Prepare the WriteBuffer.
-	 */
+	// Prepare the WriteBuffer.
 	WriteBuffer[BYTE1] = COMMAND_WRITE_ENABLE;
 
-	/*
-	 * Initiate the Transfer.
-	 */
+	// Initiate the Transfer.
 	TransferInProgress = TRUE;
 	Status = XSpi_Transfer(SpiPtr, WriteBuffer, NULL, WRITE_ENABLE_BYTES);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Wait till the Transfer is complete and check if there are any errors
-	 * in the transaction..
-	 */
+
+	// Wait until the transfer is complete and check if there are any errors in the transaction.
 	while (TransferInProgress);
 	if (ErrorCount != 0) {
 		ErrorCount = 0;
@@ -349,6 +419,36 @@ int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd)
 	return XST_SUCCESS;
 }
 
+
+int SpiReadID(XSpi *SpiPtr, int n)
+{
+	int Status;
+
+	Status = SpiFlashWaitForFlashReady();
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	WriteBuffer[BYTE1] = COMMAND_READ_JEDIC_ID;
+
+	TransferInProgress = TRUE;
+	Status = XSpi_Transfer( SpiPtr, WriteBuffer, ReadBuffer, n);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+
+	while (TransferInProgress);
+	if (ErrorCount != 0) {
+		ErrorCount = 0;
+		return XST_FAILURE;
+	}
+
+	return XST_SUCCESS;
+}
+
+
 /**
 *
 * This function reads the data from the Numonyx Serial Flash Memory
@@ -361,7 +461,7 @@ int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd)
 *
 * @note		None
 */
-int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd)
+int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd, u32 dummy_bytes)
 {
 	int Status;
 
@@ -384,7 +484,8 @@ int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd)
 	} else if (ReadCmd == COMMAND_DUAL_IO_READ) {
 		ByteCount += DUAL_READ_DUMMY_BYTES;
 	} else if (ReadCmd == COMMAND_QUAD_IO_READ) {
-		ByteCount += QUAD_IO_READ_DUMMY_BYTES;
+		//ByteCount += QUAD_IO_READ_DUMMY_BYTES;
+		ByteCount += dummy_bytes;
 	} else if (ReadCmd == COMMAND_QUAD_READ) {
 		ByteCount += QUAD_READ_DUMMY_BYTES;
 	}
