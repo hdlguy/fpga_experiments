@@ -60,13 +60,15 @@
 #define QUAD_READ_DUMMY_BYTES		4
 
 #define DUAL_IO_READ_DUMMY_BYTES	2
-#define QUAD_IO_READ_DUMMY_BYTES	5
+//#define QUAD_IO_READ_DUMMY_BYTES	5 // micron
+//#define QUAD_IO_READ_DUMMY_BYTES	3 // spansion
+
 
 
 int SpiReadID(XSpi *SpiPtr, int n);
 int SpiFlashWriteEnable(XSpi *SpiPtr);
 int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd);
-int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd);
+int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd, u32 dummy_bytes);
 int SpiFlashBulkErase(XSpi *SpiPtr);
 int SpiFlashSectorErase(XSpi *SpiPtr, u32 Addr);
 int SpiFlashGetStatus(XSpi *SpiPtr);
@@ -145,22 +147,32 @@ int main(void)
 
 	xil_printf("** ID Bytes\r\n");
 
-	/* Clear the read Buffer. */
-	for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
-		ReadBuffer[Index] = 0x0;
-	}
-
 	int num_id_bytes = 24;
+
+	/* Clear the read Buffer. */
+	for (Index = 0; Index < num_id_bytes; Index++) ReadBuffer[Index] = 0x0;
+
 	Status = SpiReadID(&Spi, num_id_bytes);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
 	for (int i=0; i<num_id_bytes; i++) { xil_printf("%02x ", ReadBuffer[i]); } xil_printf("\r\n");
+	u32 flashtype = 0;
+    if (ReadBuffer[1] == 0x20) { xil_printf("flash = Micron\r\n"); flashtype=1; }
+    if (ReadBuffer[1] == 0x01) { xil_printf("flash = Spansion\r\n"); flashtype=2; }
+    if (ReadBuffer[1] == 0x9D) { xil_printf("flash = ISSI\r\n"); flashtype=3; }
+    u32 quad_io_read_dummy_bytes;
+    switch (flashtype) {
+      case 1: quad_io_read_dummy_bytes=5; break;
+      case 2: quad_io_read_dummy_bytes=3; break;
+      case 3: quad_io_read_dummy_bytes=5; break;
+      default: quad_io_read_dummy_bytes=5; break;
+    }
 
 	////////////////////////// Erase ///////////////////////
 
-	xil_printf("** Erase\r\n");
+	xil_printf("**** Erase ****\r\n");
 
 	for (int i=0; i<NUM_SECTORS; i++) {
 
@@ -186,7 +198,7 @@ int main(void)
 	
 	/////////// Blank Check ///////////////////
 	
-	xil_printf("** Blank Check\r\n");
+	xil_printf("**** Blank Check ****\r\n");
 
 	for (int i=0; i<NUM_PAGES; i++){
 
@@ -204,20 +216,22 @@ int main(void)
 		}
 
 		/* Clear the read Buffer. */
-		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		//for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes; Index++) {
 			ReadBuffer[Index] = 0x0;
 		}
 
 		/* Read the data from the Page using Quad IO Fast Read command. */
-		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
+		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ, quad_io_read_dummy_bytes);
 		if (Status != XST_SUCCESS) {
 			return XST_FAILURE;
 		}
 
 		// check that page is erased
-		u8 wval, rval;
+		u8 rval;
 		for (Index = 0; Index < PAGE_SIZE; Index++) {
-			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			//rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes];
 			if (rval != 0xff) {
 				xil_printf("error: %d 0x%02x  \r\n", Index, rval);
 				return XST_FAILURE;
@@ -225,98 +239,97 @@ int main(void)
 		}
 
 	}
+	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
 	
-//
-//
-//	///////////////////////// Write //////////////////////////////
-//
-//	xil_printf("** Write\r\n");
-//
-//	for (int i=0; i<NUM_PAGES; i++){
-//
-//		if ((i%1024)==0) {
-//			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
-//			regptr[LED_CONTROL] = i/1024;
-//		}
-//
-//		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
-//
-//
-//		//	for (u32 Index = 4; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES; Index++) {
-//		//		WriteBuffer[Index] = (u8)((Index - 4)%64 +32 );
-//		//	}
-//
-//		// Fill WriteBuffer
-//		srand(Address);
-//		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
-//			WriteBuffer[j] = (u8)rand();
-//		}
-//
-//		// Enable writes
-//		Status = SpiFlashWriteEnable(&Spi);
-//		if (Status != XST_SUCCESS) {
-//			return XST_FAILURE;
-//		}
-//
-//		// Write the data using Quad Fast Write command.
-//		Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
-//		if (Status != XST_SUCCESS) {
-//			return XST_FAILURE;
-//		}
-//
-//	}
-//	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
-//
-//
-//	//////////////////////////// read and check///////////////////////////
-//
-//	xil_printf("** Verify\r\n");
-//
-//	for (int i=0; i<NUM_PAGES; i++){
-//
-//		if ((i%1024)==0) {
-//			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
-//			regptr[LED_CONTROL] = i/1024;
-//		}
-//
-//		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
-//
-//		/* Wait while the Flash is busy. */
-//		Status = SpiFlashWaitForFlashReady();
-//		if (Status != XST_SUCCESS) {
-//			return XST_FAILURE;
-//		}
-//
-//		// Fill WriteBuffer
-//		srand(Address);
-//		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
-//			WriteBuffer[j] = (u8)rand();
-//		}
-//
-//		/* Clear the read Buffer. */
-//		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
-//			ReadBuffer[Index] = 0x0;
-//		}
-//
-//		/* Read the data from the Page using Quad IO Fast Read command. */
-//		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ);
-//		if (Status != XST_SUCCESS) {
-//			return XST_FAILURE;
-//		}
-//
-//		/* Compare the data read against the data written. */
-//		u8 wval, rval;
-//		for (Index = 0; Index < PAGE_SIZE; Index++) {
-//			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
-//			wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
-//			if (rval != wval) {
-//				xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
-//				return XST_FAILURE;
-//			}
-//		}
-//
-//	}
-//	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+
+	///////////////////////// Write //////////////////////////////
+
+	xil_printf("**** Write ****\r\n");
+
+	for (int i=0; i<NUM_PAGES; i++){
+
+		if ((i%1024)==0) {
+			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+			regptr[LED_CONTROL] = i/1024;
+		}
+
+		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
+
+		// Fill WriteBuffer
+		srand(Address);
+		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
+			WriteBuffer[j] = (u8)rand();
+		}
+
+		// Enable writes
+		Status = SpiFlashWriteEnable(&Spi);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		// Write the data using Quad Fast Write command.
+		Status = SpiFlashWrite(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_WRITE);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+	}
+	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
+
+
+	//////////////////////////// read and check///////////////////////////
+
+	xil_printf("** Verify\r\n");
+
+	for (int i=0; i<NUM_PAGES; i++){
+
+		if ((i%1024)==0) {
+			xil_printf("Page %d/%d\r", i+1, NUM_PAGES);
+			regptr[LED_CONTROL] = i/1024;
+		}
+
+		Address = FLASH_TEST_ADDRESS + i * PAGE_SIZE;
+
+		/* Wait while the Flash is busy. */
+		Status = SpiFlashWaitForFlashReady();
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/* Clear the read Buffer. */
+		//for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
+		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes; Index++) {
+			ReadBuffer[Index] = 0x0;
+		}
+
+		/* Read the data from the Page using Quad IO Fast Read command. */
+		Status = SpiFlashRead(&Spi, Address, PAGE_SIZE, COMMAND_QUAD_IO_READ, quad_io_read_dummy_bytes);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		// Fill WriteBuffer
+		srand(Address);
+		for (int j=4; j<(PAGE_SIZE+READ_WRITE_EXTRA_BYTES); j++) {
+			WriteBuffer[j] = (u8)rand();
+		}
+		
+		/* Compare the data read against the data written. */
+		u8 wval, rval;
+		uint32_t errors = 0;
+		for (Index = 0; Index < PAGE_SIZE; Index++) {
+			//rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
+			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes];
+			wval = WriteBuffer[Index + READ_WRITE_EXTRA_BYTES];
+			if (rval != wval) {
+				errors ++;
+				if (errors < 20) xil_printf("error: %d 0x%02x  0x%02x\r\n", Index, rval, wval);
+			}
+		}
+		if (errors != 0) return XST_FAILURE;
+
+	}
+	xil_printf("Page %d/%d\r\n", NUM_PAGES, NUM_PAGES);
 
 
 	xil_printf("********** Success! ***********\r\n");
@@ -448,7 +461,7 @@ int SpiReadID(XSpi *SpiPtr, int n)
 *
 * @note		None
 */
-int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd)
+int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd, u32 dummy_bytes)
 {
 	int Status;
 
@@ -471,7 +484,8 @@ int SpiFlashRead(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 ReadCmd)
 	} else if (ReadCmd == COMMAND_DUAL_IO_READ) {
 		ByteCount += DUAL_READ_DUMMY_BYTES;
 	} else if (ReadCmd == COMMAND_QUAD_IO_READ) {
-		ByteCount += QUAD_IO_READ_DUMMY_BYTES;
+		//ByteCount += QUAD_IO_READ_DUMMY_BYTES;
+		ByteCount += dummy_bytes;
 	} else if (ReadCmd == COMMAND_QUAD_READ) {
 		ByteCount += QUAD_READ_DUMMY_BYTES;
 	}
