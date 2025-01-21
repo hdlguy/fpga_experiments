@@ -49,7 +49,7 @@ if { [string first $scripts_vivado_version $current_vivado_version] == -1 } {
 
 set list_projs [get_projects -quiet]
 if { $list_projs eq "" } {
-   create_project project_1 myproj -part xc7a35tcsg324-1
+   create_project project_1 myproj -part xc7a100tcsg324-2
 }
 
 
@@ -455,7 +455,7 @@ proc create_root_design { parentCell } {
   # Create instance: axi_quad_spi_0, and set properties
   set axi_quad_spi_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_quad_spi:3.2 axi_quad_spi_0 ]
   set_property -dict [list \
-    CONFIG.C_SPI_MEMORY {2} \
+    CONFIG.C_SPI_MEMORY {3} \
     CONFIG.C_SPI_MODE {2} \
     CONFIG.C_USE_STARTUP {1} \
   ] $axi_quad_spi_0

@@ -3,8 +3,8 @@
 ## ./flashboard.sh  command_proc
 
 appname=$1
-memfile=../implement_neso/results/top.mmi
-bitfile=../implement_neso/results/top.bit
+memfile=../implement/results/top.mmi
+bitfile=../implement/results/top.bit
 
 echo $appname
 
