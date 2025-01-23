@@ -1,11 +1,13 @@
+// This design is used to test run-time access to the qspi configuration flash.
+// The startup block is enabled in the AXI QSPI interface so that SCK is not specifically brought out.
+// Also, the JTAG uart is enabled in the debug module so that the usb-uart is not consumed.
+//
+// QSPI access is implemented in C code derived from Xilinx example code.
+//
 module top (
-    //input   logic       rstn,
     input   logic       clkin100,
     output  logic[7:0]  led,
-    output  logic       uart_txd,
-    input   logic       uart_rxd,
     inout   logic       qspi_io_io[3:0],
-    //output  logic       qspi_sck_io,
     inout   logic       qspi_ss_io
 );
 
@@ -23,7 +25,6 @@ module top (
         end
     end
     assign resetn = ~reset;
-
 
     logic           axi_aresetn;
     logic           axi_aclk;
@@ -95,24 +96,16 @@ module top (
         .qspi_io3_i     (qspi_io_i[3]),
         .qspi_io3_o     (qspi_io_o[3]),
         .qspi_io3_t     (qspi_io_t[3]),
-//        .qspi_sck_i     (qspi_sck_i),
-//        .qspi_sck_o     (qspi_sck_o),
-//        .qspi_sck_t     (qspi_sck_t),
         .qspi_ss_i      (qspi_ss_i),
         .qspi_ss_o      (qspi_ss_o),
-        .qspi_ss_t      (qspi_ss_t),              
-        //
-        .usb_uart_rxd   (uart_rxd),
-        .usb_uart_txd   (uart_txd)
+        .qspi_ss_t      (qspi_ss_t)     
     );
     IOBUF qspi_io0_iobuf (.I(qspi_io_o[0]), .IO(qspi_io_io[0]), .O(qspi_io_i[0]), .T(qspi_io_t[0]));
     IOBUF qspi_io1_iobuf (.I(qspi_io_o[1]), .IO(qspi_io_io[1]), .O(qspi_io_i[1]), .T(qspi_io_t[1]));
     IOBUF qspi_io2_iobuf (.I(qspi_io_o[2]), .IO(qspi_io_io[2]), .O(qspi_io_i[2]), .T(qspi_io_t[2]));
     IOBUF qspi_io3_iobuf (.I(qspi_io_o[3]), .IO(qspi_io_io[3]), .O(qspi_io_i[3]), .T(qspi_io_t[3])); 
     IOBUF qspi_ss_iobuf  (.I(qspi_ss_o),    .IO(qspi_ss_io),    .O(qspi_ss_i),    .T(qspi_ss_t));    
-//    IOBUF qspi_sck_iobuf (.I(qspi_sck_o),   .IO(qspi_sck_io),   .O(qspi_sck_i),   .T(qspi_sck_t));    
     
-
     localparam logic[31:0] VERSION = 32'h00_01_02_03;
     localparam logic[31:0] ID      = 32'hDEADBEEF;
     localparam integer LOG2_NREGS = 4;
