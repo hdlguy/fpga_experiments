@@ -19,7 +19,7 @@ tclapp::install ultrafast -quiet
 
 read_verilog -sv ../source/top.sv
 
-read_xdc         ../source/arty_top.xdc
+read_xdc         ../source/top.xdc
 
 close_project
 
