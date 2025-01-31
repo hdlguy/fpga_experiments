@@ -9,7 +9,7 @@ module top (
 
     // generate the power up reset.
     logic reset;
-    logic[7:0] reset_count = -1;
+    logic[15:0] reset_count = -1;
     always_ff @(posedge clk) begin
         if (reset_count != 0) begin
             reset_count <= reset_count - 1;
@@ -29,6 +29,8 @@ module top (
 	       led <= led_count[31:24];
 	   end
 	end	
+	
+	top_ila ila_inst (.clk(clk), .probe0(led_count));
 
 endmodule
 
