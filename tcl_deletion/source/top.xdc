@@ -11,6 +11,8 @@ set_property IOSTANDARD LVCMOS33    [get_ports clkin100]
 set_property PACKAGE_PIN E3         [get_ports clkin100]
 
 set_property IOSTANDARD LVCMOS33 [get_ports {led[*]}]
+set_property DRIVE 4             [get_ports {led[*]}]
+set_property SLEW SLOW           [get_ports {led[*]}]
 set_property PACKAGE_PIN T10 [get_ports {led[7]}]
 set_property PACKAGE_PIN  T9 [get_ports {led[6]}]
 set_property PACKAGE_PIN  J5 [get_ports {led[5]}]
