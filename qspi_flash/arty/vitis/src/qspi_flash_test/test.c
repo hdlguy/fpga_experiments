@@ -1,4 +1,8 @@
-
+// This program demonstrates access to the QSPI configuration flash.
+// It is derived from the Xilinx Vitis example code for Micron QSPI flash access.
+// Code has been added to read the JEDIC ID of the part and adjust the 
+// number of dummy bytes on read to make it work for Micron, Spansion and ISSI flash.
+//
 #include "xparameters.h"
 #include "xspi.h"
 #include "xil_exception.h"
