@@ -27,6 +27,10 @@ report_utilization      -file   ./results/utilization.rpt
 #set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 #set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 
+# multiboot
+set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design]
+set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 0x0400000 [current_design]
+
 write_bitstream -verbose -force ./results/top.bit
 
 close_project
