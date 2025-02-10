@@ -1,5 +1,7 @@
 #
-write_cfgmem -force -format MCS -size 128 -interface SPIx4 -loadbit "up 0x0 ./results/top.bit" -verbose ./results/top.mcs
+#write_cfgmem -force -format MCS -size 128 -interface SPIx4 -loadbit "up 0x0 ./results/top.bit" -verbose ./results/top.mcs
+write_cfgmem -force -format mcs -interface SPIx4 -size 128 -loadbit "up 0 ../implement1/results/top.bit up 0x0400000 ../implement2/results/top.bit" ./results/top.mcs
+
 
 disconnect_hw_server -quiet
 open_hw_manager
@@ -45,7 +47,7 @@ if {$status != 0} {
     program_hw_cfgmem -hw_cfgmem [ get_property PROGRAM.HW_CFGMEM [current_hw_device]]
 }
 
-boot_hw_device  [current_hw_device]
+boot_hw_device -timeout 15  [current_hw_device]
 close_hw_manager
 
 

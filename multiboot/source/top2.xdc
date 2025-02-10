@@ -4,9 +4,9 @@ set_property CONFIG_VOLTAGE 2.5 [current_design]
 set_property BITSTREAM.CONFIG.CONFIGRATE 50 [current_design]
 set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
+
 # multiboot
 set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design]
-#set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 0x0400000 [current_design]
 
 create_clock -name clk100  -period 10.0 [get_ports clkin100]
 
