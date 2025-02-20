@@ -1,6 +1,6 @@
 #
 #write_cfgmem -force -format MCS -size 128 -interface SPIx4 -loadbit "up 0x0 ./results/top.bit" -verbose ./results/top.mcs
-write_cfgmem -force -format mcs -interface SPIx4 -size 128 -loadbit "up 0 ./results/top1.bit up 0x0400000 ./results/top2.bit" ./results/top.mcs
+write_cfgmem -force -format mcs -interface SPIx4 -size 128 -loadbit "up 0x000000  ./results/top1.bit up 0x400000 ./results/top2.bit" ./results/top.mcs
 
 
 disconnect_hw_server -quiet
