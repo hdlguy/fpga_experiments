@@ -22,4 +22,9 @@ set_property PACKAGE_PIN  J2 [get_ports {led[2]}]
 set_property PACKAGE_PIN  J4 [get_ports {led[1]}]
 set_property PACKAGE_PIN  F6 [get_ports {led[0]}] 
 
+set_property IOSTANDARD LVCMOS33 [get_ports {usb_uart*}]
+set_property PACKAGE_PIN A9  [get_ports {usb_uart_rxd}]
+set_property PACKAGE_PIN D10 [get_ports {usb_uart_txd}]
 
+set_property IOSTANDARD LVCMOS33    [get_ports rstn]
+set_property PACKAGE_PIN C2         [get_ports rstn]

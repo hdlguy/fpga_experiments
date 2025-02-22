@@ -1,27 +1,26 @@
 // trivial design to investigate deleted .tcl files.
 module top (
     input   logic       clkin100,
-    output  logic[7:0]  led
+    output  logic[7:0]  led,
+    input   logic       usb_uart_rxd,
+    output  logic       usb_uart_txd
 );
 
-    logic clk;
-    assign clk = clkin100;
-
-    // generate the power up reset.
-    logic reset;
-    logic[15:0] reset_count = -1;
-    always_ff @(posedge clk) begin
-        if (reset_count != 0) begin
-            reset_count <= reset_count - 1;
-            reset <= 1;
-        end else begin
-            reset <= 0;
-        end
-    end
+    logic axi_aclk, axi_aresetn, clk;
+    assign clk = axi_aclk;
+    
+    system system_i (
+        .clkin(clkin100),
+        .resetn(1'b1),
+        .axi_aclk(axi_aclk),
+        .axi_aresetn(axi_aresetn),
+        .usb_uart_rxd(usb_uart_rxd),
+        .usb_uart_txd(usb_uart_txd)
+    );
 	
 	logic[31:0] led_count=0;
 	always_ff @(posedge clk) begin
-	   if (reset) begin
+	   if (axi_aresetn == 0) begin
 	       led_count <= 0;
 	       led <= 0;
 	   end else begin
