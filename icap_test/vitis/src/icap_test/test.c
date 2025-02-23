@@ -29,10 +29,12 @@ int main(void)
 	// write to the AXI HWICAP fifo
 	for (int Index = 0; Index < IPROG_LENGTH; Index++) XHwIcap_WriteReg(BaseAddress, XHI_WF_OFFSET, IProg[Index]);
 
-	xil_printf("***********initiating IProg transfer. Hasta la vista! ***************\n\r");
-	for (int i=0; i<10000000; i++);
+	xil_printf("************* hit ENTER to reboot from flash *************\n\r");
+	getchar();
 
 	// initiation tranfer
+	xil_printf("***********initiating IProg transfer. Hasta la vista! ***************\n\r");
+	for (int i=0; i<1000000; i++);
 	XHwIcap_WriteReg(BaseAddress, XHI_CR_OFFSET, XHI_CR_WRITE_MASK);
 
 	// we never get here
