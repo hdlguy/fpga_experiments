@@ -1,3 +1,0 @@
-## command to make timer images.
-vivado -mode batch -source multiboot_address_table.tcl -tclargs spi 4 50 128 524288
-
