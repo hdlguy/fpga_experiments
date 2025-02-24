@@ -22,8 +22,7 @@ write_bitstream -verbose -force ./results/top2.bit
 
 # multiboot golden bitstream
 set_property BITSTREAM.CONFIG.CONFIGFALLBACK ENABLE [current_design]
-#set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 0x0400000 [current_design]
-set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 0x03F0000 [current_design]
+set_property BITSTREAM.CONFIG.NEXT_CONFIG_ADDR 0x03F0000 [current_design] ;# points to timer1.bin start address
 write_bitstream -verbose -force ./results/top1.bit
 
 close_project

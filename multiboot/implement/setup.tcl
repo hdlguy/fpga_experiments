@@ -10,12 +10,7 @@ set_property target_language verilog [current_project]
 set_property default_lib work [current_project]
 load_features ipintegrator
 tclapp::install ultrafast -quiet
-set_property CUSTOMIZED_DEFAULT_IP_LOCATION ./ [current_project]
-
-#read_ip ../source/top_ila/top_ila.xci
-
-#upgrade_ip -quiet  [get_ips *]
-#generate_target {all} [get_ips *]
+#set_property CUSTOMIZED_DEFAULT_IP_LOCATION ./ [current_project]
 
 read_verilog -sv ../source/top.sv
 
