@@ -6,27 +6,16 @@ module top (
     output  logic       usb_uart_txd
 );
 
-    logic axi_aclk, axi_aresetn, clk;
-    assign clk = axi_aclk;
+    logic clk;
+    assign clk = clkin100;
     
-    system system_i (
-        .clkin(clkin100),
-        .resetn(1'b1),
-        .axi_aclk(axi_aclk),
-        .axi_aresetn(axi_aresetn),
-        .usb_uart_rxd(usb_uart_rxd),
-        .usb_uart_txd(usb_uart_txd)
-    );
+    system1 system1_i (.clkin(clkin100), .resetn(1'b1), .usb_uart_rxd(usb_uart_rxd), .usb_uart_txd(usb_uart_txd));    
+    system2 system2_i (.clkin(clkin100), .resetn(1'b1));
 	
 	logic[31:0] led_count=0;
 	always_ff @(posedge clk) begin
-	   if (axi_aresetn == 0) begin
-	       led_count <= 0;
-	       led <= 0;
-	   end else begin
-	       led_count <= led_count + 1;
-	       led <= led_count[31:24];
-	   end
+       led_count <= led_count + 1;
+       led <= led_count[31:24];
 	end	
 	
 	top_ila ila_inst (.clk(clk), .probe0(led_count));
