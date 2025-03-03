@@ -9,16 +9,51 @@ module top (
     logic clk;
     assign clk = clkin100;
     
-    system1 system1_i (.clkin(clkin100), .resetn(1'b1), .usb_uart_rxd(usb_uart_rxd), .usb_uart_txd(usb_uart_txd));    
-    system2 system2_i (.clkin(clkin100), .resetn(1'b1));
+    logic debug_capture;
+    logic debug_clk;
+    logic debug_disable;
+    logic[0:7] debug_reg_en;
+    logic debug_rst;
+    logic debug_shift;
+    logic debug_tdi;
+    logic debug_tdo;
+    logic debug_update;
+    
+    system1 system1_i (
+        .clkin(clkin100), 
+        .resetn(1'b1), 
+        .usb_uart_rxd(usb_uart_rxd), 
+        .usb_uart_txd(usb_uart_txd),
+        .gpio_tri_o(led[3:0]),
+        //
+        .debug_capture(debug_capture),
+        .debug_clk(debug_clk),
+        .debug_disable(debug_disable),
+        .debug_reg_en(debug_reg_en),
+        .debug_rst(debug_rst),
+        .debug_shift(debug_shift),
+        .debug_tdi(debug_tdi),
+        .debug_tdo(debug_tdo),
+        .debug_update(debug_update)
+    );   
+     
+    system2 system2_i (
+        .clkin(clkin100), 
+        .resetn(1'b1),        
+        .gpio_tri_o(led[7:4]),
+        //
+        .debug_capture(debug_capture),
+        .debug_clk(debug_clk),
+        .debug_disable(debug_disable),
+        .debug_reg_en(debug_reg_en),
+        .debug_rst(debug_rst),
+        .debug_shift(debug_shift),
+        .debug_tdi(debug_tdi),
+        .debug_tdo(debug_tdo),
+        .debug_update(debug_update)
+    );
 	
-	logic[31:0] led_count=0;
-	always_ff @(posedge clk) begin
-       led_count <= led_count + 1;
-       led <= led_count[31:24];
-	end	
-	
-	top_ila ila_inst (.clk(clk), .probe0(led_count));
+	//top_ila ila_inst (.clk(clk), .probe0(led_count));
 
 endmodule
 
