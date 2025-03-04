@@ -34,7 +34,7 @@ set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_f
 
 add_files -norecurse ../vitis2/release/production2.elf
 set_property SCOPED_TO_REF system2 [get_files -all -of_objects [get_fileset sources_1] {production2.elf}]
-set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production2.elf}]
+set_property SCOPED_TO_CELLS { microblaze_1 } [get_files -all -of_objects [get_fileset sources_1] {production2.elf}]
 
 close_project
 
