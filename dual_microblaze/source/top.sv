@@ -19,6 +19,7 @@ module top (
     logic debug_tdo;
     logic debug_update;
     
+/*
     system1 system1_i (
         .clkin(clkin100), 
         .resetn(1'b1), 
@@ -36,6 +37,7 @@ module top (
         .debug_tdo(debug_tdo),
         .debug_update(debug_update)
     );   
+*/
      
     system2 system2_i (
         .clkin(clkin100), 
