@@ -19,7 +19,7 @@ int main()
     	xil_printf("0x%08x\n\r", whilecount);
     	*gpioptr = whilecount;
 
-    	for(int i=0; i<8000000; i++); // delay
+    	for(int i=0; i<1000000; i++); // delay
     	whilecount++;
 
     }

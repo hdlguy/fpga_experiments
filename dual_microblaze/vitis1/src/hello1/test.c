@@ -20,7 +20,7 @@ int main()
     	*gpioptr = whilecount;
 
 
-    	for(int i=0; i<8000000; i++); // delay
+    	for(int i=0; i<2000000; i++); // delay
     	whilecount++;
 
     }
