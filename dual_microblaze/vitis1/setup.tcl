@@ -5,7 +5,7 @@
 file delete -force ./workspace
 
 set hw ../implement/results/top.xsa
-set proc "microblaze_0"
+set proc "microblaze_1"
 
 setws ./workspace
 
