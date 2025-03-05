@@ -16,8 +16,8 @@ int main()
     uint32_t whilecount = 0;
     while(1) {
 
-    	xil_printf("hello\n\r");
-    	*gpioptr = whilecount;
+    	xil_printf("0x%08x\n\r", whilecount);
+    	*gpioptr = 0x01 << (whilecount & 0x00000003);
 
 
     	for(int i=0; i<2000000; i++); // delay
