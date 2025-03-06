@@ -16,25 +16,21 @@ read_ip ../source/top_ila/top_ila.xci
 upgrade_ip -quiet  [get_ips *]
 generate_target {all} [get_ips *]
 
-source ../source/system1.tcl
-generate_target {synthesis implementation} [get_files ./proj.srcs/sources_1/bd/system1/system1.bd]
-set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/system1/system1.bd]
-
-source ../source/system2.tcl
-generate_target {synthesis implementation} [get_files ./proj.srcs/sources_1/bd/system2/system2.bd]
-set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/system2/system2.bd]
+source ../source/system.tcl
+generate_target {synthesis implementation} [get_files ./proj.srcs/sources_1/bd/system/system.bd]
+set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/system/system.bd]
 
 read_verilog -sv ../source/top.sv
 
 read_xdc         ../source/top.xdc
 
-add_files -norecurse ../vitis1/release/production1.elf
-set_property SCOPED_TO_REF system1 [get_files -all -of_objects [get_fileset sources_1] {production1.elf}]
-set_property SCOPED_TO_CELLS { microblaze_1 } [get_files -all -of_objects [get_fileset sources_1] {production1.elf}]
+add_files -norecurse ../vitis0/release/production0.elf
+set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production0.elf}]
+set_property SCOPED_TO_CELLS { microblaze_1 } [get_files -all -of_objects [get_fileset sources_1] {production0.elf}]
 
-add_files -norecurse ../vitis2/release/production2.elf
-set_property SCOPED_TO_REF system2 [get_files -all -of_objects [get_fileset sources_1] {production2.elf}]
-set_property SCOPED_TO_CELLS { microblaze_2 } [get_files -all -of_objects [get_fileset sources_1] {production2.elf}]
+add_files -norecurse ../vitis1/release/production1.elf
+set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production1.elf}]
+set_property SCOPED_TO_CELLS { microblaze_1 } [get_files -all -of_objects [get_fileset sources_1] {production1.elf}]
 
 close_project
 
