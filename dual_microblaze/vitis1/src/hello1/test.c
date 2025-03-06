@@ -11,12 +11,12 @@ int main()
 
 	uint32_t* gpioptr = (uint32_t *) XPAR_GPIO_0_BASEADDR;
 
-    xil_printf("Hello World\n\r");
+    xil_printf("microblaze_1: Hello World!\n\r");
 
     uint32_t whilecount = 0;
     while(1) {
 
-    	xil_printf("0x%08x\n\r", whilecount);
+    	xil_printf("MB1: 0x%08x\n\r", whilecount);
     	*gpioptr = 0x01 << (whilecount & 0x00000003);
 
 
