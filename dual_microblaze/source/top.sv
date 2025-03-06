@@ -1,5 +1,6 @@
 // trivial design to investigate deleted .tcl files.
 module top (
+    input   logic       rstn,
     input   logic       clkin100,
     output  logic[7:0]  led,
     input   logic       usb_uart_rxd,
@@ -18,11 +19,14 @@ module top (
     logic debug_tdi;
     logic debug_tdo;
     logic debug_update;
+
+    logic resetn=0;
+    always_ff @(posedge clk) resetn <= rstn;
     
 
     system1 system1_i (
         .clkin(clkin100), 
-        .resetn(1'b1), 
+        .resetn(resetn), 
         .usb_uart_rxd(usb_uart_rxd), 
         .usb_uart_txd(usb_uart_txd),
         .gpio_tri_o(led[3:0]),
@@ -41,7 +45,7 @@ module top (
      
     system2 system2_i (
         .clkin(clkin100), 
-        .resetn(1'b1),        
+        .resetn(resetn),        
         .gpio_tri_o(led[7:4]),
         //
         .debug_capture(debug_capture),

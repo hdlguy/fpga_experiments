@@ -131,7 +131,6 @@ if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axi_intc:4.1\
 xilinx.com:ip:axi_timer:2.0\
-xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:mdm:3.2\
 xilinx.com:ip:microblaze:11.0\
 xilinx.com:ip:proc_sys_reset:5.0\
@@ -319,53 +318,6 @@ proc create_root_design { parentCell } {
   # Create instance: axi_timer_0, and set properties
   set axi_timer_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_timer:2.0 axi_timer_0 ]
 
-  # Create instance: clk_wiz_0, and set properties
-  set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0 ]
-  set_property -dict [list \
-    CONFIG.CLKOUT1_JITTER {151.366} \
-    CONFIG.CLKOUT1_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT2_JITTER {132.221} \
-    CONFIG.CLKOUT2_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {200.000} \
-    CONFIG.CLKOUT2_USED {true} \
-    CONFIG.CLKOUT3_JITTER {139.594} \
-    CONFIG.CLKOUT3_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {150.000} \
-    CONFIG.CLKOUT3_USED {true} \
-    CONFIG.CLKOUT4_JITTER {200.470} \
-    CONFIG.CLKOUT4_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {25.000} \
-    CONFIG.CLKOUT4_USED {true} \
-    CONFIG.CLKOUT5_JITTER {122.522} \
-    CONFIG.CLKOUT5_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT5_REQUESTED_OUT_FREQ {300.0} \
-    CONFIG.CLKOUT5_USED {true} \
-    CONFIG.CLKOUT6_JITTER {263.649} \
-    CONFIG.CLKOUT6_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT6_REQUESTED_OUT_FREQ {6.25} \
-    CONFIG.CLKOUT6_USED {true} \
-    CONFIG.CLK_OUT1_PORT {clkout100} \
-    CONFIG.CLK_OUT2_PORT {clkout200} \
-    CONFIG.CLK_OUT3_PORT {clkout150} \
-    CONFIG.CLK_OUT4_PORT {clkout25} \
-    CONFIG.CLK_OUT5_PORT {clkout300} \
-    CONFIG.CLK_OUT6_PORT {clkout6} \
-    CONFIG.MMCM_CLKFBOUT_MULT_F {6.000} \
-    CONFIG.MMCM_CLKIN1_PERIOD {10.0} \
-    CONFIG.MMCM_CLKIN2_PERIOD {10.0} \
-    CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.000} \
-    CONFIG.MMCM_CLKOUT1_DIVIDE {3} \
-    CONFIG.MMCM_CLKOUT2_DIVIDE {4} \
-    CONFIG.MMCM_CLKOUT3_DIVIDE {24} \
-    CONFIG.MMCM_CLKOUT4_DIVIDE {2} \
-    CONFIG.MMCM_CLKOUT5_DIVIDE {96} \
-    CONFIG.NUM_OUT_CLKS {6} \
-    CONFIG.PRIM_SOURCE {No_buffer} \
-    CONFIG.RESET_PORT {resetn} \
-    CONFIG.RESET_TYPE {ACTIVE_LOW} \
-  ] $clk_wiz_0
-
-
   # Create instance: mdm_1, and set properties
   set mdm_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:mdm:3.2 mdm_1 ]
   set_property -dict [list \
@@ -449,15 +401,11 @@ proc create_root_design { parentCell } {
   # Create port connections
   connect_bd_net -net axi_timer_0_interrupt  [get_bd_pins axi_timer_0/interrupt] \
   [get_bd_pins xlconcat_0/In0]
-  connect_bd_net -net clk_wiz_0_locked  [get_bd_pins clk_wiz_0/locked] \
-  [get_bd_pins rst_clk_wiz_0_100M/dcm_locked]
-  connect_bd_net -net clkin_1  [get_bd_ports clkin] \
-  [get_bd_pins clk_wiz_0/clk_in1]
   connect_bd_net -net mdm_1_Interrupt  [get_bd_pins mdm_1/Interrupt] \
   [get_bd_pins xlconcat_0/In1]
   connect_bd_net -net mdm_1_debug_sys_rst  [get_bd_pins mdm_1/Debug_SYS_Rst] \
   [get_bd_pins rst_clk_wiz_0_100M/mb_debug_sys_rst]
-  connect_bd_net -net microblaze_0_Clk  [get_bd_pins clk_wiz_0/clkout100] \
+  connect_bd_net -net microblaze_0_Clk  [get_bd_ports clkin] \
   [get_bd_pins axi_intc_0/s_axi_aclk] \
   [get_bd_pins axi_timer_0/s_axi_aclk] \
   [get_bd_pins mdm_1/S_AXI_ACLK] \
@@ -467,7 +415,6 @@ proc create_root_design { parentCell } {
   [get_bd_pins smartconnect_0/aclk] \
   [get_bd_pins axi_gpio_0/s_axi_aclk]
   connect_bd_net -net reset_1  [get_bd_ports resetn] \
-  [get_bd_pins clk_wiz_0/resetn] \
   [get_bd_pins rst_clk_wiz_0_100M/ext_reset_in]
   connect_bd_net -net rst_clk_wiz_0_100M_bus_struct_reset  [get_bd_pins rst_clk_wiz_0_100M/bus_struct_reset] \
   [get_bd_pins microblaze_0_local_memory/SYS_Rst]
