@@ -10,8 +10,8 @@ set proc "microblaze_1"
 setws ./workspace
 
 platform create -name "standalone_plat" -hw $hw -proc $proc -os standalone
-bsp config stdout "axi_uartlite_0"
-bsp config stdin  "axi_uartlite_0"
+#bsp config stdout "axi_uartlite_0"
+#bsp config stdin  "axi_uartlite_0"
 
 app create -name hello1 -platform standalone_plat -domain standalone_domain -template "Empty Application(C)"
 file link -symbolic ./workspace/hello1/src/test.c               ../../../src/hello1/test.c
