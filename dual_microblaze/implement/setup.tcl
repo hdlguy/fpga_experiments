@@ -26,7 +26,7 @@ read_xdc         ../source/top.xdc
 
 add_files -norecurse ../vitis0/release/production0.elf
 set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production0.elf}]
-set_property SCOPED_TO_CELLS { microblaze_1 } [get_files -all -of_objects [get_fileset sources_1] {production0.elf}]
+set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production0.elf}]
 
 add_files -norecurse ../vitis1/release/production1.elf
 set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production1.elf}]
