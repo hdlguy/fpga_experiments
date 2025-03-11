@@ -37,15 +37,15 @@ int main()
 	XLlFifo_IntClear(InstancePtr,0xffffffff);
 	XLlFifo_Status(InstancePtr);
 
-	for (uint32_t i=0; i<MAXLEN/4; i++) TxBuffer[i] = i;
 
 
-	// Transmit the Data Stream
-	for (uint32_t i=0; i<MAXLEN/4; i++) XLlFifo_TxPutWord(InstancePtr, TxBuffer[i]);
-	xil_printf("fifo transmission\n\r");
-	XLlFifo_iTxSetLen(InstancePtr, MAXLEN);
-	xil_printf("polling\n\r");
-	while( !(XLlFifo_IsTxDone(InstancePtr)) );
+//	// Transmit the Data Stream
+//	for (uint32_t i=0; i<MAXLEN/4; i++) TxBuffer[i] = i;
+//	for (uint32_t i=0; i<MAXLEN/4; i++) XLlFifo_TxPutWord(InstancePtr, TxBuffer[i]);
+//	xil_printf("fifo transmission\n\r");
+//	XLlFifo_iTxSetLen(InstancePtr, MAXLEN);
+//	xil_printf("polling\n\r");
+//	while( !(XLlFifo_IsTxDone(InstancePtr)) );
 
 
 	uint32_t RxLength;
@@ -58,7 +58,6 @@ int main()
         // receive a frame
     	while(XLlFifo_IsRxEmpty(InstancePtr)){};
 		while(XLlFifo_iRxOccupancy(InstancePtr)) {
-			/* Read Receive Length */
 			RxLength = XLlFifo_iRxGetLen(InstancePtr);
 			for (int i=0; i < RxLength/4; i++) RxBuffer[i] = XLlFifo_RxGetWord(InstancePtr);			
 		}
@@ -68,14 +67,13 @@ int main()
 		} else {
 			xil_printf("RxLength = %d\n\r", RxLength);
 		}
-		XLlFifo_RxReset(InstancePtr);  // ???????????
+//		XLlFifo_RxReset(InstancePtr);  // ???????????
 		
 
-    	// Transmit the Data Stream
+    	// Transmit a frame
+		for (uint32_t i=0; i<MAXLEN/4; i++) TxBuffer[i] = i + (whilecount<<16);
     	for (uint32_t i=0; i<MAXLEN/4; i++) XLlFifo_TxPutWord(InstancePtr, TxBuffer[i]);
-    	//xil_printf("fifo transmission\n\r");
     	XLlFifo_iTxSetLen(InstancePtr, MAXLEN);
-    	//xil_printf("polling\n\r");
     	while( !(XLlFifo_IsTxDone(InstancePtr)) );
 
     	//for(int i=0; i<1000000; i++); // delay
