@@ -21,7 +21,7 @@ source ../source/system.tcl
 generate_target {synthesis implementation} [get_files ./proj.srcs/sources_1/bd/system/system.bd]
 set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/system/system.bd]
 
-read_verilog -sv ../source/datagen.sv
+read_verilog -sv ../source/datagen/datagen.sv
 read_verilog -sv ../source/top.sv
 
 read_xdc         ../source/top.xdc
