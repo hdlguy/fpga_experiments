@@ -1,8 +1,8 @@
 
 module datagen(
     //
-    input clk,
-    input trigger,
+    input  logic        clk,
+    input  logic        trigger,
     //
     output logic [7:0]  m_axis_tdata,
     output logic        m_axis_tlast,

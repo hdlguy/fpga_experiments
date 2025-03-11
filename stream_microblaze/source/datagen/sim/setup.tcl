@@ -7,9 +7,9 @@ set_property part xc7a35ticsg324-1L [current_project]
 set_property target_language verilog [current_project]
 set_property default_lib work [current_project]
 
-read_ip ../source/top_ila/top_ila.xci
+#read_ip ../source/top_ila/top_ila.xci
 
-upgrade_ip -quiet  [get_ips *]
+#upgrade_ip -quiet  [get_ips *]
 
 read_verilog -sv ../datagen.sv
 read_verilog -sv ../datagen_tb.sv
