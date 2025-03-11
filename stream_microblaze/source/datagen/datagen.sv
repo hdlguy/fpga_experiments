@@ -83,12 +83,17 @@ module datagen(
         end
     end
     
+    logic[7:0] pulse_count=0;
+    always_ff @(posedge clk) begin
+        if (trigger) pulse_count <= pulse_count + 1;
+    end
+    
     assign m_axis_tlast = (data_count == Ndata-1);
     always_comb begin
         if (control_enable) begin
             m_axis_tdata = control[data_count]; 
         end else begin
-            m_axis_tdata = data_count[7:0];
+            m_axis_tdata = data_count[7:0] + pulse_count;
         end
     end
 

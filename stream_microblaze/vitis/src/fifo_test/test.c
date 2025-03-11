@@ -54,26 +54,31 @@ int main()
     while(1) {
 
         xil_printf("0x%08x\n\r", whilecount);
-
+        
+        // receive a frame
+    	while(XLlFifo_IsRxEmpty(InstancePtr)){};
 		while(XLlFifo_iRxOccupancy(InstancePtr)) {
 			/* Read Receive Length */
 			RxLength = XLlFifo_iRxGetLen(InstancePtr);
 			for (int i=0; i < RxLength/4; i++) RxBuffer[i] = XLlFifo_RxGetWord(InstancePtr);			
 		}
-		xil_printf("RxLength = %d\n\r", RxLength);
 		Status = XLlFifo_IsRxDone(InstancePtr);
 		if(Status != TRUE){
 			xil_printf("Failing in receive complete ... \r\n");
+		} else {
+			xil_printf("RxLength = %d\n\r", RxLength);
 		}
+		XLlFifo_RxReset(InstancePtr);  // ???????????
+		
 
     	// Transmit the Data Stream
     	for (uint32_t i=0; i<MAXLEN/4; i++) XLlFifo_TxPutWord(InstancePtr, TxBuffer[i]);
-    	xil_printf("fifo transmission\n\r");
+    	//xil_printf("fifo transmission\n\r");
     	XLlFifo_iTxSetLen(InstancePtr, MAXLEN);
-    	xil_printf("polling\n\r");
+    	//xil_printf("polling\n\r");
     	while( !(XLlFifo_IsTxDone(InstancePtr)) );
 
-    	for(int i=0; i<1000000; i++); // delay
+    	//for(int i=0; i<1000000; i++); // delay
     	whilecount++;
 
     }
