@@ -57,7 +57,7 @@ module top (
     end
         
     // generate stream data
-    datagen datagen_inst (.clk(clk), .trigger(pps), .n_axis_tdata(flash_s_axis_tdata), .m_axis_tlast(flash_s_axis_tlast), .m_axis_tready(flash_s_axis_tready), .m_axis_tvalid(flash_s_axis_tvalid));
+    datagen datagen_inst (.clk(clk), .trigger(pps), .m_axis_tdata(flash_s_axis_tdata), .m_axis_tlast(flash_s_axis_tlast), .m_axis_tready(flash_s_axis_tready), .m_axis_tvalid(flash_s_axis_tvalid));
    	
 	// debug	
 	top_ila ila_inst (.clk(clk), .probe0({pps, flash_s_axis_tdata, flash_s_axis_tlast, flash_s_axis_tready, flash_s_axis_tvalid, flash_m_axis_tdata, flash_m_axis_tkeep, flash_m_axis_tlast, flash_m_axis_tready, flash_m_axis_tvalid})); //24

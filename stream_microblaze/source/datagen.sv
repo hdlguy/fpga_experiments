@@ -13,7 +13,8 @@ module datagen(
     localparam int Ndata = 1024;
     localparam logic[3:0][7:0] control = {8'h40, 8'h00, 8'h00, 8'h03};
   
-    logic data_count_clear;
+    logic[15:0] data_count=0;
+    logic data_count_clear, control_enable;
     logic[3:0] state=0, next_state;
     always_comb begin
     
@@ -21,6 +22,7 @@ module datagen(
         next_state = state;
         data_count_clear = 0;
         m_axis_tvalid = 0;
+        control_enable = 0;
         
         case (state)
             
@@ -35,8 +37,10 @@ module datagen(
                 end
             end
             
+            // put out header
             2: begin
                 m_axis_tvalid = 1;
+                control_enable = 1;
                 if ((m_axis_tvalid) && (m_axis_tready) && (data_count==3)) begin
                     next_state = 3;                   
                 end
@@ -47,6 +51,7 @@ module datagen(
                 next_state = 4;    
             end
             
+            // put out data
             4: begin           
                 m_axis_tvalid = 1;     
                 if ((m_axis_tvalid) && (m_axis_tready) && (data_count==Ndata-1)) begin
@@ -68,7 +73,6 @@ module datagen(
     
     always_ff @(posedge clk) state <= next_state;
     
-    logic[15:0] data_count=0;
     always_ff @(posedge clk) begin
         if (data_count_clear) begin
             data_count <= 0;
@@ -79,8 +83,14 @@ module datagen(
         end
     end
     
-    assign m_axis_tdata = data_count[7:0];
-    assign m_axis_tlast = (data_count = Ndata);
+    assign m_axis_tlast = (data_count == Ndata-1);
+    always_comb begin
+        if (control_enable) begin
+            m_axis_tdata = control[data_count]; 
+        end else begin
+            m_axis_tdata = data_count[7:0];
+        end
+    end
 
 endmodule
 
