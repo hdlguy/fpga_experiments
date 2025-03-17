@@ -741,7 +741,6 @@ static int SetupInterruptSystem(XSpi *SpiPtr)
 
 	int Status;
 
-#ifdef XPAR_INTC_0_DEVICE_ID
 	/*
 	 * Initialize the interrupt controller driver so that
 	 * it's ready to use, specify the device ID that is generated in
@@ -801,4 +800,3 @@ static int SetupInterruptSystem(XSpi *SpiPtr)
 
 	return XST_SUCCESS;
 }
-#endif
