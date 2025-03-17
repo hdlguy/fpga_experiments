@@ -16,6 +16,8 @@ platform create -name "standalone_plat" -hw $hw -proc $proc -os standalone
 
 app create -name qspi_flash_test -platform standalone_plat -domain standalone_domain -template "Empty Application(C)"
 file link -symbolic ./workspace/qspi_flash_test/src/test.c               ../../../src/qspi_flash_test/test.c
+file link -symbolic ./workspace/qspi_flash_test/src/qspi_flash.h         ../../../src/qspi_flash_test/qspi_flash.h
+file link -symbolic ./workspace/qspi_flash_test/src/qspi_flash.c         ../../../src/qspi_flash_test/qspi_flash.c
 file link -symbolic ./workspace/qspi_flash_test/src/fpga.h               ../../../src/fpga.h
 
 #app create -name production -platform standalone_plat -domain standalone_domain -template "Empty Application(C)"

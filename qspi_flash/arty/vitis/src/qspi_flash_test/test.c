@@ -48,7 +48,6 @@
 #define SECTOR_SIZE			0x10000
 #define NUM_SECTORS			(IMAGE_SIZE/SECTOR_SIZE)
 
-//#define FLASH_TEST_ADDRESS		0x00
 #define FLASH_TEST_ADDRESS		0x400000
 
 #define BYTE1				0 /* Byte 1 position */
@@ -63,12 +62,6 @@
 #define DUAL_READ_DUMMY_BYTES		2
 #define QUAD_READ_DUMMY_BYTES		4
 
-#define DUAL_IO_READ_DUMMY_BYTES	2
-//#define QUAD_IO_READ_DUMMY_BYTES	5 // micron
-//#define QUAD_IO_READ_DUMMY_BYTES	3 // spansion
-
-
-
 int SpiReadID(XSpi *SpiPtr, int n);
 int SpiFlashWriteEnable(XSpi *SpiPtr);
 int SpiFlashWrite(XSpi *SpiPtr, u32 Addr, u32 ByteCount, u8 WriteCmd);
@@ -82,6 +75,8 @@ static int SpiFlashWaitForFlashReady(void);
 void SpiHandler(void *CallBackRef, u32 StatusEvent, unsigned int ByteCount);
 static int SetupInterruptSystem(XSpi *SpiPtr);
 
+
+
 static XSpi Spi;
 INTC InterruptController;
 
@@ -91,8 +86,6 @@ static int ErrorCount;
 
 static u8 ReadBuffer[PAGE_SIZE + READ_WRITE_EXTRA_BYTES + 4];
 static u8 WriteBuffer[PAGE_SIZE + READ_WRITE_EXTRA_BYTES];
-
-//static u8 TestByte = 0x20;
 
 int main(void)
 {
@@ -220,7 +213,6 @@ int main(void)
 		}
 
 		/* Clear the read Buffer. */
-		//for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES; Index++) {
 		for (Index = 0; Index < PAGE_SIZE + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes; Index++) {
 			ReadBuffer[Index] = 0x0;
 		}
@@ -234,7 +226,6 @@ int main(void)
 		// check that page is erased
 		u8 rval;
 		for (Index = 0; Index < PAGE_SIZE; Index++) {
-			//rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + QUAD_IO_READ_DUMMY_BYTES];
 			rval = ReadBuffer[Index + READ_WRITE_EXTRA_BYTES + quad_io_read_dummy_bytes];
 			if (rval != 0xff) {
 				xil_printf("error: %d 0x%02x  \r\n", Index, rval);
@@ -342,6 +333,7 @@ int main(void)
 
 	return XST_SUCCESS;
 }
+
 
 
 int SpiFlashWriteEnable(XSpi *SpiPtr)

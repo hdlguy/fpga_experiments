@@ -1,3 +1,6 @@
+//
+// fpga.h
+//
 #define 	REG_BASEADDR 		XPAR_M_AXI_BASEADDR
 
 // define AXI registers
