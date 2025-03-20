@@ -1,7 +1,7 @@
 
-program_flash: main.cpp ../fpga.h Makefile
-	g++ main.cpp -o program_flash -g -I. -I.. -lm
+bit2bin: main.cpp Makefile
+	g++ main.cpp -o bit2bin -g -I. -I.. -lm
 
 clean:
-	rm program_flash
+	rm bit2bin
 
