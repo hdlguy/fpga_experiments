@@ -53,8 +53,18 @@ int main(int argc, char * argv[])
     fread(bitstream, streamsize, 1, fp);
     fclose(fp);
 
+
+    // copy bitstream to binstream omitting header.
+    const int header_length = 119;
+    uint8_t *binstream = (uint8_t *)malloc(streamsize);
+    for (int i=header_length; i<streamsize; i++) {
+        binstream[i-header_length] = bitstream[i];
+    }
+
+
+
     fp = fopen(outfile, "wb");
-    fwrite(bitstream, streamsize, 1, fp);
+    fwrite(binstream, streamsize-header_length, 1, fp);
     fclose(fp);
 
     return(0);
