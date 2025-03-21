@@ -27,7 +27,7 @@ write_hw_platform -fixed -force -file   ./results/top.xsa
 #set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 #set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 
-write_bitstream -verbose -force ./results/top.bit
+write_bitstream -verbose -force -bin_file ./results/top.bit
 
 close_project
 
