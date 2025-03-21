@@ -25,8 +25,15 @@
 #define FLASH_OP_REBOOT 5
 
 
+// This little program reads a xilinx .bit file and writes a xilinx .bin file.
+// This is done by searching for the sync pattern then removing all the bytes 
+// up to the beginning of the preamble.
+//
 int main(int argc, char * argv[])
 {
+
+    const uint32_t sync_pat = 0xAA995566;
+    const int preamble_length = 48;
 
     // get command line arguments
     char *infile, *outfile;
@@ -38,39 +45,52 @@ int main(int argc, char * argv[])
         infile  = argv[1] ;
         outfile = argv[2] ;
     }
-    
+ 
+   
     // read the bit file
     FILE *fp;
-    printf("opening %s\n", infile);
     struct stat file_info;
-    if (stat(infile, &file_info) != 0) { printf("ERROR: problem opening %s\n", infile); return(1); }   
+    stat(infile, &file_info);
     size_t streamsize = file_info.st_size;
-    printf("%s file size = %lu\n", infile, (unsigned long)streamsize);
-    fp = fopen(infile, "rb");
-    if (fp == NULL) { printf("ERROR: could not open %s\n", infile); return(1); }
     uint8_t *bitstream = (uint8_t *)malloc(streamsize);
-    if (bitstream == NULL) { printf("ERROR: malloc failure\n"); return(1); }   
+    fp = fopen(infile, "rb");
     fread(bitstream, streamsize, 1, fp);
     fclose(fp);
 
 
+    // find the sync pattern
+    uint32_t search_pat;
+    int sync_loc=-1;
+    for (int i=0; i<streamsize-4; i++) {
+        search_pat = (bitstream[i+0]<<24) | (bitstream[i+1]<<16) | (bitstream[i+2]<< 8) | (bitstream[i+3]<< 0);
+        if (search_pat == sync_pat) {
+            sync_loc = i;
+        }
+    }
+    printf("sync location = %d\n", sync_loc);
+
+
+    // check for validity
+    if (sync_loc<preamble_length) {
+        printf("sync pattern not found\n");
+        return(1);
+    } 
+
+
     // copy bitstream to binstream omitting header.
-    const int header_length = 119;
-    uint8_t *binstream = (uint8_t *)malloc(streamsize);
-    for (int i=header_length; i<streamsize; i++) {
-        binstream[i-header_length] = bitstream[i];
+    size_t binsize = streamsize - sync_loc + preamble_length;
+    uint8_t *binstream = (uint8_t *)malloc(binsize);
+    for (int i=0; i<binsize; i++) {
+        binstream[i] = bitstream[i+sync_loc-preamble_length];
     }
 
 
-
+    // write bin file
     fp = fopen(outfile, "wb");
-    fwrite(binstream, streamsize-header_length, 1, fp);
+    fwrite(binstream, binsize, 1, fp);
     fclose(fp);
 
     return(0);
 
 }
 
-/*
-
-*/
