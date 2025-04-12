@@ -1,0 +1,20 @@
+
+NET "clkin100" TNM_NET = clkin100;
+TIMESPEC TS_clkin100 = PERIOD "clkin100" 10 ns HIGH 50%;
+
+NET "clkin100" IOSTANDARD=LVCMOS33;
+NET "clkin100" LOC=R4;
+
+INST "led<*>" TNM = led_out;
+TIMEGRP "led_out" OFFSET = OUT 11 ns AFTER "clkin100";
+NET "led<*>" IOSTANDARD=LVCMOS25;
+INST "led*" IOB=TRUE;
+NET "led<0>" LOC=T14;
+NET "led<1>" LOC=T15;
+NET "led<2>" LOC=T16;
+NET "led<3>" LOC=U16;
+NET "led<4>" LOC=V15;
+NET "led<5>" LOC=W16;
+NET "led<6>" LOC=W15;
+NET "led<7>" LOC=Y13;
+
