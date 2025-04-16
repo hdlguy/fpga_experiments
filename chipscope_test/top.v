@@ -6,7 +6,7 @@ module top(
 	 
 	assign clk = clkin100;
 	
-	reg [31:0] count;
+	(* keep="true" *)  reg [31:0] count;
 	
 	always @(posedge clk) begin
 		count <= count + 1;

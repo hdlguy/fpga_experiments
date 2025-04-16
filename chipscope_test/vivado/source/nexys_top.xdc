@@ -5,7 +5,7 @@ set_property BITSTREAM.CONFIG.CONFIGRATE 6   [current_design]
 set_property BITSTREAM.Config.SPI_BUSWIDTH 4 [current_design]
 set_property BITSTREAM.GENERAL.COMPRESS TRUE [current_design]
 
-##create_clock -name clk100  -period 10.0 [get_ports clkin100]
+create_clock -name clk100  -period 10.0 [get_ports clkin100]
 
 set_property IOSTANDARD LVCMOS33 [get_ports clkin100]
 set_property PACKAGE_PIN R4 [get_ports clkin100]
