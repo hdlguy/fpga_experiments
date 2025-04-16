@@ -1,9 +1,9 @@
 
 module top(
     input 	wire		clkin100,
-    output 	reg[7:0] led
+    output 	reg[7:0]	led
 );
-
+	 
 	assign clk = clkin100;
 	
 	reg [31:0] count;
