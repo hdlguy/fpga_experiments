@@ -1,5 +1,5 @@
 #ChipScope Core Inserter Project File Version 3.0
-#Fri Apr 11 17:44:01 MDT 2025
+#Wed Apr 16 12:25:12 MDT 2025
 Project.device.designInputFile=/home/pdudley/github/fpga_experiments/chipscope_test/top_cs.ngc
 Project.device.designOutputFile=/home/pdudley/github/fpga_experiments/chipscope_test/top_cs.ngc
 Project.device.deviceFamily=21
@@ -18,6 +18,38 @@ Project.icon.triggerOutPinName=
 Project.unit.dimension=1
 Project.unit<0>.clockChannel=clkin100_BUFGP
 Project.unit<0>.clockEdge=Rising
+Project.unit<0>.dataChannel<0>=count<0>
+Project.unit<0>.dataChannel<10>=count<10>
+Project.unit<0>.dataChannel<11>=count<11>
+Project.unit<0>.dataChannel<12>=count<12>
+Project.unit<0>.dataChannel<13>=count<13>
+Project.unit<0>.dataChannel<14>=count<14>
+Project.unit<0>.dataChannel<15>=count<15>
+Project.unit<0>.dataChannel<16>=count<16>
+Project.unit<0>.dataChannel<17>=count<17>
+Project.unit<0>.dataChannel<18>=count<18>
+Project.unit<0>.dataChannel<19>=count<19>
+Project.unit<0>.dataChannel<1>=count<1>
+Project.unit<0>.dataChannel<20>=count<20>
+Project.unit<0>.dataChannel<21>=count<21>
+Project.unit<0>.dataChannel<22>=count<22>
+Project.unit<0>.dataChannel<23>=count<23>
+Project.unit<0>.dataChannel<24>=count<24>
+Project.unit<0>.dataChannel<25>=count<25>
+Project.unit<0>.dataChannel<26>=count<26>
+Project.unit<0>.dataChannel<27>=count<27>
+Project.unit<0>.dataChannel<28>=count<28>
+Project.unit<0>.dataChannel<29>=count<29>
+Project.unit<0>.dataChannel<2>=count<2>
+Project.unit<0>.dataChannel<30>=count<30>
+Project.unit<0>.dataChannel<31>=count<31>
+Project.unit<0>.dataChannel<3>=count<3>
+Project.unit<0>.dataChannel<4>=count<4>
+Project.unit<0>.dataChannel<5>=count<5>
+Project.unit<0>.dataChannel<6>=count<6>
+Project.unit<0>.dataChannel<7>=count<7>
+Project.unit<0>.dataChannel<8>=count<8>
+Project.unit<0>.dataChannel<9>=count<9>
 Project.unit<0>.dataDepth=16384
 Project.unit<0>.dataEqualsTrigger=true
 Project.unit<0>.dataPortWidth=32
