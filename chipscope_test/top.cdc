@@ -1,5 +1,5 @@
 #ChipScope Core Inserter Project File Version 3.0
-#Wed Apr 16 12:25:12 MDT 2025
+#Thu Apr 17 10:10:17 MDT 2025
 Project.device.designInputFile=/home/pdudley/github/fpga_experiments/chipscope_test/top_cs.ngc
 Project.device.designOutputFile=/home/pdudley/github/fpga_experiments/chipscope_test/top_cs.ngc
 Project.device.deviceFamily=21
