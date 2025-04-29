@@ -36,10 +36,10 @@ int main()
     	xil_printf("flash_bram_errors = %d\n\r", errors);
     	
     	
-    	// write to the register file
-    	for (int i=0; i<NREGS; i++) regptr[i] = whilecount+i;
     	// read and print the register file
     	for (int i=0; i<NREGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
+    	// write to the register file
+    	for (int i=0; i<NREGS; i++) regptr[i] = whilecount+i;
     	
 
 
