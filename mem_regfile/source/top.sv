@@ -70,10 +70,12 @@ module top (
 	   .read_val(read_val)
 	);
 	
-	assign read_val = reg_val;
+	assign read_val[0] = 32'hdeadbeef;
+	assign read_val[1] = 32'h01234567;
+	assign read_val[Nregs-1:2] = reg_val[Nregs-1:2];
 		
 	
-	top_ila ila_inst (.clk(clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, regfile_rst, regfile_we})); // 82
+	top_ila ila_inst (.clk(clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, regfile_rst, regfile_we, pul_val[3]})); // 114
 
 endmodule
 
