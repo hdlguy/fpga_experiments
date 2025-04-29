@@ -37,7 +37,7 @@ int main()
     	
     	
     	// write to the register file
-    	for (int i=0; i<NREGS; i++) regptr[i] = 0x00000001 << i;
+    	for (int i=0; i<NREGS; i++) regptr[i] = whilecount+i;
     	// read and print the register file
     	for (int i=0; i<NREGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
     	

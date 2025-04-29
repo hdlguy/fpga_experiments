@@ -31,10 +31,16 @@ module mem_regfile #(
         end
 
         // write
-        if ((we[0]) && (en)) begin reg_val_int[addr][ 7: 0] <= wr_data[ 7: 0]; pul_val[addr][ 7: 0] <= wr_data[ 7: 0]; end else begin pul_val[addr][ 7: 0] <= 0; end
-        if ((we[1]) && (en)) begin reg_val_int[addr][15: 8] <= wr_data[15: 8]; pul_val[addr][15: 8] <= wr_data[15: 8]; end else begin pul_val[addr][15: 8] <= 0; end
-        if ((we[2]) && (en)) begin reg_val_int[addr][23:16] <= wr_data[23:16]; pul_val[addr][23:16] <= wr_data[23:16]; end else begin pul_val[addr][23:16] <= 0; end
-        if ((we[3]) && (en)) begin reg_val_int[addr][31:24] <= wr_data[31:24]; pul_val[addr][31:24] <= wr_data[31:24]; end else begin pul_val[addr][31:24] <= 0; end
+        if ((we[0]) && (en)) reg_val_int[addr][ 7: 0] <= wr_data[ 7: 0];
+        if ((we[1]) && (en)) reg_val_int[addr][15: 8] <= wr_data[15: 8];
+        if ((we[2]) && (en)) reg_val_int[addr][23:16] <= wr_data[23:16];
+        if ((we[3]) && (en)) reg_val_int[addr][31:24] <= wr_data[31:24];
+    
+        // pulse
+        if ((we[0]) && (en)) begin pul_val[addr][ 7: 0] <= wr_data[ 7: 0]; end else begin pul_val <= 0; end
+        if ((we[1]) && (en)) begin pul_val[addr][15: 8] <= wr_data[15: 8]; end else begin pul_val <= 0; end
+        if ((we[2]) && (en)) begin pul_val[addr][23:16] <= wr_data[23:16]; end else begin pul_val <= 0; end
+        if ((we[3]) && (en)) begin pul_val[addr][31:24] <= wr_data[31:24]; end else begin pul_val <= 0; end
     
     end
 
