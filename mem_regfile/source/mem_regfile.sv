@@ -3,18 +3,18 @@
 // This module goes out in the Verilog code so that two dimensional arrays can be used in the application interface.
 //
 module mem_regfile #(
-    parameter int                       Naddr = 4+2,      // number of byte address bits
-    parameter int                       Nregs = 2**(Naddr-2),
-    parameter logic[Nregs-1:0][31:0]    init_reg = 0;
+    parameter int                       Naddr = 4,      // register address (not byte address)
+    parameter int                       Nregs = 2**Naddr,
+    parameter logic[Nregs-1:0][31:0]    init_reg = 0
 ) (
     // interface to bram controller
     input   logic                   clk,
-    input   logic[Naddr-1;0]        addr,
+    input   logic[Naddr-1:0]        addr,
     input   logic[31:0]             wr_data,
     output  logic[31:0]             rd_data,
     input   logic                   en,
     input   logic                   reset,
-    input   logic[3:0]              wr_en,
+    input   logic[3:0]              we,
     // interface to application
     output  logic[Nregs-1:0][31:0]  reg_val,    // current register value
     output  logic[Nregs-1:0][31:0]  pul_val,    // single cycle pulse for any bits written as 1. (self-clearing)
@@ -22,7 +22,7 @@ module mem_regfile #(
 );
 
 
-    output  logic[Nregs-1:0][31:0]  reg_val_int = init_reg;
+    logic[Nregs-1:0][31:0] reg_val_int = init_reg;
     always_ff @(posedge clk) begin
 
         // read
@@ -31,10 +31,10 @@ module mem_regfile #(
         end
 
         // write
-        if ((wr_en[0]) && (en)) begin reg_val[addr][ 7: 0] <= wr_data[ 7: 0]; pul_val[addr][ 7: 0] <= wr_data[ 7: 0]; end else begin pul_val[addr][ 7: 0] <= 0; end
-        if ((wr_en[1]) && (en)) begin reg_val[addr][15: 8] <= wr_data[15: 8]; pul_val[addr][15: 8] <= wr_data[15: 8]; end else begin pul_val[addr][15: 8] <= 0; end
-        if ((wr_en[2]) && (en)) begin reg_val[addr][23:16] <= wr_data[23:16]; pul_val[addr][23:16] <= wr_data[23:16]; end else begin pul_val[addr][23:16] <= 0; end
-        if ((wr_en[3]) && (en)) begin reg_val[addr][31:24] <= wr_data[31:24]; pul_val[addr][31:24] <= wr_data[31:24]; end else begin pul_val[addr][31:24] <= 0; end
+        if ((we[0]) && (en)) begin reg_val[addr][ 7: 0] <= wr_data[ 7: 0]; pul_val[addr][ 7: 0] <= wr_data[ 7: 0]; end else begin pul_val[addr][ 7: 0] <= 0; end
+        if ((we[1]) && (en)) begin reg_val[addr][15: 8] <= wr_data[15: 8]; pul_val[addr][15: 8] <= wr_data[15: 8]; end else begin pul_val[addr][15: 8] <= 0; end
+        if ((we[2]) && (en)) begin reg_val[addr][23:16] <= wr_data[23:16]; pul_val[addr][23:16] <= wr_data[23:16]; end else begin pul_val[addr][23:16] <= 0; end
+        if ((we[3]) && (en)) begin reg_val[addr][31:24] <= wr_data[31:24]; pul_val[addr][31:24] <= wr_data[31:24]; end else begin pul_val[addr][31:24] <= 0; end
     
     end
 

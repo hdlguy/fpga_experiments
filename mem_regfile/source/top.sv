@@ -6,16 +6,38 @@ module top (
     output  logic       usb_uart_txd
 );
 
+	localparam int Naddr = 4;
+    localparam int Nregs = 2**Naddr;
+    localparam logic[Nregs-1:0][31:0] init_reg = 0;
+	
     logic axi_aclk, axi_aresetn, clk;
     assign clk = axi_aclk;
+    
+    logic [11:0]regfile_addr;
+    logic regfile_clk;
+    logic [31:0]regfile_din;
+    logic [31:0]regfile_dout;
+    logic regfile_en;
+    logic regfile_rst;
+    logic [3:0]regfile_we;
     
     system system_i (
         .clkin(clkin100),
         .resetn(1'b1),
+        //
         .axi_aclk(axi_aclk),
         .axi_aresetn(axi_aresetn),
+        //
         .usb_uart_rxd(usb_uart_rxd),
-        .usb_uart_txd(usb_uart_txd)
+        .usb_uart_txd(usb_uart_txd),
+        //
+        .regfile_addr   (regfile_addr),
+        .regfile_clk    (regfile_clk),
+        .regfile_din    (regfile_din),
+        .regfile_dout   (regfile_dout),
+        .regfile_en     (regfile_en),
+        .regfile_rst    (regfile_rst),
+        .regfile_we     (regfile_we)        
     );
 	
 	logic[31:0] led_count=0;
@@ -29,7 +51,29 @@ module top (
 	   end
 	end	
 	
-	top_ila ila_inst (.clk(clk), .probe0(led_count));
+	
+    logic[Nregs-1:0][31:0]  reg_val, pul_val, read_val;
+	mem_regfile #(
+	   .Naddr(Naddr),
+	   .init_reg(init_reg)
+	) uut (
+	   .clk(regfile_clk),
+	   .addr(regfile_addr[5:2]),
+	   .wr_data(regfile_din),
+	   .rd_data(regfile_dout),
+	   .en(regfile_en),
+	   .reset(regfile_rst),
+	   .we(regfile_we),
+	   //
+	   .reg_val(reg_val),
+	   .pul_val(pul_val),
+	   .read_val(read_val)
+	);
+	
+	assign read_val = reg_val;
+		
+	
+	top_ila ila_inst (.clk(clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, regfile_rst, regfile_we})); // 82
 
 endmodule
 

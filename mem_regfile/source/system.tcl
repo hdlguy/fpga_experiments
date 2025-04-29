@@ -130,18 +130,17 @@ set bCheckIPs 1
 if { $bCheckIPs == 1 } {
    set list_check_ips "\ 
 xilinx.com:ip:axi_intc:4.1\
-xilinx.com:ip:axi_timer:2.0\
 xilinx.com:ip:clk_wiz:6.0\
 xilinx.com:ip:mdm:3.2\
 xilinx.com:ip:microblaze:11.0\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:xlconcat:2.1\
-xilinx.com:ip:axi_hwicap:3.0\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:axi_uartlite:2.0\
+xilinx.com:ip:axi_bram_ctrl:4.1\
+xilinx.com:ip:blk_mem_gen:8.4\
 xilinx.com:ip:lmb_bram_if_cntlr:4.0\
 xilinx.com:ip:lmb_v10:3.0\
-xilinx.com:ip:blk_mem_gen:8.4\
 "
 
    set list_ips_missing ""
@@ -304,6 +303,12 @@ proc create_root_design { parentCell } {
   # Create interface ports
   set usb_uart [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:uart_rtl:1.0 usb_uart ]
 
+  set regfile [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:bram_rtl:1.0 regfile ]
+  set_property -dict [ list \
+   CONFIG.MASTER_TYPE {BRAM_CTRL} \
+   CONFIG.READ_WRITE_MODE {READ_WRITE} \
+   ] $regfile
+
 
   # Create ports
   set axi_aclk [ create_bd_port -dir O -type clk axi_aclk ]
@@ -317,50 +322,47 @@ proc create_root_design { parentCell } {
   # Create instance: axi_intc_0, and set properties
   set axi_intc_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_intc:4.1 axi_intc_0 ]
 
-  # Create instance: axi_timer_0, and set properties
-  set axi_timer_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_timer:2.0 axi_timer_0 ]
-
   # Create instance: clk_wiz_0, and set properties
   set clk_wiz_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:clk_wiz:6.0 clk_wiz_0 ]
   set_property -dict [list \
-    CONFIG.CLKOUT1_JITTER {151.366} \
-    CONFIG.CLKOUT1_PHASE_ERROR {132.063} \
-    CONFIG.CLKOUT2_JITTER {132.221} \
-    CONFIG.CLKOUT2_PHASE_ERROR {132.063} \
+    CONFIG.CLKOUT1_JITTER {130.958} \
+    CONFIG.CLKOUT1_PHASE_ERROR {98.575} \
+    CONFIG.CLKOUT2_JITTER {114.829} \
+    CONFIG.CLKOUT2_PHASE_ERROR {98.575} \
     CONFIG.CLKOUT2_REQUESTED_OUT_FREQ {200.000} \
-    CONFIG.CLKOUT2_USED {true} \
+    CONFIG.CLKOUT2_USED {false} \
     CONFIG.CLKOUT3_JITTER {139.594} \
     CONFIG.CLKOUT3_PHASE_ERROR {132.063} \
     CONFIG.CLKOUT3_REQUESTED_OUT_FREQ {150.000} \
-    CONFIG.CLKOUT3_USED {true} \
+    CONFIG.CLKOUT3_USED {false} \
     CONFIG.CLKOUT4_JITTER {200.470} \
     CONFIG.CLKOUT4_PHASE_ERROR {132.063} \
     CONFIG.CLKOUT4_REQUESTED_OUT_FREQ {25.000} \
-    CONFIG.CLKOUT4_USED {true} \
+    CONFIG.CLKOUT4_USED {false} \
     CONFIG.CLKOUT5_JITTER {122.522} \
     CONFIG.CLKOUT5_PHASE_ERROR {132.063} \
     CONFIG.CLKOUT5_REQUESTED_OUT_FREQ {300.0} \
-    CONFIG.CLKOUT5_USED {true} \
+    CONFIG.CLKOUT5_USED {false} \
     CONFIG.CLKOUT6_JITTER {263.649} \
     CONFIG.CLKOUT6_PHASE_ERROR {132.063} \
     CONFIG.CLKOUT6_REQUESTED_OUT_FREQ {6.25} \
-    CONFIG.CLKOUT6_USED {true} \
+    CONFIG.CLKOUT6_USED {false} \
     CONFIG.CLK_OUT1_PORT {clkout100} \
     CONFIG.CLK_OUT2_PORT {clkout200} \
     CONFIG.CLK_OUT3_PORT {clkout150} \
     CONFIG.CLK_OUT4_PORT {clkout25} \
     CONFIG.CLK_OUT5_PORT {clkout300} \
     CONFIG.CLK_OUT6_PORT {clkout6} \
-    CONFIG.MMCM_CLKFBOUT_MULT_F {6.000} \
-    CONFIG.MMCM_CLKIN1_PERIOD {10.0} \
-    CONFIG.MMCM_CLKIN2_PERIOD {10.0} \
-    CONFIG.MMCM_CLKOUT0_DIVIDE_F {6.000} \
-    CONFIG.MMCM_CLKOUT1_DIVIDE {3} \
-    CONFIG.MMCM_CLKOUT2_DIVIDE {4} \
-    CONFIG.MMCM_CLKOUT3_DIVIDE {24} \
-    CONFIG.MMCM_CLKOUT4_DIVIDE {2} \
-    CONFIG.MMCM_CLKOUT5_DIVIDE {96} \
-    CONFIG.NUM_OUT_CLKS {6} \
+    CONFIG.MMCM_CLKFBOUT_MULT_F {10.000} \
+    CONFIG.MMCM_CLKIN1_PERIOD {10.000} \
+    CONFIG.MMCM_CLKIN2_PERIOD {10.000} \
+    CONFIG.MMCM_CLKOUT0_DIVIDE_F {10.000} \
+    CONFIG.MMCM_CLKOUT1_DIVIDE {1} \
+    CONFIG.MMCM_CLKOUT2_DIVIDE {1} \
+    CONFIG.MMCM_CLKOUT3_DIVIDE {1} \
+    CONFIG.MMCM_CLKOUT4_DIVIDE {1} \
+    CONFIG.MMCM_CLKOUT5_DIVIDE {1} \
+    CONFIG.NUM_OUT_CLKS {1} \
     CONFIG.PRIM_SOURCE {No_buffer} \
     CONFIG.RESET_PORT {resetn} \
     CONFIG.RESET_TYPE {ACTIVE_LOW} \
@@ -414,11 +416,8 @@ proc create_root_design { parentCell } {
 
   # Create instance: xlconcat_0, and set properties
   set xlconcat_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:xlconcat:2.1 xlconcat_0 ]
-  set_property CONFIG.NUM_PORTS {4} $xlconcat_0
+  set_property CONFIG.NUM_PORTS {2} $xlconcat_0
 
-
-  # Create instance: axi_hwicap_0, and set properties
-  set axi_hwicap_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_hwicap:3.0 axi_hwicap_0 ]
 
   # Create instance: smartconnect_0, and set properties
   set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
@@ -433,46 +432,56 @@ proc create_root_design { parentCell } {
   set_property CONFIG.C_BAUDRATE {115200} $axi_uartlite_0
 
 
+  # Create instance: axi_bram_ctrl_0, and set properties
+  set axi_bram_ctrl_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0 ]
+  set_property CONFIG.SINGLE_PORT_BRAM {1} $axi_bram_ctrl_0
+
+
+  # Create instance: regfile_ctrl, and set properties
+  set regfile_ctrl [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 regfile_ctrl ]
+  set_property CONFIG.SINGLE_PORT_BRAM {1} $regfile_ctrl
+
+
+  # Create instance: blk_mem_gen_0, and set properties
+  set blk_mem_gen_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:blk_mem_gen:8.4 blk_mem_gen_0 ]
+
   # Create interface connections
+  connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTA] [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA]
   connect_bd_intf_net -intf_net axi_intc_0_interrupt [get_bd_intf_pins axi_intc_0/interrupt] [get_bd_intf_pins microblaze_0/INTERRUPT]
   connect_bd_intf_net -intf_net axi_uartlite_0_UART [get_bd_intf_ports usb_uart] [get_bd_intf_pins axi_uartlite_0/UART]
   connect_bd_intf_net -intf_net microblaze_0_M_AXI_DP [get_bd_intf_pins microblaze_0/M_AXI_DP] [get_bd_intf_pins smartconnect_0/S00_AXI]
   connect_bd_intf_net -intf_net microblaze_0_debug [get_bd_intf_pins mdm_1/MBDEBUG_0] [get_bd_intf_pins microblaze_0/DEBUG]
   connect_bd_intf_net -intf_net microblaze_0_dlmb_1 [get_bd_intf_pins microblaze_0/DLMB] [get_bd_intf_pins microblaze_0_local_memory/DLMB]
   connect_bd_intf_net -intf_net microblaze_0_ilmb_1 [get_bd_intf_pins microblaze_0/ILMB] [get_bd_intf_pins microblaze_0_local_memory/ILMB]
-  connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins smartconnect_0/M00_AXI] [get_bd_intf_pins axi_timer_0/S_AXI]
+  connect_bd_intf_net -intf_net regfile_ctrl_BRAM_PORTA [get_bd_intf_ports regfile] [get_bd_intf_pins regfile_ctrl/BRAM_PORTA]
+  connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins smartconnect_0/M00_AXI] [get_bd_intf_pins axi_uartlite_0/S_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins smartconnect_0/M01_AXI] [get_bd_intf_pins axi_intc_0/s_axi]
   connect_bd_intf_net -intf_net smartconnect_0_M02_AXI [get_bd_intf_pins smartconnect_0/M02_AXI] [get_bd_intf_pins mdm_1/S_AXI]
-  connect_bd_intf_net -intf_net smartconnect_0_M03_AXI [get_bd_intf_pins smartconnect_0/M03_AXI] [get_bd_intf_pins axi_hwicap_0/S_AXI_LITE]
-  connect_bd_intf_net -intf_net smartconnect_0_M04_AXI [get_bd_intf_pins smartconnect_0/M04_AXI] [get_bd_intf_pins axi_uartlite_0/S_AXI]
+  connect_bd_intf_net -intf_net smartconnect_0_M03_AXI [get_bd_intf_pins axi_bram_ctrl_0/S_AXI] [get_bd_intf_pins smartconnect_0/M03_AXI]
+  connect_bd_intf_net -intf_net smartconnect_0_M04_AXI [get_bd_intf_pins regfile_ctrl/S_AXI] [get_bd_intf_pins smartconnect_0/M04_AXI]
 
   # Create port connections
-  connect_bd_net -net axi_hwicap_0_ip2intc_irpt  [get_bd_pins axi_hwicap_0/ip2intc_irpt] \
-  [get_bd_pins xlconcat_0/In1]
-  connect_bd_net -net axi_timer_0_interrupt  [get_bd_pins axi_timer_0/interrupt] \
-  [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net axi_uartlite_0_interrupt  [get_bd_pins axi_uartlite_0/interrupt] \
-  [get_bd_pins xlconcat_0/In3]
+  [get_bd_pins xlconcat_0/In1]
   connect_bd_net -net clk_wiz_0_locked  [get_bd_pins clk_wiz_0/locked] \
   [get_bd_pins rst_clk_wiz_0_100M/dcm_locked]
   connect_bd_net -net clkin_1  [get_bd_ports clkin] \
   [get_bd_pins clk_wiz_0/clk_in1]
   connect_bd_net -net mdm_1_Interrupt  [get_bd_pins mdm_1/Interrupt] \
-  [get_bd_pins xlconcat_0/In2]
+  [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net mdm_1_debug_sys_rst  [get_bd_pins mdm_1/Debug_SYS_Rst] \
   [get_bd_pins rst_clk_wiz_0_100M/mb_debug_sys_rst]
   connect_bd_net -net microblaze_0_Clk  [get_bd_pins clk_wiz_0/clkout100] \
   [get_bd_ports axi_aclk] \
   [get_bd_pins axi_intc_0/s_axi_aclk] \
-  [get_bd_pins axi_timer_0/s_axi_aclk] \
   [get_bd_pins mdm_1/S_AXI_ACLK] \
   [get_bd_pins microblaze_0/Clk] \
   [get_bd_pins microblaze_0_local_memory/LMB_Clk] \
   [get_bd_pins rst_clk_wiz_0_100M/slowest_sync_clk] \
-  [get_bd_pins axi_hwicap_0/icap_clk] \
-  [get_bd_pins axi_hwicap_0/s_axi_aclk] \
   [get_bd_pins smartconnect_0/aclk] \
-  [get_bd_pins axi_uartlite_0/s_axi_aclk]
+  [get_bd_pins axi_uartlite_0/s_axi_aclk] \
+  [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] \
+  [get_bd_pins regfile_ctrl/s_axi_aclk]
   connect_bd_net -net reset_1  [get_bd_ports resetn] \
   [get_bd_pins clk_wiz_0/resetn] \
   [get_bd_pins rst_clk_wiz_0_100M/ext_reset_in]
@@ -483,21 +492,21 @@ proc create_root_design { parentCell } {
   connect_bd_net -net rst_clk_wiz_0_100M_peripheral_aresetn  [get_bd_pins rst_clk_wiz_0_100M/peripheral_aresetn] \
   [get_bd_ports axi_aresetn] \
   [get_bd_pins axi_intc_0/s_axi_aresetn] \
-  [get_bd_pins axi_timer_0/s_axi_aresetn] \
   [get_bd_pins mdm_1/S_AXI_ARESETN] \
-  [get_bd_pins axi_hwicap_0/s_axi_aresetn] \
   [get_bd_pins smartconnect_0/aresetn] \
-  [get_bd_pins axi_uartlite_0/s_axi_aresetn]
+  [get_bd_pins axi_uartlite_0/s_axi_aresetn] \
+  [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] \
+  [get_bd_pins regfile_ctrl/s_axi_aresetn]
   connect_bd_net -net xlconcat_0_dout  [get_bd_pins xlconcat_0/dout] \
   [get_bd_pins axi_intc_0/intr]
 
   # Create address segments
-  assign_bd_address -offset 0x40200000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_hwicap_0/S_AXI_LITE/Reg] -force
+  assign_bd_address -offset 0xC0000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] -force
   assign_bd_address -offset 0x40020000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_intc_0/S_AXI/Reg] -force
-  assign_bd_address -offset 0x40030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_timer_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x40600000 -range 0x00010000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs axi_uartlite_0/S_AXI/Reg] -force
   assign_bd_address -offset 0x00000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs microblaze_0_local_memory/dlmb_bram_if_cntlr/SLMB/Mem] -force
   assign_bd_address -offset 0x41400000 -range 0x00001000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs mdm_1/S_AXI/Reg] -force
+  assign_bd_address -offset 0xC2000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces microblaze_0/Data] [get_bd_addr_segs regfile_ctrl/S_AXI/Mem0] -force
   assign_bd_address -offset 0x00000000 -range 0x00008000 -target_address_space [get_bd_addr_spaces microblaze_0/Instruction] [get_bd_addr_segs microblaze_0_local_memory/ilmb_bram_if_cntlr/SLMB/Mem] -force
 
 
