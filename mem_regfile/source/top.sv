@@ -1,4 +1,4 @@
-// trivial design to investigate deleted .tcl files.
+// 
 module top (
     input   logic       clkin100,
     output  logic[7:0]  led,
