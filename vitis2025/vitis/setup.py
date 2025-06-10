@@ -30,11 +30,11 @@ comp = client.create_app_component(
     name="hello_world",
     platform = "$COMPONENT_LOCATION/../standalone_plat/export/standalone_plat/standalone_plat.xpfm",
     domain = "standalone_microblaze_0",
-    #template = "hello_world"
-    template = "empty_application"
+    template = "hello_world"
+    #template = "empty_application"
 )
 
-os.system('ln -s ../../../src/hello_world/test.c workspace/hello_world/src/test.c')
+#os.system('ln -s ../../../src/hello_world/hello_world.c workspace/hello_world/src/hello_world.c')
 
 comp = client.get_component(name="hello_world")
 
