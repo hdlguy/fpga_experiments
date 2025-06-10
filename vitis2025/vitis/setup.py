@@ -2,6 +2,9 @@
 # vitis --workspace ./workspace
 
 import vitis
+import os
+
+os.system('rm -rf workspace')
 
 client = vitis.create_client()
 client.set_workspace(path="workspace")
@@ -23,7 +26,13 @@ platform = client.get_component(name="standalone_plat")
 
 status = platform.build()
 
-comp = client.create_app_component(name="hello_world",platform = "$COMPONENT_LOCATION/../standalone_plat/export/standalone_plat/standalone_plat.xpfm",domain = "standalone_microblaze_0",template = "hello_world")
+comp = client.create_app_component(
+    name="hello_world",
+    platform = "$COMPONENT_LOCATION/../standalone_plat/export/standalone_plat/standalone_plat.xpfm",
+    domain = "standalone_microblaze_0",
+    #template = "hello_world"
+    template = "empty_application"
+)
 
 comp = client.get_component(name="hello_world")
 
