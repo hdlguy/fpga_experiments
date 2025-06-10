@@ -34,6 +34,8 @@ comp = client.create_app_component(
     template = "empty_application"
 )
 
+os.system('ln -s ../../../src/hello_world/test.c workspace/hello_world/src/test.c')
+
 comp = client.get_component(name="hello_world")
 
 status = comp.clean()
