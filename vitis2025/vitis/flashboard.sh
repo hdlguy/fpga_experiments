@@ -6,7 +6,8 @@
 
 appname=$1
 
-appname='hello_world'
+echo "appname = $appname"
+
 results='../implement/results/'
 
 # merge the elf file of the C application into the bitfile
