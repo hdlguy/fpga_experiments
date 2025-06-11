@@ -39,7 +39,9 @@ comp = client.create_app_component(
 )
 
 #comp.import_files("./src/hello_world/hello_world.c")
+
 os.system('ln -s ../../../src/hello_world/hello_world.c workspace/hello_world/src/hello_world.c')
+os.system('ln -s ../../../src/fpga.h workspace/hello_world/src/fpga.h')
 
 #comp = client.get_component(name=app_name)
 

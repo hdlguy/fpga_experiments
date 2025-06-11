@@ -1,18 +1,23 @@
 
 #include <stdio.h>
-//#include "platform.h"
 #include "xil_printf.h"
-
+#include "xparameters.h"
+#include "fpga.h"
 
 int main()
 {
-    //init_platform();
+
+    uint32_t* regptr = (uint32_t *) XPAR_REGFILE_CTRL_BASEADDR;
 
     print("Hello World\n\r");
-    print("Successfully ran Hello World application\n\r");
+    uint32_t whilecount=0;
+    while(1) {
+        xil_printf("%08u: FPGA_VERSION = 0x%08x, FPGA_ID = 0x%08x\n\r", whilecount, regptr[FPGA_VERSION], regptr[FPGA_ID]);
+        regptr[FPGA_LED_CONTROL] = whilecount;
+        for(int i=0; i<10000000; i++);
+        whilecount++;
+    }
 
-    //cleanup_platform();
-    
     return(0);
     
 }

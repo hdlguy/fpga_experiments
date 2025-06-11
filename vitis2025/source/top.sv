@@ -49,11 +49,10 @@ module top (
 	always_ff @(posedge clk) begin
 	   if (axi_aresetn == 0) begin
 	       led_count <= 0;
-	       led <= 0;
 	   end else begin
 	       led_count <= led_count + 1;
-	       led <= led_count[31:24];
 	   end
+	   //led <= led_count[31:24];
 	end	
 	
 	
@@ -77,6 +76,7 @@ module top (
 	
 	assign read_val[0] = 32'hdeadbeef;
 	assign read_val[1] = 32'h01234567;
+    assign led = reg_val[2][7:0];
 	assign read_val[Nregs-1:2] = reg_val[Nregs-1:2];
 		
 	
