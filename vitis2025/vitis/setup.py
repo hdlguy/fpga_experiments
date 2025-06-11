@@ -1,5 +1,6 @@
 # vitis -s setup.py
-# vitis --workspace ./workspace
+# vitis 
+#   then do file -> "set workspace" or file -> "open recent workspace"
 
 import vitis
 import os
