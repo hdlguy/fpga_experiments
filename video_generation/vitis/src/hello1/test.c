@@ -11,6 +11,15 @@ int main()
     // uint32_t *regptr = (uint32_t *)XPAR_M00_AXI_BASEADDR;
     //uint32_t *regptr = (uint32_t *)XPAR_AXI_REGFILE_CTRL_BASEADDR;
     //xil_printf("regptr = %p\n\r", regptr);
+
+    uint32_t *tpgptr = (uint32_t *)XPAR_V_TPG_0_BASEADDR;
+    xil_printf("tpgptr = %p\n\r", tpgptr);
+
+    uint32_t rval;
+    for (int i=0; i<55; i++) {
+        rval = tpgptr[i];
+        xil_printf("reg[%02d] = 0x%08x\n\r", i, rval);    
+    }
     
     uint32_t whilecount=0;
 	while(1){
@@ -24,3 +33,4 @@ int main()
     
     return 0;
 }
+

@@ -11,7 +11,8 @@ print("app_name = ", app_name)
 plat_name = "standalone_plat"
 hw_xsa = "../implement/results/top.xsa"
 #cpu_name = "microblaze_0"
-cpu_name = "psu_cortexa53_0"
+cpu_name = "ps7_cortexa9_0"
+#cpu_name = "psu_cortexa53_0"
 
 os.system('rm -rf workspace')
 
