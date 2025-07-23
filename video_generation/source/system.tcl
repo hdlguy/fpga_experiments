@@ -137,6 +137,7 @@ xilinx.com:ip:system_ila:1.1\
 xilinx.com:ip:axis_data_fifo:2.0\
 xilinx.com:inline_hdl:ilconstant:1.0\
 xilinx.com:ip:xlconcat:2.1\
+xilinx.com:ip:axi_bram_ctrl:4.1\
 "
 
    set list_ips_missing ""
@@ -203,6 +204,12 @@ proc create_root_design { parentCell } {
   set DDR [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddrx_rtl:1.0 DDR ]
 
   set FIXED_IO [ create_bd_intf_port -mode Master -vlnv xilinx.com:display_processing_system7:fixedio_rtl:1.0 FIXED_IO ]
+
+  set regfile [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:bram_rtl:1.0 regfile ]
+  set_property -dict [ list \
+   CONFIG.MASTER_TYPE {BRAM_CTRL} \
+   CONFIG.READ_WRITE_MODE {READ_WRITE} \
+   ] $regfile
 
 
   # Create ports
@@ -708,7 +715,10 @@ proc create_root_design { parentCell } {
 
   # Create instance: smartconnect_0, and set properties
   set smartconnect_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 smartconnect_0 ]
-  set_property CONFIG.NUM_SI {1} $smartconnect_0
+  set_property -dict [list \
+    CONFIG.NUM_MI {2} \
+    CONFIG.NUM_SI {1} \
+  ] $smartconnect_0
 
 
   # Create instance: system_ila_0, and set properties
@@ -737,15 +747,18 @@ proc create_root_design { parentCell } {
   set_property CONFIG.NUM_PORTS {1} $xlconcat_0
 
 
-  # Create instance: system_ila_1, and set properties
-  set system_ila_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:system_ila:1.1 system_ila_1 ]
+  # Create instance: regfile_ctrl, and set properties
+  set regfile_ctrl [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 regfile_ctrl ]
+  set_property CONFIG.SINGLE_PORT_BRAM {1} $regfile_ctrl
+
 
   # Create interface connections
+  connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_ports regfile] [get_bd_intf_pins regfile_ctrl/BRAM_PORTA]
   connect_bd_intf_net -intf_net processing_system7_0_DDR [get_bd_intf_ports DDR] [get_bd_intf_pins processing_system7_0/DDR]
   connect_bd_intf_net -intf_net processing_system7_0_FIXED_IO [get_bd_intf_ports FIXED_IO] [get_bd_intf_pins processing_system7_0/FIXED_IO]
   connect_bd_intf_net -intf_net processing_system7_0_M_AXI_GP0 [get_bd_intf_pins processing_system7_0/M_AXI_GP0] [get_bd_intf_pins smartconnect_0/S00_AXI]
-connect_bd_intf_net -intf_net [get_bd_intf_nets processing_system7_0_M_AXI_GP0] [get_bd_intf_pins processing_system7_0/M_AXI_GP0] [get_bd_intf_pins system_ila_1/SLOT_0_AXI]
   connect_bd_intf_net -intf_net smartconnect_0_M00_AXI [get_bd_intf_pins smartconnect_0/M00_AXI] [get_bd_intf_pins v_tpg_0/s_axi_CTRL]
+  connect_bd_intf_net -intf_net smartconnect_0_M01_AXI [get_bd_intf_pins smartconnect_0/M01_AXI] [get_bd_intf_pins regfile_ctrl/S_AXI]
   connect_bd_intf_net -intf_net v_tpg_0_m_axis_video [get_bd_intf_pins v_tpg_0/m_axis_video] [get_bd_intf_pins axis_data_fifo_0/S_AXIS]
 connect_bd_intf_net -intf_net [get_bd_intf_nets v_tpg_0_m_axis_video] [get_bd_intf_pins v_tpg_0/m_axis_video] [get_bd_intf_pins system_ila_0/SLOT_0_AXIS]
 
@@ -762,7 +775,7 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets v_tpg_0_m_axis_video] [get_bd_in
   [get_bd_pins processing_system7_0/M_AXI_GP0_ACLK] \
   [get_bd_pins system_ila_0/clk] \
   [get_bd_pins axis_data_fifo_0/s_axis_aclk] \
-  [get_bd_pins system_ila_1/clk]
+  [get_bd_pins regfile_ctrl/s_axi_aclk]
   connect_bd_net -net processing_system7_0_FCLK_RESET0_N  [get_bd_pins processing_system7_0/FCLK_RESET0_N] \
   [get_bd_pins rst_ps7_0_100M/ext_reset_in]
   connect_bd_net -net rst_ps7_0_100M_peripheral_aresetn  [get_bd_pins rst_ps7_0_100M/peripheral_aresetn] \
@@ -771,13 +784,14 @@ connect_bd_intf_net -intf_net [get_bd_intf_nets v_tpg_0_m_axis_video] [get_bd_in
   [get_bd_pins v_tpg_0/ap_rst_n] \
   [get_bd_pins system_ila_0/resetn] \
   [get_bd_pins axis_data_fifo_0/s_axis_aresetn] \
-  [get_bd_pins system_ila_1/resetn]
+  [get_bd_pins regfile_ctrl/s_axi_aresetn]
   connect_bd_net -net v_tpg_0_interrupt  [get_bd_pins v_tpg_0/interrupt] \
   [get_bd_pins xlconcat_0/In0]
   connect_bd_net -net xlconcat_0_dout  [get_bd_pins xlconcat_0/dout] \
   [get_bd_pins processing_system7_0/Core0_nFIQ]
 
   # Create address segments
+  assign_bd_address -offset 0x40000000 -range 0x00001000 -with_name SEG_axi_bram_ctrl_0_Mem0 -target_address_space [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs regfile_ctrl/S_AXI/Mem0] -force
   assign_bd_address -offset 0x43C00000 -range 0x00010000 -target_address_space [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs v_tpg_0/s_axi_CTRL/Reg] -force
 
 

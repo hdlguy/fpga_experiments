@@ -26,8 +26,7 @@ int main()
     tpgptr[XV_TPG_CTRL_ADDR_IER/4] = 0;
     tpgptr[XV_TPG_CTRL_ADDR_ISR/4] = 0;
     tpgptr[XV_TPG_CTRL_ADDR_HEIGHT_DATA/4] = 128;
-    tpgptr[XV_TPG_CTRL_ADDR_HEIGHT_DATA/4] = 128;
-    tpgptr[XV_TPG_CTRL_ADDR_WIDTH_DATA/4] = 256;
+    tpgptr[XV_TPG_CTRL_ADDR_WIDTH_DATA/4] = 70;
     tpgptr[XV_TPG_CTRL_ADDR_BCKGNDID_DATA/4] = 0x0E;
     tpgptr[XV_TPG_CTRL_ADDR_OVRLAYID_DATA/4] = 0;
     tpgptr[XV_TPG_CTRL_ADDR_MASKID_DATA/4] = 0;
