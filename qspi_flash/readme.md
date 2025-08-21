@@ -7,7 +7,7 @@ A Microblaze CPU is used to access the flash through a Xilinx AXI QSPI Controlle
 
     - JEDEC Flash ID detection
     - Flash erase on address range 0x40_0000 to 0x7F_FFFF.
-    - Blank deted over above range.
+    - Blank detect over above range.
     - Flash write with random numbers in above range.
     - Flash read and verify over above range.
 
@@ -20,7 +20,7 @@ A Microblaze CPU is used to access the flash through a Xilinx AXI QSPI Controlle
 The only significant difference between the operation of these flash chips turned out to be the number of dummy bytes between the read command and the start of valid data.  This code reads the JEDEC ID register and adjusts the number of dummy bytes to make the same code work for Spansion, Micron and ISSI flash.
 
 Console output: 
-
+```
 **** qspi_flash_test ****
 FPGA_ID = 0x00010203, FPGA_VERSION = 0x00010203
 ** ID Bytes
@@ -35,4 +35,4 @@ Page 16384/16384
 ** Verify
 Page 16384/16384
 ********** Success! ***********
-
+```
