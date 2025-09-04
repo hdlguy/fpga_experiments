@@ -48,15 +48,20 @@ module top (
     logic [3:0]     m_axi_wstrb;
     logic           m_axi_wvalid;
 
-    logic qspi_io_i[3:0];
-    logic qspi_io_o[3:0];
-    logic qspi_io_t[3:0];
+    logic[3:0] qspi_io_i;
+    logic[3:0] qspi_io_o;
+    logic[3:0] qspi_io_t;
     logic qspi_sck_i;
     logic qspi_sck_o;
     logic qspi_sck_t;
     logic qspi_ss_i;
     logic qspi_ss_o;    
     logic qspi_ss_t;
+    
+    logic startup_cfgclk;
+    logic startup_cfgmclk;
+    logic startup_eos;
+    logic startup_preq;
 
     system system_i (
         .resetn         (resetn),
@@ -98,8 +103,14 @@ module top (
         .qspi_io3_t     (qspi_io_t[3]),
         .qspi_ss_i      (qspi_ss_i),
         .qspi_ss_o      (qspi_ss_o),
-        .qspi_ss_t      (qspi_ss_t)     
+        .qspi_ss_t      (qspi_ss_t),
+        //
+        .startup_cfgclk (startup_cfgclk),
+        .startup_cfgmclk(startup_cfgmclk),
+        .startup_eos    (startup_eos),
+        .startup_preq   (startup_preq)                     
     );
+    
     IOBUF qspi_io0_iobuf (.I(qspi_io_o[0]), .IO(qspi_io_io[0]), .O(qspi_io_i[0]), .T(qspi_io_t[0]));
     IOBUF qspi_io1_iobuf (.I(qspi_io_o[1]), .IO(qspi_io_io[1]), .O(qspi_io_i[1]), .T(qspi_io_t[1]));
     IOBUF qspi_io2_iobuf (.I(qspi_io_o[2]), .IO(qspi_io_io[2]), .O(qspi_io_i[2]), .T(qspi_io_t[2]));
@@ -112,6 +123,7 @@ module top (
     localparam integer NREGS = 2**LOG2_NREGS;
     logic [NREGS-1:0][31:0] slv_reg, slv_read, slv_wr_pulse;
     
+    // connect signals to register file
     assign slv_read[0] = VERSION;
     assign slv_read[1] = ID;
     assign led[3:0] = slv_reg[3][3:0];
@@ -155,7 +167,8 @@ module top (
 	   led[7:4] <= led_count[27:24];
 	end
 	
-	top_ila ila_inst (.clk(axi_aclk), .probe0({axi_aresetn, m_axi_arvalid, m_axi_araddr, m_axi_awvalid, m_axi_awaddr, m_axi_rvalid, m_axi_rdata, m_axi_wvalid, m_axi_wdata})); // 4*32+5=133
+	//top_ila ila_inst (.clk(axi_aclk), .probe0({axi_aresetn, m_axi_arvalid, m_axi_araddr, m_axi_awvalid, m_axi_awaddr, m_axi_rvalid, m_axi_rdata, m_axi_wvalid, m_axi_wdata})); // 4*32+5=133
+	top_ila ila_inst (.clk(axi_aclk), .probe0({qspi_io_i, qspi_io_o, qspi_io_t, qspi_ss_i, qspi_ss_o, qspi_ss_t, startup_cfgclk})); // 16
 
 endmodule
 
