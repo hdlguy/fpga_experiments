@@ -23,10 +23,12 @@ write_mem_info          -force  ./results/top.mmi
 
 
 write_bitstream -verbose -force -file ./results/top.bit
-#write_bitstream -verbose 
+file copy ./results/top.bit ./proj.runs/impl_1/
 
 write_hw_platform -fixed -include_bit -force -file ./results/top.xsa
+#write_hw_platform -fixed -force -file ./results/top.xsa
 
 close_project
+
 
 
