@@ -434,7 +434,7 @@ proc create_root_design { parentCell } {
   # Create instance: axi_timebase_wdt_0, and set properties
   set axi_timebase_wdt_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_timebase_wdt:3.0 axi_timebase_wdt_0 ]
   set_property -dict [list \
-    CONFIG.C_WDT_INTERVAL {27} \
+    CONFIG.C_WDT_INTERVAL {28} \
     CONFIG.WDT_ENABLE_ONCE {Enable_repeatedly} \
   ] $axi_timebase_wdt_0
 
