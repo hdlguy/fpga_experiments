@@ -10,6 +10,9 @@ create_clock -name clk100  -period 10.0 [get_ports clkin100]
 set_property IOSTANDARD LVCMOS33    [get_ports clkin100]
 set_property PACKAGE_PIN E3         [get_ports clkin100]
 
+set_property IOSTANDARD LVCMOS33    [get_ports resetn]
+set_property PACKAGE_PIN C2         [get_ports resetn]
+
 set_property IOSTANDARD LVCMOS33 [get_ports {led[*]}]
 set_property DRIVE 4             [get_ports {led[*]}]
 set_property SLEW SLOW           [get_ports {led[*]}]
@@ -22,9 +25,16 @@ set_property PACKAGE_PIN  J2 [get_ports {led[2]}]
 set_property PACKAGE_PIN  J4 [get_ports {led[1]}]
 set_property PACKAGE_PIN  F6 [get_ports {led[0]}] 
 
+set_property IOSTANDARD LVCMOS33 [get_ports {btn[*]}]
+set_property DRIVE 4             [get_ports {btn[*]}]
+set_property SLEW SLOW           [get_ports {btn[*]}]
+set_property PACKAGE_PIN B8 [get_ports {btn[3]}]
+set_property PACKAGE_PIN B9 [get_ports {btn[2]}]
+set_property PACKAGE_PIN C9 [get_ports {btn[1]}]
+set_property PACKAGE_PIN D9 [get_ports {btn[0]}]
+
+
 set_property IOSTANDARD LVCMOS33 [get_ports {usb_uart*}]
 set_property PACKAGE_PIN A9  [get_ports {usb_uart_rxd}]
 set_property PACKAGE_PIN D10 [get_ports {usb_uart_txd}]
 
-set_property IOSTANDARD LVCMOS33    [get_ports rstn]
-set_property PACKAGE_PIN C2         [get_ports rstn]

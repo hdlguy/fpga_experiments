@@ -1,14 +1,26 @@
+<<<<<<< HEAD
 // This bare-metal is C code to experiment with the AXI Watchdog Timer.
+=======
+// this little Vitis app demonstrates basic operation of the AXI Watchdog Timer.
+// The while(1) loop runs fast enough to prevent the WDT asserting reset on the CPU.
+// Pressing one of the buttons on the board suspends the while loop so that a CPU 
+// reset is triggered by the WDT.
+>>>>>>> a530319fb5def36e97e103ff1c38a8de7204be23
 #include <stdlib.h>
 #include "xil_printf.h"
 #include "xparameters.h"
 #include "xstatus.h"
 #include "xwdttb_hw.h"
+<<<<<<< HEAD
+=======
+#include "xgpio_l.h"
+>>>>>>> a530319fb5def36e97e103ff1c38a8de7204be23
 
 int main()
 {
 
     uint32_t* wdt_ptr = (uint32_t *) XPAR_XWDTTB_0_BASEADDR;
+    uint32_t* gpio_ptr = (uint32_t *) XPAR_XGPIO_0_BASEADDR;
 
     xil_printf("\n\rHello World\n\r");
 
@@ -18,17 +30,38 @@ int main()
     uint32_t whilecount=0;
     while(1) {
 
+<<<<<<< HEAD
         uint32_t rval = wdt_ptr[XWT_TWCSR0_OFFSET];
         uint32_t reset_status = (rval >> 3) & 0x01;
         uint32_t timer_state  = (rval >> 2) & 0x01;
+=======
+      uint32_t rval = wdt_ptr[XWT_TWCSR0_OFFSET/4];
+      uint32_t reset_status = (rval >> 3) & 0x01;
+      uint32_t timer_state  = (rval >> 2) & 0x01;
+>>>>>>> a530319fb5def36e97e103ff1c38a8de7204be23
 
         xil_printf("0x%08x: ", whilecount);
         xil_printf("reset_status = %d, timer_state = %d\n\r", reset_status, timer_state);
 
+<<<<<<< HEAD
         wdt_ptr[XWT_TWCSR0_OFFSET] = 0x0c; // clear the reset status and timer state.
 
         // xil_printf("XWT_TWCSR0_OFFSET = 0x%08x\n\r", wdt_ptr[XWT_TWCSR0_OFFSET/4]);
         // xil_printf("XWT_TBR_OFFSET    = 0x%08x\n\r", wdt_ptr[XWT_TBR_OFFSET/4]);
+=======
+      wdt_ptr[XWT_TWCSR0_OFFSET/4] = 0x0c; // clear the reset status and timer state.
+      gpio_ptr[XGPIO_DATA_OFFSET/4] = 0x00ff & whilecount;
+
+      // xil_printf("XWT_TWCSR0_OFFSET = 0x%08x\n\r", wdt_ptr[XWT_TWCSR0_OFFSET/4]);
+      // xil_printf("XWT_TBR_OFFSET    = 0x%08x\n\r", wdt_ptr[XWT_TBR_OFFSET/4]);
+
+      uint32_t btn_val = gpio_ptr[XGPIO_DATA2_OFFSET/4];
+
+      while (btn_val != 0); // simulate a fault by waiting while a button is pressed
+
+    	for(int i=0; i<4000000; i++); // delay
+    	whilecount++;
+>>>>>>> a530319fb5def36e97e103ff1c38a8de7204be23
 
         for(int i=0; i<6000000; i++); // delay
         whilecount++;
