@@ -6,9 +6,9 @@ import os
 import sys
 
 #app_name = sys.argv[1]
-app_name = "freertos_test"
-plat_name = "freertos_plat"
-domain_name = "freertos_domain_0"
+app_name    = "freertos_test"
+plat_name   = "freertos_plat"
+domain_name = "freertos_domain"
 hw_xsa = "../implement/results/top.xsa"
 cpu_name = "microblaze_0"
 #cpu_name = "ps7_cortexa9_0"
@@ -42,15 +42,14 @@ status = platform.build()
 # create empty application
 comp = client.create_app_component(
     name=app_name,
-    #platform = "./workspace/{plat_name}/export/{plat_name}/{plat_name}.xpfm",
-    platform = "./workspace/freertos_plat/export/freertos_plat/freertos_plat.xpfm",
+    platform = f"./workspace/{plat_name}/export/{plat_name}/{plat_name}.xpfm",
     domain = domain_name,
     template = "empty_application"
 )
 
 # add source files as symbolic links
 os.system(f"ln -s ../../../src/{app_name}/test.c workspace/{app_name}/src/test.c")
-os.system(f'ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h')
+os.system(f"ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h")
 
 status = comp.clean()
 status = platform.build()
