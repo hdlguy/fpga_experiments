@@ -5,7 +5,6 @@ close_project -quiet
 open_project proj.xpr
 
 update_compile_order -fileset sources_1
-#launch_runs impl_1 -to_step write_bitstream -jobs 8
 
 reset_run synth_1
 launch_runs synth_1 -jobs 8
@@ -20,13 +19,10 @@ report_utilization      -file   ./results/utilization.rpt
 write_debug_probes      -force  ./results/top.ltx
 write_mem_info          -force  ./results/top.mmi
 
-
-
 write_bitstream -verbose -force -file ./results/top.bit
 file copy ./results/top.bit ./proj.runs/impl_1/
 
 write_hw_platform -fixed -include_bit -force -file ./results/top.xsa
-#write_hw_platform -fixed -force -file ./results/top.xsa
 
 close_project
 
