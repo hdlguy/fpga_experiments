@@ -3,7 +3,6 @@
 #include "xparameters.h"
 #include "fpga.h"
 
-//#define BRAM_SIZE (XPAR_REGFILE_CTRL_S_AXI_HIGHADDR-XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR+1)
 #define BRAM_SIZE 4096
 #define NREGS 16
 
@@ -12,8 +11,8 @@ uint32_t wval[BRAM_SIZE/4], rval[BRAM_SIZE/4];
 int main()
 {
 
-    uint32_t* regptr = (uint32_t *)XPAR_REGFILE_CTRL_S_AXI_BASEADDR;
-   	uint32_t* bram_ptr = (uint32_t *)XPAR_AXI_BRAM_CTRL_0_S_AXI_BASEADDR;
+    uint32_t* regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
+   	uint32_t* bram_ptr = (uint32_t *)XPAR_AXI_BRAM_CTRL_0_BASEADDR;
 
     xil_printf("Hello World\n\r");
 
@@ -27,7 +26,6 @@ int main()
     	srand(whilecount);
     	for (int i=0; i<BRAM_SIZE/4; i++) wval[i] = (uint32_t)rand();
 		for (int i=0; i<BRAM_SIZE/4; i++) bram_ptr[i] = wval[i];
-
     	// read and check the bram
     	uint32_t errors=0;
     	srand(whilecount);
@@ -42,8 +40,8 @@ int main()
     	for (int i=0; i<NREGS; i++) regptr[i] = whilecount+i;
     	
 
-
-    	for(int i=0; i<8000000; i++); // delay
+		// delay
+    	for(int i=0; i<8000000; i++); 
     	whilecount++;
 
     }
