@@ -3,9 +3,6 @@
 #include "xparameters.h"
 #include "fpga.h"
 
-#define BRAM_SIZE 4096
-#define NREGS 16
-
 uint32_t wval[BRAM_SIZE/4], rval[BRAM_SIZE/4];
     
 int main()
@@ -31,13 +28,16 @@ int main()
     	srand(whilecount);
     	for (int i=0; i<BRAM_SIZE/4; i++) rval[i] = bram_ptr[i];
 		for (int i=0; i<BRAM_SIZE/4; i++) if (wval[i] != rval[i]) errors++;
-    	xil_printf("flash_bram_errors = %d\n\r", errors);
+    	xil_printf("bram_errors = %d\n\r", errors);
     	
     	
-    	// read and print the register file
-    	for (int i=0; i<NREGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
     	// write to the register file
-    	for (int i=0; i<NREGS; i++) regptr[i] = whilecount+i;
+    	for (int i=2; i<N_REGS; i++) regptr[i] = whilecount+i;
+    	// read and check the register file
+		errors = 0;
+    	for (int i=2; i<N_REGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
+    	for (int i=2; i<N_REGS; i++) { if (regptr[i] != (whilecount+i)) errors++; }
+    	xil_printf("register errors = %d\n\r", errors);
     	
 
 		// delay

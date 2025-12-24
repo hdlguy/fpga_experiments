@@ -8,7 +8,8 @@ bitfile=../implement/results/top.bit
 
 echo $appname
 
-updatemem --force --meminfo $memfile  --bit $bitfile --data ./workspace/$appname/Debug/$appname.elf --proc system_i/microblaze_0 --out ./download.bit 
+#updatemem --force --meminfo $memfile  --bit $bitfile --data ./workspace/$appname/Debug/$appname.elf --proc system_i/microblaze_0 --out ./download.bit 
+updatemem --force --meminfo $memfile  --bit $bitfile --data ./workspace/$appname/build/$appname.elf --proc system_i/microblaze_0 --out ./download.bit 
 
 echo "the_ROM_image: { ./download.bit }" > bootgen754.bif
 
