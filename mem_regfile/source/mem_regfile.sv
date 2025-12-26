@@ -13,7 +13,6 @@ module mem_regfile #(
     input   logic[31:0]             wr_data,
     output  logic[31:0]             rd_data,
     input   logic                   en,
-    input   logic                   reset,
     input   logic[3:0]              we,
     // interface to application
     output  logic[Nregs-1:0][31:0]  reg_val,    // current register value

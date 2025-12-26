@@ -16,24 +16,20 @@ module top (
 //        32'h7777_7777, 32'h6666_6666, 32'h5555_5555, 32'h4444_4444,
 //        32'h3333_3030, 32'h2222_2222, 32'h1111_1111, 32'h0000_0000
 //    };
-	
-    logic axi_aclk, axi_aresetn, clk;
-    assign clk = axi_aclk;
-    
+	    
     logic [11:0]regfile_addr;
     logic regfile_clk;
     logic [31:0]regfile_din;
     logic [31:0]regfile_dout;
     logic regfile_en;
-    logic regfile_rst;
     logic [3:0]regfile_we;
     
     system system_i (
         .clkin(clkin100),
         .resetn(rstn),
         //
-        .axi_aclk(axi_aclk),
-        .axi_aresetn(axi_aresetn),
+        .axi_aclk(),
+        .axi_aresetn(),
         //
         .usb_uart_rxd(usb_uart_rxd),
         .usb_uart_txd(usb_uart_txd),
@@ -43,7 +39,7 @@ module top (
         .regfile_din    (regfile_din),
         .regfile_dout   (regfile_dout),
         .regfile_en     (regfile_en),
-        .regfile_rst    (regfile_rst),
+        .regfile_rst    (),
         .regfile_we     (regfile_we)        
     );
 	
@@ -58,7 +54,6 @@ module top (
 	   .wr_data     (regfile_din),
 	   .rd_data     (regfile_dout),
 	   .en          (regfile_en),
-	   .reset       (regfile_rst),
 	   .we          (regfile_we),
 	   //
 	   .reg_val     (reg_val),
@@ -73,7 +68,7 @@ module top (
     assign led = reg_val[2][7:0];
 		
 	
-	top_ila ila_inst (.clk(clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, regfile_rst, regfile_we, pul_val[3]})); // 114
+	top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
 
 endmodule
 
