@@ -1,4 +1,6 @@
-// trivial design to investigate deleted .tcl files.
+// trivial design to investigate using to the ICAP to
+// reboot the fpga from configuration flash. The 
+// AXI ICAP is in the system IPI block diagram.
 module top (
     input   logic       clkin100,
     output  logic[7:0]  led,
