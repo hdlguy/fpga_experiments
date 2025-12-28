@@ -1,0 +1,11 @@
+#set_property PACKAGE_PIN L2 [get_ports clk]
+set_property IOSTANDARD LVCMOS15 [get_ports {led[*]}]
+
+set_property PACKAGE_PIN C28 [get_ports {led[2]}]
+set_property PACKAGE_PIN D27 [get_ports {led[3]}]
+set_property PACKAGE_PIN J26 [get_ports {led[1]}]
+set_property PACKAGE_PIN E27 [get_ports {led[4]}]
+set_property PACKAGE_PIN G28 [get_ports {led[7]}]
+set_property PACKAGE_PIN H27 [get_ports {led[6]}]
+set_property PACKAGE_PIN E28 [get_ports {led[5]}]
+set_property PACKAGE_PIN H25 [get_ports {led[0]}]
