@@ -10,7 +10,6 @@ set_property target_language verilog [current_project]
 set_property default_lib work [current_project]
 load_features ipintegrator
 tclapp::install ultrafast -quiet
-#set_property CUSTOMIZED_DEFAULT_IP_LOCATION ./ [current_project]
 
 read_ip ../source/top_ila/top_ila.xci
 
@@ -24,6 +23,10 @@ set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/syst
 read_verilog -sv ../source/top.sv
 
 read_xdc         ../source/top.xdc
+
+add_files -norecurse ../vitis/release/production.elf
+set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
+set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
 
 close_project
 
