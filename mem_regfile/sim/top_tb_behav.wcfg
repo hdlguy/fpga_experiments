@@ -8,7 +8,6 @@
             <top_module name="axi_bram_ctrl_funcs" />
             <top_module name="glbl" />
             <top_module name="ipif_pkg" />
-            <top_module name="lib_pkg" />
             <top_module name="lmb_bram_if_funcs" />
             <top_module name="mdm_funcs" />
             <top_module name="top_tb" />
@@ -17,15 +16,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="5,010.001 ns"></ZoomEndTime>
-      <Cursor1Time time="0.000 ns"></Cursor1Time>
+      <ZoomStartTime time="0.000000 us"></ZoomStartTime>
+      <ZoomEndTime time="51.000001 us"></ZoomEndTime>
+      <Cursor1Time time="0.000000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="352"></NameColumnWidth>
-      <ValueColumnWidth column_width="76"></ValueColumnWidth>
+      <ValueColumnWidth column_width="72"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="48" />
+   <WVObjectSize size="44" />
    <wvobject type="array" fp_name="/top_tb/led">
       <obj_property name="ElementShortName">led[7:0]</obj_property>
       <obj_property name="ObjectShortName">led[7:0]</obj_property>
@@ -41,6 +40,10 @@
    <wvobject type="logic" fp_name="/top_tb/clkin100">
       <obj_property name="ElementShortName">clkin100</obj_property>
       <obj_property name="ObjectShortName">clkin100</obj_property>
+   </wvobject>
+   <wvobject type="logic" fp_name="/top_tb/rstn">
+      <obj_property name="ElementShortName">rstn</obj_property>
+      <obj_property name="ObjectShortName">rstn</obj_property>
    </wvobject>
    <wvobject fp_name="divider6" type="divider">
       <obj_property name="label">uut</obj_property>
@@ -61,22 +64,6 @@
    <wvobject type="logic" fp_name="/top_tb/uut/usb_uart_txd">
       <obj_property name="ElementShortName">usb_uart_txd</obj_property>
       <obj_property name="ObjectShortName">usb_uart_txd</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/axi_aclk">
-      <obj_property name="ElementShortName">axi_aclk</obj_property>
-      <obj_property name="ObjectShortName">axi_aclk</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/axi_aresetn">
-      <obj_property name="ElementShortName">axi_aresetn</obj_property>
-      <obj_property name="ObjectShortName">axi_aresetn</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/clk">
-      <obj_property name="ElementShortName">clk</obj_property>
-      <obj_property name="ObjectShortName">clk</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/regfile_rst">
-      <obj_property name="ElementShortName">regfile_rst</obj_property>
-      <obj_property name="ObjectShortName">regfile_rst</obj_property>
    </wvobject>
    <wvobject type="logic" fp_name="/top_tb/uut/regfile_clk">
       <obj_property name="ElementShortName">regfile_clk</obj_property>
@@ -109,22 +96,17 @@
       <obj_property name="ElementShortName">regfile_dout[31:0]</obj_property>
       <obj_property name="ObjectShortName">regfile_dout[31:0]</obj_property>
    </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/led_count">
-      <obj_property name="ElementShortName">led_count[31:0]</obj_property>
-      <obj_property name="ObjectShortName">led_count[31:0]</obj_property>
-   </wvobject>
    <wvobject type="array" fp_name="/top_tb/uut/reg_val">
-      <obj_property name="ElementShortName">reg_val[15:0][31:0]</obj_property>
-      <obj_property name="ObjectShortName">reg_val[15:0][31:0]</obj_property>
-      <obj_property name="isExpanded"></obj_property>
+      <obj_property name="ElementShortName">reg_val[63:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">reg_val[63:0][31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/top_tb/uut/pul_val">
-      <obj_property name="ElementShortName">pul_val[15:0][31:0]</obj_property>
-      <obj_property name="ObjectShortName">pul_val[15:0][31:0]</obj_property>
+      <obj_property name="ElementShortName">pul_val[63:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">pul_val[63:0][31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/top_tb/uut/read_val">
-      <obj_property name="ElementShortName">read_val[15:0][31:0]</obj_property>
-      <obj_property name="ObjectShortName">read_val[15:0][31:0]</obj_property>
+      <obj_property name="ElementShortName">read_val[63:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">read_val[63:0][31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/top_tb/uut/Naddr">
       <obj_property name="ElementShortName">Naddr[31:0]</obj_property>
@@ -135,8 +117,8 @@
       <obj_property name="ObjectShortName">Nregs[31:0]</obj_property>
    </wvobject>
    <wvobject type="array" fp_name="/top_tb/uut/init_reg">
-      <obj_property name="ElementShortName">init_reg[15:0][31:0]</obj_property>
-      <obj_property name="ObjectShortName">init_reg[15:0][31:0]</obj_property>
+      <obj_property name="ElementShortName">init_reg[63:0][31:0]</obj_property>
+      <obj_property name="ObjectShortName">init_reg[63:0][31:0]</obj_property>
    </wvobject>
    <wvobject fp_name="divider28" type="divider">
       <obj_property name="label">system</obj_property>

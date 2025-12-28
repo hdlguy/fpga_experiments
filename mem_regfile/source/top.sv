@@ -9,13 +9,13 @@ module top (
 
 	localparam int Naddr = 6;
     localparam int Nregs = 2**Naddr;
-    localparam logic[Nregs-1:0][31:0] init_reg = 0;
-//    localparam logic[Nregs-1:0][31:0] init_reg = {
-//        32'hffff_ffff, 32'heeee_eeee, 32'hdddd_dddd, 32'hcccc_cccc,
-//        32'hbbbb_bbbb, 32'haaaa_aaaa, 32'h9999_9999, 32'h8888_8888,
-//        32'h7777_7777, 32'h6666_6666, 32'h5555_5555, 32'h4444_4444,
-//        32'h3333_3030, 32'h2222_2222, 32'h1111_1111, 32'h0000_0000
-//    };
+    //localparam logic[Nregs-1:0][31:0] init_reg = 0;
+    localparam logic[Nregs-1:0][31:0] init_reg = {
+        32'hffff_ffff, 32'heeee_eeee, 32'hdddd_dddd, 32'hcccc_cccc,
+        32'hbbbb_bbbb, 32'haaaa_aaaa, 32'h9999_9999, 32'h8888_8888,
+        32'h7777_7777, 32'h6666_6666, 32'h5555_5555, 32'h4444_4444,
+        32'h3333_3030, 32'h2222_2222, 32'h1111_1111, 32'h0000_0000
+    };
 	    
     logic [11:0]regfile_addr;
     logic regfile_clk;
