@@ -18,11 +18,13 @@ open_run impl_1
 report_timing_summary   -file   ./results/timing.rpt
 report_utilization      -file   ./results/utilization.rpt
 write_debug_probes      -force  ./results/top.ltx
+write_mem_info          -force  ./results/top.mmi
 
 
-write_device_image -force -verbose ./results/top.pdi
+write_bitstream -verbose -force -file ./results/top.bit
 
-#write_hw_platform -fixed -include_bit -force -file ./results/top.xsa
+file copy ./results/top.bit ./proj.runs/impl_1/ 
+write_hw_platform -fixed -include_bit -force -file ./results/top.xsa
 
 close_project
 
