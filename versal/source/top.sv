@@ -1,13 +1,26 @@
 // 
 module top (
-    input   logic       clkin100,
-    input   logic       rstn,
-    output  logic[7:0]  led,
-    input   logic       usb_uart_rxd,
-    output  logic       usb_uart_txd
+//    //
+//    input wire [0:0] sys_clk0_0_clk_p,
+//    input wire [0:0] sys_clk0_0_clk_n,
+//    //
+//    inout  logic[63:0] CH0_DDR4_0_0_dq,        
+//    inout  logic[7:0] CH0_DDR4_0_0_dqs_t,      
+//    inout  logic[7:0] CH0_DDR4_0_0_dqs_c,      
+//    output logic[16:0] CH0_DDR4_0_0_adr,      
+//    output logic[1:0] CH0_DDR4_0_0_ba,        
+//    output logic[1:0] CH0_DDR4_0_0_bg,        
+//    output logic[0:0] CH0_DDR4_0_0_act_n,     
+//    output logic[0:0] CH0_DDR4_0_0_reset_n,   
+//    output logic[0:0] CH0_DDR4_0_0_ck_t,      
+//    output logic[0:0] CH0_DDR4_0_0_ck_c,      
+//    output logic[0:0] CH0_DDR4_0_0_cke,       
+//    output logic[0:0] CH0_DDR4_0_0_cs_n,      
+//    inout  logic[7:0] CH0_DDR4_0_0_dm_n,      
+//    output logic[0:0] CH0_DDR4_0_0_odt       
 );
 
-	localparam int Naddr = 6;
+	localparam int Naddr = 4;
     localparam int Nregs = 2**Naddr;
     //localparam logic[Nregs-1:0][31:0] init_reg = 0;
     localparam logic[Nregs-1:0][31:0] init_reg = {
@@ -17,30 +30,40 @@ module top (
         32'h3333_3030, 32'h2222_2222, 32'h1111_1111, 32'h0000_0000
     };
 	    
-    logic [11:0]regfile_addr;
+    logic [15:0]regfile_addr;
     logic regfile_clk;
     logic [31:0]regfile_din;
     logic [31:0]regfile_dout;
     logic regfile_en;
     logic [3:0]regfile_we;
     
-    system system_i (
-        .clkin(clkin100),
-        .resetn(rstn),
+    system system_inst (
+//        //
+//        .CH0_DDR4_0_0_dq(CH0_DDR4_0_0_dq),          // inout wire [63:0] CH0_DDR4_0_0_dq
+//        .CH0_DDR4_0_0_dqs_t(CH0_DDR4_0_0_dqs_t),    // inout wire [7:0] CH0_DDR4_0_0_dqs_t
+//        .CH0_DDR4_0_0_dqs_c(CH0_DDR4_0_0_dqs_c),    // inout wire [7:0] CH0_DDR4_0_0_dqs_c
+//        .CH0_DDR4_0_0_adr(CH0_DDR4_0_0_adr),        // output wire [16:0] CH0_DDR4_0_0_adr
+//        .CH0_DDR4_0_0_ba(CH0_DDR4_0_0_ba),          // output wire [1:0] CH0_DDR4_0_0_ba
+//        .CH0_DDR4_0_0_bg(CH0_DDR4_0_0_bg),          // output wire [1:0] CH0_DDR4_0_0_bg
+//        .CH0_DDR4_0_0_act_n(CH0_DDR4_0_0_act_n),    // output wire [0:0] CH0_DDR4_0_0_act_n
+//        .CH0_DDR4_0_0_reset_n(CH0_DDR4_0_0_reset_n),// output wire [0:0] CH0_DDR4_0_0_reset_n
+//        .CH0_DDR4_0_0_ck_t(CH0_DDR4_0_0_ck_t),      // output wire [0:0] CH0_DDR4_0_0_ck_t
+//        .CH0_DDR4_0_0_ck_c(CH0_DDR4_0_0_ck_c),      // output wire [0:0] CH0_DDR4_0_0_ck_c
+//        .CH0_DDR4_0_0_cke(CH0_DDR4_0_0_cke),        // output wire [0:0] CH0_DDR4_0_0_cke
+//        .CH0_DDR4_0_0_cs_n(CH0_DDR4_0_0_cs_n),      // output wire [0:0] CH0_DDR4_0_0_cs_n
+//        .CH0_DDR4_0_0_dm_n(CH0_DDR4_0_0_dm_n),      // inout wire [7:0] CH0_DDR4_0_0_dm_n
+//        .CH0_DDR4_0_0_odt(CH0_DDR4_0_0_odt),        // output wire [0:0] CH0_DDR4_0_0_odt
+//        //
+//        .sys_clk0_0_clk_p(sys_clk0_0_clk_p), // input wire [0:0] sys_clk0_0_clk_p
+//        .sys_clk0_0_clk_n(sys_clk0_0_clk_n), // input wire [0:0] sys_clk0_0_clk_n
         //
-        .axi_aclk(),
-        .axi_aresetn(),
-        //
-        .usb_uart_rxd(usb_uart_rxd),
-        .usb_uart_txd(usb_uart_txd),
-        //
-        .regfile_addr   (regfile_addr),
-        .regfile_clk    (regfile_clk),
-        .regfile_din    (regfile_din),
-        .regfile_dout   (regfile_dout),
-        .regfile_en     (regfile_en),
-        .regfile_rst    (),
-        .regfile_we     (regfile_we)        
+        .regfile_addr(regfile_addr), 
+        .regfile_clk(regfile_clk), 
+        .regfile_din(regfile_din), 
+        .regfile_dout(regfile_dout), 
+        .regfile_en(regfile_en),
+        .regfile_rst(regfile_rst), 
+        .regfile_we(regfile_we) 
     );
 	
 	
@@ -68,7 +91,7 @@ module top (
     assign led = reg_val[2][7:0];
 		
 	
-	top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
+	//top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
 
 endmodule
 
