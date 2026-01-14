@@ -1,23 +1,23 @@
 // 
 module top (
-//    //
-//    input wire [0:0] sys_clk0_0_clk_p,
-//    input wire [0:0] sys_clk0_0_clk_n,
-//    //
-//    inout  logic[63:0] CH0_DDR4_0_0_dq,        
-//    inout  logic[7:0] CH0_DDR4_0_0_dqs_t,      
-//    inout  logic[7:0] CH0_DDR4_0_0_dqs_c,      
-//    output logic[16:0] CH0_DDR4_0_0_adr,      
-//    output logic[1:0] CH0_DDR4_0_0_ba,        
-//    output logic[1:0] CH0_DDR4_0_0_bg,        
-//    output logic[0:0] CH0_DDR4_0_0_act_n,     
-//    output logic[0:0] CH0_DDR4_0_0_reset_n,   
-//    output logic[0:0] CH0_DDR4_0_0_ck_t,      
-//    output logic[0:0] CH0_DDR4_0_0_ck_c,      
-//    output logic[0:0] CH0_DDR4_0_0_cke,       
-//    output logic[0:0] CH0_DDR4_0_0_cs_n,      
-//    inout  logic[7:0] CH0_DDR4_0_0_dm_n,      
-//    output logic[0:0] CH0_DDR4_0_0_odt       
+    //
+    inout  logic [63:0] DDR4_dq,
+    inout  logic [7:0]  DDR4_dqs_t,
+    inout  logic [7:0]  DDR4_dqs_c,
+    output logic [16:0] DDR4_adr,
+    output logic [1:0]  DDR4_ba,
+    output logic [0:0]  DDR4_bg,
+    output logic [0:0]  DDR4_act_n,
+    output logic [0:0]  DDR4_reset_n,
+    output logic [0:0]  DDR4_ck_t,
+    output logic [0:0]  DDR4_ck_c,
+    output logic [0:0]  DDR4_cke,
+    output logic [0:0]  DDR4_cs_n,
+    inout  logic [7:0]  DDR4_dm_n,
+    output logic [0:0]  DDR4_odt,
+    //
+    input  logic [0:0]  sys_clk_n,
+    input  logic [0:0]  sys_clk_p
 );
 
 	localparam int Naddr = 4;
@@ -38,32 +38,31 @@ module top (
     logic [3:0]regfile_we;
     
     system system_inst (
-//        //
-//        .CH0_DDR4_0_0_dq(CH0_DDR4_0_0_dq),          // inout wire [63:0] CH0_DDR4_0_0_dq
-//        .CH0_DDR4_0_0_dqs_t(CH0_DDR4_0_0_dqs_t),    // inout wire [7:0] CH0_DDR4_0_0_dqs_t
-//        .CH0_DDR4_0_0_dqs_c(CH0_DDR4_0_0_dqs_c),    // inout wire [7:0] CH0_DDR4_0_0_dqs_c
-//        .CH0_DDR4_0_0_adr(CH0_DDR4_0_0_adr),        // output wire [16:0] CH0_DDR4_0_0_adr
-//        .CH0_DDR4_0_0_ba(CH0_DDR4_0_0_ba),          // output wire [1:0] CH0_DDR4_0_0_ba
-//        .CH0_DDR4_0_0_bg(CH0_DDR4_0_0_bg),          // output wire [1:0] CH0_DDR4_0_0_bg
-//        .CH0_DDR4_0_0_act_n(CH0_DDR4_0_0_act_n),    // output wire [0:0] CH0_DDR4_0_0_act_n
-//        .CH0_DDR4_0_0_reset_n(CH0_DDR4_0_0_reset_n),// output wire [0:0] CH0_DDR4_0_0_reset_n
-//        .CH0_DDR4_0_0_ck_t(CH0_DDR4_0_0_ck_t),      // output wire [0:0] CH0_DDR4_0_0_ck_t
-//        .CH0_DDR4_0_0_ck_c(CH0_DDR4_0_0_ck_c),      // output wire [0:0] CH0_DDR4_0_0_ck_c
-//        .CH0_DDR4_0_0_cke(CH0_DDR4_0_0_cke),        // output wire [0:0] CH0_DDR4_0_0_cke
-//        .CH0_DDR4_0_0_cs_n(CH0_DDR4_0_0_cs_n),      // output wire [0:0] CH0_DDR4_0_0_cs_n
-//        .CH0_DDR4_0_0_dm_n(CH0_DDR4_0_0_dm_n),      // inout wire [7:0] CH0_DDR4_0_0_dm_n
-//        .CH0_DDR4_0_0_odt(CH0_DDR4_0_0_odt),        // output wire [0:0] CH0_DDR4_0_0_odt
-//        //
-//        .sys_clk0_0_clk_p(sys_clk0_0_clk_p), // input wire [0:0] sys_clk0_0_clk_p
-//        .sys_clk0_0_clk_n(sys_clk0_0_clk_n), // input wire [0:0] sys_clk0_0_clk_n
+        .DDR4_dq(DDR4_dq),          // inout  wire [63:0] DDR4_dq
+        .DDR4_dqs_t(DDR4_dqs_t),    // inout  wire [7:0] DDR4_dqs_t
+        .DDR4_dqs_c(DDR4_dqs_c),    // inout  wire [7:0] DDR4_dqs_c
+        .DDR4_adr(DDR4_adr),        // output wire [16:0] DDR4_adr
+        .DDR4_ba(DDR4_ba),          // output wire [1:0] DDR4_ba
+        .DDR4_bg(DDR4_bg),          // output wire [0:0] DDR4_bg
+        .DDR4_act_n(DDR4_act_n),    // output wire [0:0] DDR4_act_n
+        .DDR4_reset_n(DDR4_reset_n),// output wire [0:0] DDR4_reset_n
+        .DDR4_ck_t(DDR4_ck_t),      // output wire [0:0] DDR4_ck_t
+        .DDR4_ck_c(DDR4_ck_c),      // output wire [0:0] DDR4_ck_c
+        .DDR4_cke(DDR4_cke),        // output wire [0:0] DDR4_cke
+        .DDR4_cs_n(DDR4_cs_n),      // output wire [0:0] DDR4_cs_n
+        .DDR4_dm_n(DDR4_dm_n),      // inout  wire [7:0] DDR4_dm_n
+        .DDR4_odt(DDR4_odt),        // output wire [0:0] DDR4_odt
         //
-        .regfile_addr(regfile_addr), 
-        .regfile_clk(regfile_clk), 
-        .regfile_din(regfile_din), 
-        .regfile_dout(regfile_dout), 
-        .regfile_en(regfile_en),
-        .regfile_rst(regfile_rst), 
-        .regfile_we(regfile_we) 
+        .sys_clk_n(sys_clk_n),      // input  wire [0:0] sys_clk_n
+        .sys_clk_p(sys_clk_p),      // input  wire [0:0] sys_clk_p
+        //
+        .regfile_addr(regfile_addr), // output wire [12:0] regfile_addr
+        .regfile_clk(regfile_clk), // output wire regfile_clk
+        .regfile_din(regfile_din), // output wire [31:0] regfile_din
+        .regfile_dout(regfile_dout), // input wire [31:0] regfile_dout
+        .regfile_en(regfile_en), // output wire regfile_en
+        .regfile_rst(regfile_rst), // output wire regfile_rst
+        .regfile_we(regfile_we) // output wire [3:0] regfile_we
     );
 	
 	
