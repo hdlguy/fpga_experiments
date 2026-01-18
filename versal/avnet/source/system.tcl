@@ -133,6 +133,7 @@ if { $bCheckIPs == 1 } {
 xilinx.com:ip:axi_noc:1.1\
 xilinx.com:ip:versal_cips:3.4\
 xilinx.com:ip:axi_bram_ctrl:4.1\
+xilinx.com:ip:proc_sys_reset:5.0\
 "
 
    set list_ips_missing ""
@@ -200,11 +201,6 @@ proc create_root_design { parentCell } {
 
   set ch1_lpddr4_trip1 [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:lpddr4_rtl:1.0 ch1_lpddr4_trip1 ]
 
-  set lpddr4_clk1 [ create_bd_intf_port -mode Slave -vlnv xilinx.com:interface:diff_clock_rtl:1.0 lpddr4_clk1 ]
-  set_property -dict [ list \
-   CONFIG.FREQ_HZ {200000000} \
-   ] $lpddr4_clk1
-
   set regfile [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:bram_rtl:1.0 regfile ]
   set_property -dict [ list \
    CONFIG.MASTER_TYPE {BRAM_CTRL} \
@@ -224,7 +220,7 @@ proc create_root_design { parentCell } {
     CONFIG.MC_EN_INTR_RESP {TRUE} \
     CONFIG.MC_LP4_OVERWRITE_IO_PROP {true} \
     CONFIG.MC_LP4_PIN_EFFICIENT {true} \
-    CONFIG.MC_SYSTEM_CLOCK {Differential} \
+    CONFIG.MC_SYSTEM_CLOCK {Internal} \
     CONFIG.MI_NAMES {} \
     CONFIG.MI_SIDEBAND_PINS {} \
     CONFIG.NUM_CLKS {7} \
@@ -315,14 +311,18 @@ proc create_root_design { parentCell } {
   # Create instance: versal_cips_0, and set properties
   set versal_cips_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:versal_cips:3.4 versal_cips_0 ]
   set_property -dict [list \
+    CONFIG.CLOCK_MODE {Custom} \
     CONFIG.DDR_MEMORY_MODE {Custom} \
     CONFIG.DEBUG_MODE {JTAG} \
     CONFIG.DESIGN_MODE {1} \
     CONFIG.PS_BOARD_INTERFACE {ps_pmc_fixed_io} \
     CONFIG.PS_PMC_CONFIG { \
+      CLOCK_MODE {Custom} \
       DDR_MEMORY_MODE {Connectivity to DDR via NOC} \
       DEBUG_MODE {JTAG} \
       DESIGN_MODE {1} \
+      PMC_CRP_HSM1_REF_CTRL_FREQMHZ {200} \
+      PMC_HSM1_CLK_OUT_ENABLE {1} \
       PMC_I2CPMC_PERIPHERAL {{ENABLE 1} {IO {PMC_MIO 50 .. 51}}} \
       PMC_MIO11 {{AUX_IO 0} {DIRECTION in} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA default} {PULL disable} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
       PMC_MIO12 {{AUX_IO 0} {DIRECTION out} {DRIVE_STRENGTH 8mA} {OUTPUT_DATA high} {PULL pullup} {SCHMITT 0} {SLEW slow} {USAGE GPIO}} \
@@ -405,12 +405,14 @@ proc create_root_design { parentCell } {
   set_property CONFIG.SINGLE_PORT_BRAM {1} $regfile_ctrl
 
 
+  # Create instance: proc_sys_reset_0, and set properties
+  set proc_sys_reset_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:proc_sys_reset:5.0 proc_sys_reset_0 ]
+
   # Create interface connections
   connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_ports regfile] [get_bd_intf_pins regfile_ctrl/BRAM_PORTA]
   connect_bd_intf_net -intf_net axi_noc_0_CH0_LPDDR4_0 [get_bd_intf_ports ch0_lpddr4_trip1] [get_bd_intf_pins axi_noc_0/CH0_LPDDR4_0]
   connect_bd_intf_net -intf_net axi_noc_0_CH1_LPDDR4_0 [get_bd_intf_ports ch1_lpddr4_trip1] [get_bd_intf_pins axi_noc_0/CH1_LPDDR4_0]
   connect_bd_intf_net -intf_net axi_noc_0_M00_AXI [get_bd_intf_pins regfile_ctrl/S_AXI] [get_bd_intf_pins axi_noc_0/M00_AXI]
-  connect_bd_intf_net -intf_net lpddr4_clk1_1 [get_bd_intf_ports lpddr4_clk1] [get_bd_intf_pins axi_noc_0/sys_clk0]
   connect_bd_intf_net -intf_net versal_cips_0_FPD_CCI_NOC_0 [get_bd_intf_pins versal_cips_0/FPD_CCI_NOC_0] [get_bd_intf_pins axi_noc_0/S00_AXI]
   connect_bd_intf_net -intf_net versal_cips_0_FPD_CCI_NOC_1 [get_bd_intf_pins versal_cips_0/FPD_CCI_NOC_1] [get_bd_intf_pins axi_noc_0/S01_AXI]
   connect_bd_intf_net -intf_net versal_cips_0_FPD_CCI_NOC_2 [get_bd_intf_pins versal_cips_0/FPD_CCI_NOC_2] [get_bd_intf_pins axi_noc_0/S02_AXI]
@@ -421,7 +423,10 @@ proc create_root_design { parentCell } {
   # Create port connections
   connect_bd_net -net clk_wizard_0_clkout150  [get_bd_pins versal_cips_0/pl0_ref_clk] \
   [get_bd_pins regfile_ctrl/s_axi_aclk] \
-  [get_bd_pins axi_noc_0/aclk6]
+  [get_bd_pins axi_noc_0/aclk6] \
+  [get_bd_pins proc_sys_reset_0/slowest_sync_clk]
+  connect_bd_net -net proc_sys_reset_0_peripheral_aresetn  [get_bd_pins proc_sys_reset_0/peripheral_aresetn] \
+  [get_bd_pins regfile_ctrl/s_axi_aresetn]
   connect_bd_net -net versal_cips_0_fpd_cci_noc_axi0_clk  [get_bd_pins versal_cips_0/fpd_cci_noc_axi0_clk] \
   [get_bd_pins axi_noc_0/aclk0]
   connect_bd_net -net versal_cips_0_fpd_cci_noc_axi1_clk  [get_bd_pins versal_cips_0/fpd_cci_noc_axi1_clk] \
@@ -430,10 +435,12 @@ proc create_root_design { parentCell } {
   [get_bd_pins axi_noc_0/aclk2]
   connect_bd_net -net versal_cips_0_fpd_cci_noc_axi3_clk  [get_bd_pins versal_cips_0/fpd_cci_noc_axi3_clk] \
   [get_bd_pins axi_noc_0/aclk3]
+  connect_bd_net -net versal_cips_0_hsm1_ref_clk  [get_bd_pins versal_cips_0/hsm1_ref_clk] \
+  [get_bd_pins axi_noc_0/sys_clk0]
   connect_bd_net -net versal_cips_0_lpd_axi_noc_clk  [get_bd_pins versal_cips_0/lpd_axi_noc_clk] \
   [get_bd_pins axi_noc_0/aclk4]
   connect_bd_net -net versal_cips_0_pl0_resetn  [get_bd_pins versal_cips_0/pl0_resetn] \
-  [get_bd_pins regfile_ctrl/s_axi_aresetn]
+  [get_bd_pins proc_sys_reset_0/ext_reset_in]
   connect_bd_net -net versal_cips_0_pmc_axi_noc_axi0_clk  [get_bd_pins versal_cips_0/pmc_axi_noc_axi0_clk] \
   [get_bd_pins axi_noc_0/aclk5]
 
