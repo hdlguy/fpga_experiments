@@ -27,9 +27,9 @@ module top (
   inout  logic [1:0]    ch1_lpddr4_trip1_dqs_c_b,
   inout  logic [1:0]    ch1_lpddr4_trip1_dqs_t_a,
   inout  logic [1:0]    ch1_lpddr4_trip1_dqs_t_b,
-  output logic          ch1_lpddr4_trip1_reset_n,
-  input  logic          lpddr4_clk1_clk_n,
-  input  logic          lpddr4_clk1_clk_p
+  output logic          ch1_lpddr4_trip1_reset_n
+  //input  logic          lpddr4_clk1_clk_n,
+  //input  logic          lpddr4_clk1_clk_p
 );
 
 	localparam int Naddr = 4;
@@ -78,9 +78,9 @@ module top (
         .ch1_lpddr4_trip1_dqs_t_a   (ch1_lpddr4_trip1_dqs_t_a),
         .ch1_lpddr4_trip1_dqs_t_b   (ch1_lpddr4_trip1_dqs_t_b),
         .ch1_lpddr4_trip1_reset_n   (ch1_lpddr4_trip1_reset_n),
-        //
-        .lpddr4_clk1_clk_n          (lpddr4_clk1_clk_n),
-        .lpddr4_clk1_clk_p          (lpddr4_clk1_clk_p),
+        ////
+        //.lpddr4_clk1_clk_n          (lpddr4_clk1_clk_n),
+        //.lpddr4_clk1_clk_p          (lpddr4_clk1_clk_p),
         //
         .regfile_addr               (regfile_addr),
         .regfile_clk                (regfile_clk),
