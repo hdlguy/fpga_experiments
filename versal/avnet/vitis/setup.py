@@ -47,7 +47,7 @@ comp = client.create_app_component(
 
 # add source files as symbolic links
 os.system(f"ln -s ../../../src/{app_name}/test.c workspace/{app_name}/src/test.c")
-os.system(f'ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h')
+os.system(f"ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h")
 
 status = comp.clean()
 status = platform.build()
