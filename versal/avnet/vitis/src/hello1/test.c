@@ -8,10 +8,10 @@ uint32_t wval[BRAM_SIZE/4], rval[BRAM_SIZE/4];
 int main()
 {
 
+    xil_printf("Hello World\n\r");
+/*
     uint32_t* regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
    	uint32_t* bram_ptr = (uint32_t *)XPAR_AXI_BRAM_CTRL_0_BASEADDR;
-
-    xil_printf("Hello World\n\r");
 
     uint32_t whilecount=0;
     while(1) {
@@ -45,6 +45,6 @@ int main()
     	whilecount++;
 
     }
-    
+*/    
     return 0;
 }

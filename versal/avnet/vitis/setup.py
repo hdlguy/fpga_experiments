@@ -5,7 +5,8 @@ import vitis
 import os
 import sys
 
-app_name = sys.argv[1]
+#app_name = sys.argv[1]
+app_name = "hello1"
 print("app_name = ", app_name)
 
 plat_name = "standalone_plat"
@@ -50,7 +51,7 @@ os.system(f"ln -s ../../../src/{app_name}/test.c workspace/{app_name}/src/test.c
 os.system(f"ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h")
 
 status = comp.clean()
-status = platform.build()
+#status = platform.build()
 comp.build()
 vitis.dispose()
 
