@@ -20,7 +20,7 @@ int main()
     	// read and check the bram
     	uint32_t errors=0;
 		for (int i=0; i<BRAM_SIZE/4; i++) if (bram_ptr[i] != (whilecount+i)) errors++;
-    	xil_printf("bram_errors = %d\n\r", errors);
+    	xil_printf("0x%08x: bram_errors = %d\n", whilecount, errors);
     	
 		// delay
     	for(int i=0; i<8000000; i++); 
