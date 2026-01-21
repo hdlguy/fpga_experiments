@@ -25,7 +25,7 @@ read_verilog -sv ../source/mem_regfile.sv
 read_verilog -sv ../source/top.sv
 
 read_xdc         ../source/top.xdc
-read_xdc         ../source/ddr4.xdc
+#read_xdc         ../source/ddr4.xdc
 
 add_files -norecurse ../vitis/release/production.elf
 set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
