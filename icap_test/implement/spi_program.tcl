@@ -45,7 +45,7 @@ if {$status != 0} {
     program_hw_cfgmem -hw_cfgmem [ get_property PROGRAM.HW_CFGMEM [current_hw_device]]
 }
 
-boot_hw_device  [current_hw_device]
+boot_hw_device -timeout 10 [current_hw_device]
 close_hw_manager
 
 

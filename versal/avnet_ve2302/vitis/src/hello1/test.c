@@ -3,14 +3,16 @@
 #include "xparameters.h"
 #include "fpga.h"
 
+#define BRAM_SIZE (XPAR_XBRAM_0_HIGHADDR - XPAR_XBRAM_0_BASEADDR + 1)
+
 uint32_t wval[BRAM_SIZE/4], rval[BRAM_SIZE/4];
     
 int main()
 {
 
     xil_printf("Hello World\n\r");
-/*
-    uint32_t* regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
+
+    uint32_t* regptr   = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
    	uint32_t* bram_ptr = (uint32_t *)XPAR_AXI_BRAM_CTRL_0_BASEADDR;
 
     uint32_t whilecount=0;
@@ -21,13 +23,13 @@ int main()
     	// *********** test the flash bram
     	// fill the bram
     	srand(whilecount);
-    	for (int i=0; i<BRAM_SIZE/4; i++) wval[i] = (uint32_t)rand();
-		for (int i=0; i<BRAM_SIZE/4; i++) bram_ptr[i] = wval[i];
+    	for (uint32_t i=0; i<BRAM_SIZE/4; i++) wval[i] = (uint32_t)rand();
+		for (uint32_t i=0; i<BRAM_SIZE/4; i++) bram_ptr[i] = wval[i];
     	// read and check the bram
     	uint32_t errors=0;
     	srand(whilecount);
-    	for (int i=0; i<BRAM_SIZE/4; i++) rval[i] = bram_ptr[i];
-		for (int i=0; i<BRAM_SIZE/4; i++) if (wval[i] != rval[i]) errors++;
+    	for (uint32_t i=0; i<BRAM_SIZE/4; i++) rval[i] = bram_ptr[i];
+		for (uint32_t i=0; i<BRAM_SIZE/4; i++) if (wval[i] != rval[i]) errors++;
     	xil_printf("bram_errors = %d\n\r", errors);
     	
     	
@@ -35,8 +37,8 @@ int main()
     	for (int i=2; i<N_REGS; i++) regptr[i] = whilecount+i;
     	// read and check the register file
 		errors = 0;
-    	for (int i=2; i<N_REGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
-    	for (int i=2; i<N_REGS; i++) { if (regptr[i] != (whilecount+i)) errors++; }
+    	for (uint32_t i=2; i<N_REGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
+    	for (uint32_t i=2; i<N_REGS; i++) { if (regptr[i] != (whilecount+i)) errors++; }
     	xil_printf("register errors = %d\n\r", errors);
     	
 
@@ -45,6 +47,6 @@ int main()
     	whilecount++;
 
     }
-*/    
+
     return 0;
 }
