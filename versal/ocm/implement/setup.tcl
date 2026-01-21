@@ -5,7 +5,8 @@
 close_project -quiet
 file delete -force proj.xpr *.os *.jou *.log proj.srcs proj.cache proj.runs
 
-create_project -part xcve2302-sfva784-1LP-e-s -force proj
+create_project -part xcve2002-sbva484-1LP-e-S -force proj
+#create_project -part xcve2302-sfva784-1LP-e-s -force proj
 #set devicePart     "xcve2302-sfva784-1LP-e-s"
 #create_project -part xc7a100tcsg324-1 -force proj 
 set_property target_language verilog [current_project]
