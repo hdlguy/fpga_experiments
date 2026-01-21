@@ -15,11 +15,10 @@ int main()
     while(1) {
 
         if (bramptr[0] != 0) {
-            xil_printf("bramptr[0] = 0x%08x, clearing now.", bramptr[0]);
+            xil_printf("0x%08x: bramptr[0] = 0x%08x, clearing now.\n\r", whilecount, bramptr[0]);
             bramptr[0] = 0;
         }
         
-        if((whilecount&0x003fffff) == 0) { xil_printf("0x%08x\n\r", whilecount); }
         whilecount++;
 
     }

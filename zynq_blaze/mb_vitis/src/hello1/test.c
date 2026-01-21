@@ -14,14 +14,9 @@ int main()
     uint32_t whilecount=0;
     while(1) {
 
-    	// *********** test the flash bram
-    	// fill the bram
-    	for (int i=0; i<BRAM_SIZE/4; i++) bram_ptr[i] = (whilecount+i); //(uint32_t)rand();
-    	// read and check the bram
-    	uint32_t errors=0;
-		for (int i=0; i<BRAM_SIZE/4; i++) if (bram_ptr[i] != (whilecount+i)) errors++;
-    	xil_printf("0x%08x: bram_errors = %d\n", whilecount, errors);
-    	
+		xil_printf("0x%08x\n", bram_ptr[0]);
+		bram_ptr[0] = 0xffffffff;
+	
 		// delay
     	for(int i=0; i<8000000; i++); 
     	whilecount++;

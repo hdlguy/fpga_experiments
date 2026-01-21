@@ -23,9 +23,9 @@ read_verilog -sv  [glob ../source/top.sv]
 
 read_xdc ../source/top.xdc
 
-#add_files -norecurse ../mb_vitis/release/production.elf
-#set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
-#set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
+add_files -norecurse ../mb_vitis/release/production.elf
+set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
+set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
 
 close_project
 
