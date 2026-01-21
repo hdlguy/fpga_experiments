@@ -133,6 +133,7 @@ xilinx.com:ip:versal_cips:3.4\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:proc_sys_reset:5.0\
 xilinx.com:ip:axi_bram_ctrl:4.1\
+xilinx.com:ip:emb_mem_gen:1.0\
 "
 
    set list_ips_missing ""
@@ -1365,7 +1366,7 @@ proc create_root_design { parentCell } {
   # Create instance: axi_smc, and set properties
   set axi_smc [ create_bd_cell -type ip -vlnv xilinx.com:ip:smartconnect:1.0 axi_smc ]
   set_property -dict [list \
-    CONFIG.NUM_MI {1} \
+    CONFIG.NUM_MI {2} \
     CONFIG.NUM_SI {1} \
   ] $axi_smc
 
@@ -1378,9 +1379,21 @@ proc create_root_design { parentCell } {
   set_property CONFIG.SINGLE_PORT_BRAM {1} $regfile_ctl
 
 
+  # Create instance: axi_bram_ctrl_0, and set properties
+  set axi_bram_ctrl_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0 ]
+  set_property CONFIG.SINGLE_PORT_BRAM {1} $axi_bram_ctrl_0
+
+
+  # Create instance: axi_bram_ctrl_0_bram, and set properties
+  set axi_bram_ctrl_0_bram [ create_bd_cell -type ip -vlnv xilinx.com:ip:emb_mem_gen:1.0 axi_bram_ctrl_0_bram ]
+  set_property CONFIG.MEMORY_PRIMITIVE {URAM} $axi_bram_ctrl_0_bram
+
+
   # Create interface connections
   connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_ports regfile] [get_bd_intf_pins regfile_ctl/BRAM_PORTA]
+  connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA1 [get_bd_intf_pins axi_bram_ctrl_0_bram/BRAM_PORTA] [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA]
   connect_bd_intf_net -intf_net axi_smc_M00_AXI [get_bd_intf_pins axi_smc/M00_AXI] [get_bd_intf_pins regfile_ctl/S_AXI]
+  connect_bd_intf_net -intf_net axi_smc_M01_AXI [get_bd_intf_pins axi_smc/M01_AXI] [get_bd_intf_pins axi_bram_ctrl_0/S_AXI]
   connect_bd_intf_net -intf_net versal_cips_0_M_AXI_LPD [get_bd_intf_pins versal_cips_0/M_AXI_LPD] [get_bd_intf_pins axi_smc/S00_AXI]
 
   # Create port connections
@@ -1388,15 +1401,18 @@ proc create_root_design { parentCell } {
   [get_bd_pins rst_clk_wizard_0_150M/slowest_sync_clk] \
   [get_bd_pins axi_smc/aclk] \
   [get_bd_pins versal_cips_0/m_axi_lpd_aclk] \
-  [get_bd_pins regfile_ctl/s_axi_aclk]
+  [get_bd_pins regfile_ctl/s_axi_aclk] \
+  [get_bd_pins axi_bram_ctrl_0/s_axi_aclk]
   connect_bd_net -net rst_clk_wizard_0_150M_peripheral_aresetn  [get_bd_pins rst_clk_wizard_0_150M/peripheral_aresetn] \
   [get_bd_pins axi_smc/aresetn] \
-  [get_bd_pins regfile_ctl/s_axi_aresetn]
+  [get_bd_pins regfile_ctl/s_axi_aresetn] \
+  [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn]
   connect_bd_net -net versal_cips_0_pl0_resetn  [get_bd_pins versal_cips_0/pl0_resetn] \
   [get_bd_pins rst_clk_wizard_0_150M/ext_reset_in]
 
   # Create address segments
   assign_bd_address -offset 0x80000000 -range 0x00010000 -with_name SEG_axi_bram_ctrl_0_Mem0 -target_address_space [get_bd_addr_spaces versal_cips_0/M_AXI_LPD] [get_bd_addr_segs regfile_ctl/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x80010000 -range 0x00008000 -with_name SEG_axi_bram_ctrl_0_Mem0_1 -target_address_space [get_bd_addr_spaces versal_cips_0/M_AXI_LPD] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] -force
 
 
   # Restore current instance
