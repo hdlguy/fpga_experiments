@@ -1,7 +1,8 @@
-
+//
 #include <stdint.h>
 #include <xil_printf.h>
 #include "xparameters.h"
+#include "fpga.h"
 
 #define BRAM_SIZE (1 + XPAR_AXI_BRAM_CTRL_1_HIGHADDR - XPAR_AXI_BRAM_CTRL_1_BASEADDR) // bram size in bytes
 

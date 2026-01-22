@@ -6,6 +6,7 @@ import os
 import sys
 
 app_name = sys.argv[1]
+#app_name = "hello1"
 print("app_name = ", app_name)
 
 plat_name = "standalone_plat"
@@ -32,8 +33,6 @@ platform = client.create_platform_component(
     compiler = "gcc"
 )
 
-#platform = client.get_component(name=plat_name)
-
 status = platform.build()
 
 # create empty application
@@ -45,8 +44,11 @@ comp = client.create_app_component(
 )
 
 # add source files as symbolic links
-os.system(f"ln -s ../../../src/{app_name}/test.c workspace/{app_name}/src/test.c")
-os.system(f'ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h')
+#os.system(f"ln -s ../../../src/{app_name}/test.c workspace/{app_name}/src/test.c")
+#os.system(f'ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h')
+comp.import_files(from_loc = f"./src/{app_name}/", files = ["test.c"], is_skip_copy_sources=True)
+comp.import_files(from_loc = f"./src/", files = ["fpga.h"], is_skip_copy_sources=True)
+
 
 status = comp.clean()
 status = platform.build()
