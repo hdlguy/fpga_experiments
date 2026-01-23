@@ -2,6 +2,7 @@
 the_ROM_image:
 {
 	[bootloader]../zy_vitis/workspace/standalone_plat/export/standalone_plat/sw/boot/fsbl.elf
-    ./results/top.bit
+//    ./results/top.bit
+    ./proj.runs/impl_1/top.bit
 	../zy_vitis/workspace/hello1/build/hello1.elf
 }
