@@ -33,7 +33,7 @@ write_hw_platform -fixed -include_bit -force -file ./results/top.xsa
 
 close_project
 
-exec bootgen -image bitstream.bif -arch zynq -o ./results/BOOT.bin -w
+#exec bootgen -image bitstream.bif -arch zynq -o ./results/BOOT.bin -w
 
 #write_cfgmem -disablebitswap -force -format BIN -size 256 -interface SMAPx32 -loadbit "up 0x0 ./results/top.bit" -verbose ./results/top.bit.bin
 # updatemem -meminfo ./results/top.mmi -data ../mb_vitis/release/production.elf  -bit ./results/top.bit -proc system_i/microblaze_0 -force -out ./results/top.bit
