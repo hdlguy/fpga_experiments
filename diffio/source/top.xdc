@@ -1,0 +1,35 @@
+
+create_clock -name clk100  -period 10.0 [get_ports clkin100]
+create_clock -name synclk3 -period 25.0 [get_ports synclk_p[3]]
+create_clock -name synclk2 -period 25.0 [get_ports synclk_p[2]]
+create_clock -name synclk1 -period 25.0 [get_ports synclk_p[1]]
+create_clock -name synclk0 -period 25.0 [get_ports synclk_p[0]]
+#create_generated_clock -name d_p_1 -source [get_pins {ODDR_inst/C}] -divide_by 1 -add -master_clock [get_clocks -of [get_pins ODDR_inst/C] -filter {IS_GENERATED && MASTER_CLOCK == clkin100}] [get_ports {d_p}]
+
+
+set_property IOSTANDARD LVCMOS33 [get_ports clkin100]
+set_property PACKAGE_PIN E3 [get_ports clkin100]
+
+set_property IOSTANDARD LVCMOS33 [get_ports {led[*]}]
+set_property PACKAGE_PIN T10 [get_ports {led[7]}]
+set_property PACKAGE_PIN  T9 [get_ports {led[6]}]
+set_property PACKAGE_PIN  J5 [get_ports {led[5]}]
+set_property PACKAGE_PIN  H5 [get_ports {led[4]}]
+set_property PACKAGE_PIN  H6 [get_ports {led[3]}]
+set_property PACKAGE_PIN  J2 [get_ports {led[2]}]
+set_property PACKAGE_PIN  J4 [get_ports {led[1]}]
+set_property PACKAGE_PIN  F6 [get_ports {led[0]}]
+
+set_property IOSTANDARD DIFF_SSTL18_II [get_ports [list synclk_p[*]]]
+set_property IOSTANDARD DIFF_SSTL18_II [get_ports [list synclk_n[*]]]
+set_property SLEW SLOW [get_ports [list synclk_p[*]]]
+#set_property in_term UNTUNED_SPLIT_50 [get_ports [list synclk_p[*]]]
+set_property PACKAGE_PIN R3 [get_ports synclk_p[0]]
+set_property PACKAGE_PIN T3 [get_ports synclk_n[0]]
+set_property PACKAGE_PIN T5 [get_ports synclk_p[1]]
+set_property PACKAGE_PIN T4 [get_ports synclk_n[1]]
+set_property PACKAGE_PIN N5 [get_ports synclk_p[2]]
+set_property PACKAGE_PIN P5 [get_ports synclk_n[2]]
+set_property PACKAGE_PIN P4 [get_ports synclk_p[3]]
+set_property PACKAGE_PIN P3 [get_ports synclk_n[3]]
+

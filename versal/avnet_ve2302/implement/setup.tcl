@@ -1,0 +1,36 @@
+# This script sets up a Vivado project with all ip references resolved.
+# run on linux command line with:
+#       vivado -mode batch -source setup.tcl
+#
+close_project -quiet
+file delete -force proj.xpr *.os *.jou *.log proj.srcs proj.cache proj.runs
+
+create_project -part xcve2302-sfva784-1LP-e-s -force proj
+set_property board_part avnet-tria:ve2302_io_dk_som:part0:1.0 [current_project]
+#set devicePart     "xcve2302-sfva784-1LP-e-s"
+#create_project -part xc7a100tcsg324-1 -force proj 
+set_property target_language verilog [current_project]
+set_property default_lib work [current_project]
+load_features ipintegrator
+tclapp::install ultrafast -quiet
+
+#read_ip ../source/top_ila/top_ila.xci
+#upgrade_ip -quiet  [get_ips *]
+#generate_target {all} [get_ips *]
+
+source ../source/system.tcl
+generate_target {synthesis implementation} [get_files ./proj.srcs/sources_1/bd/system/system.bd]
+set_property synth_checkpoint_mode None [get_files ./proj.srcs/sources_1/bd/system/system.bd]
+
+read_verilog -sv ../../../mem_regfile/source/mem_regfile.sv
+read_verilog -sv ../source/top.sv
+
+#read_xdc         ../source/top.xdc
+#read_xdc         ../source/ddr4.xdc
+
+#add_files -norecurse ../vitis/release/production.elf
+#set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
+#set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sources_1] {production.elf}]
+
+close_project
+
