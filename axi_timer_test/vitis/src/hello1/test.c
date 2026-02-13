@@ -2,6 +2,7 @@
 #include "xil_printf.h"
 #include "xparameters.h"
 #include "fpga.h"
+#include "sleep.h"
 
 uint32_t wval[BRAM_SIZE/4], rval[BRAM_SIZE/4];
     
@@ -35,13 +36,14 @@ int main()
     	for (int i=2; i<N_REGS; i++) regptr[i] = whilecount+i;
     	// read and check the register file
 		errors = 0;
-    	for (int i=2; i<N_REGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
+    	//for (int i=2; i<N_REGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
     	for (int i=2; i<N_REGS; i++) { if (regptr[i] != (whilecount+i)) errors++; }
     	xil_printf("register errors = %d\n\r", errors);
     	
 
 		// delay
-    	for(int i=0; i<8000000; i++); 
+    	//for(int i=0; i<8000000; i++); 
+		msleep(2000);
     	whilecount++;
 
     }

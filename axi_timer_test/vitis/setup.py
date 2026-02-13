@@ -10,6 +10,7 @@ app_name = "hello1"
 print("app_name = ", app_name)
 
 plat_name = "standalone_plat"
+domain_name = "standalone_domain"
 hw_xsa = "../implement/results/top.xsa"
 cpu_name = "microblaze_0"
 #cpu_name = "ps7_cortexa9_0"
@@ -27,11 +28,13 @@ platform = client.create_platform_component(
     hw_design = hw_xsa,
     os = "standalone",
     cpu = cpu_name,
-    domain_name = "standalone_domain_0",
+    domain_name = domain_name,
     generate_dtb = False,
     advanced_options = advanced_options,
     compiler = "gcc"
 )
+
+#status = platform.standalone_domain.set_config(option = "lib", param = "XILTIMER_sleep_timer", value = "axi_timer_0", lib_name="xiltimer")
 
 #platform = client.get_component(name=plat_name)
 
@@ -41,7 +44,7 @@ status = platform.build()
 comp = client.create_app_component(
     name=app_name,
     platform = "./workspace/standalone_plat/export/standalone_plat/standalone_plat.xpfm",
-    domain = "standalone_domain_0",
+    domain = domain_name,
     template = "empty_application"
 )
 
