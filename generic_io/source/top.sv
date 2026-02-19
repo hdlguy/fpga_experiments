@@ -4,17 +4,17 @@ module top #(
     parameter int board_version
 )(
     // board 0 specific IO
-    input   logic       bd0_clk,
-    input   logic[7:0]  bd0_inputa, bd0_inputb,
-    output  logic[7:0]  bd0_sum,
+    input   logic           bd0_clk,
+    input   logic[7:0]      bd0_inputa, bd0_inputb,
+    output  logic[7:0]      bd0_sum,
     // board 1 specific IO
-    input   logic       bd1_clk,
-    input   logic[7:0]  bd1_inputa, bd1_inputb,
-    output  logic[7:0]  bd1_sum,
+    input   logic           bd1_clk,
+    input   logic[7:0]      bd1_inputa, bd1_inputb,
+    output  logic[7:0]      bd1_sum,
     // common IO
-    input   logic       clk100,
-    input   logic[7:0]  mult_a, mult_b,
-    output  logic[15:]  prod
+    input   logic           clk100,
+    input   logic[7:0]      mult_a, mult_b,
+    output  logic[15:0]     prod
 );
 
     localparam int board0 = 0;
