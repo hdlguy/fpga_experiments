@@ -1,7 +1,7 @@
 // top.sv - experiment with generic to make common source file for two board versions.
 
 module top #(
-    parameter int board_version
+    parameter int BOARD_VERSION
 )(
     // board 0 specific IO
     input   logic           bd0_clk,
@@ -17,11 +17,11 @@ module top #(
     output  logic[15:0]     prod
 );
 
-    localparam int board0 = 0;
-    localparam int board1 = 1;
+    localparam int BOARD0 = 0;
+    localparam int BOARD1 = 1;
 
     // board 0 specific logic
-    generate if(board_version == board0) begin
+    generate if(BOARD_VERSION == BOARD0) begin
         logic clk0;
         assign clk0 = bd0_clk;
         always_ff @(posedge clk0) begin
@@ -32,7 +32,7 @@ module top #(
     end endgenerate
 
     // board 1 specific logic
-    generate if(board_version == board1) begin
+    generate if(BOARD_VERSION == BOARD1) begin
         logic clk1;
         assign clk1 = bd1_clk;
         always_ff @(posedge clk1) begin
@@ -47,7 +47,7 @@ module top #(
     assign clk = clk100;
 
     always_ff @(posedge clk) begin
-        prod <= signed(mult_a) * signed(mult_b);
+        prod <= $signed(mult_a) * $signed(mult_b);
     end
 
 endmodule
