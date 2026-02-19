@@ -1,4 +1,8 @@
 #
+create_clock -period 1.500 -name bd0_clk                         [get_ports bd0_clk]
+create_clock -period 8.000 -name bd1_clk                         [get_ports bd1_clk]
+create_clock -period 10.000 -name clk100 -waveform {0.000 5.000} [get_ports clk100]
+#
 set_property IOSTANDARD LVCMOS33 [get_ports {bd0_*}]
 #
 set_property IOSTANDARD LVCMOS25 [get_ports {bd1_*}]

@@ -13,9 +13,9 @@ tclapp::install ultrafast -quiet
 
 read_verilog -sv ../source/top.sv
 
-read_xdc         ../source/bd0_top.xdc
+read_xdc         ../source/bd0_top.xdc ;# set XDC for board
 
-set_property generic {BOARD_VERSION=0} [current_fileset]
+set_property generic {BOARD_VERSION=0} [current_fileset] ;# set verilog generic for board
 
 close_project
 

@@ -21,5 +21,12 @@ write_debug_probes      -force  ./results/top.ltx
 
 close_project
 
+try {
+    set result [exec grep VIO ./results/timing.rpt]
+    set result "Timing FAILED!: ${result}"
+} on error {e} {
+    set result "    Timing Passed!"
+}
+puts ${result}
 
 
