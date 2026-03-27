@@ -34,10 +34,6 @@ platform = client.create_platform_component(
     compiler = "gcc"
 )
 
-#status = platform.standalone_domain.set_config(option = "lib", param = "XILTIMER_sleep_timer", value = "axi_timer_0", lib_name="xiltimer")
-
-#platform = client.get_component(name=plat_name)
-
 status = platform.build()
 
 # create empty application
@@ -50,7 +46,7 @@ comp = client.create_app_component(
 
 # add source files as symbolic links
 os.system(f"ln -s ../../../src/{app_name}/test.c workspace/{app_name}/src/test.c")
-os.system(f'ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h')
+os.system(f"ln -s ../../../src/fpga.h workspace/{app_name}/src/fpga.h")
 
 status = comp.clean()
 status = platform.build()
