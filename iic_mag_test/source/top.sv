@@ -26,14 +26,16 @@ module top (
     logic regfile_en;
     logic [3:0]regfile_we;
     
-    logic iic_scl_i, iic_scl_o, iic_scl_t, iic_sda_i, iic_sda_o, iic_sda_t;            
+    logic iic_scl_i, iic_scl_o, iic_scl_t, iic_sda_i, iic_sda_o, iic_sda_t;     
+    
+    logic axi_aclk;       
     
     system system_i (
         .clkin(clkin100),
         .resetn(rstn),
         //
-        .axi_aclk(),
-        .axi_aresetn(),
+        .axi_aclk       (axi_aclk),
+        .axi_aresetn    (),
         //
         .usb_uart_rxd(usb_uart_rxd),
         .usb_uart_txd(usb_uart_txd),
@@ -82,7 +84,8 @@ module top (
     assign led = reg_val[2][7:0];
 		
 	
-	//top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
+	iic_ila iic_ila_inst(.clk(axi_aclk), .probe0({iic_scl_i, iic_scl_o, iic_scl_t, iic_sda_i, iic_sda_o, iic_sda_t}));  // 6
+	// top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
 
 endmodule
 

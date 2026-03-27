@@ -36,13 +36,14 @@ int main()
     	for (int i=2; i<N_REGS; i++) regptr[i] = whilecount+i;
     	// read and check the register file
 		errors = 0;
-    	//for (int i=2; i<N_REGS; i++) xil_printf("%d: %08x\n\r", i, regptr[i]);
     	for (int i=2; i<N_REGS; i++) { if (regptr[i] != (whilecount+i)) errors++; }
     	xil_printf("register errors = %d\n\r", errors);
+
+		// write the LEDs
+		regptr[FPGA_LED_CONTROL] = whilecount & 0x0ff;
     	
 
 		// delay
-    	//for(int i=0; i<8000000; i++); 
 		msleep(2000);
     	whilecount++;
 
