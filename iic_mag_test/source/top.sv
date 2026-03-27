@@ -4,7 +4,9 @@ module top (
     input   logic       rstn,
     output  logic[7:0]  led,
     input   logic       usb_uart_rxd,
-    output  logic       usb_uart_txd
+    output  logic       usb_uart_txd,
+    inout   logic       iic_scl,
+    inout   logic       iic_sda
 );
 
 	localparam int Naddr = 6;
@@ -24,6 +26,8 @@ module top (
     logic regfile_en;
     logic [3:0]regfile_we;
     
+    logic iic_scl_i, iic_scl_o, iic_scl_t, iic_sda_i, iic_sda_o, iic_sda_t;            
+    
     system system_i (
         .clkin(clkin100),
         .resetn(rstn),
@@ -34,6 +38,13 @@ module top (
         .usb_uart_rxd(usb_uart_rxd),
         .usb_uart_txd(usb_uart_txd),
         //
+        .iic_scl_i      (iic_scl_i), 
+        .iic_scl_o      (iic_scl_o), 
+        .iic_scl_t      (iic_scl_t), 
+        .iic_sda_i      (iic_sda_i), 
+        .iic_sda_o      (iic_sda_o), 
+        .iic_sda_t      (iic_sda_t),     
+        //
         .regfile_addr   (regfile_addr),
         .regfile_clk    (regfile_clk),
         .regfile_din    (regfile_din),
@@ -42,6 +53,9 @@ module top (
         .regfile_rst    (),
         .regfile_we     (regfile_we)        
     );
+    
+    IOBUF #(.DRIVE(12), .IBUF_LOW_PWR("TRUE"), .IOSTANDARD("DEFAULT"), .SLEW("SLOW")) scl_IOBUF_inst (.O(iic_scl_i), .IO(iic_scl), .I(iic_scl_o), .T(iic_scl_t));
+    IOBUF #(.DRIVE(12), .IBUF_LOW_PWR("TRUE"), .IOSTANDARD("DEFAULT"), .SLEW("SLOW")) sda_IOBUF_inst (.O(iic_sda_i), .IO(iic_sda), .I(iic_sda_o), .T(iic_sda_t));
 	
 	
     logic[Nregs-1:0][31:0]  reg_val, pul_val, read_val;

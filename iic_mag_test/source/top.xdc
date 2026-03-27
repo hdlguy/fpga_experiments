@@ -28,3 +28,9 @@ set_property PACKAGE_PIN D10 [get_ports {usb_uart_txd}]
 
 set_property IOSTANDARD LVCMOS33    [get_ports rstn]
 set_property PACKAGE_PIN C2         [get_ports rstn]
+
+
+set_property IOSTANDARD LVCMOS33    [get_ports iic_*]
+set_property PACKAGE_PIN A11        [get_ports iic_scl] ;# JA.P3
+set_property PACKAGE_PIN D12        [get_ports iic_sda] ;# JA.P4
+
