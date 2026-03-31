@@ -1,6 +1,7 @@
 //
 #include "xparameters.h"
 #include "xiic.h"
+#include "sleep.h"
 
 #ifndef SDT
 
@@ -44,7 +45,7 @@
 #define SLAVE_ADDRESS	0x30 // 7-bit address
 
 #define SEND_COUNT		2
-#define RECEIVE_COUNT   2
+#define RECEIVE_COUNT   16
 
 
 int IicRepeatedStartExample();
@@ -71,11 +72,11 @@ u8 ReadBuffer[RECEIVE_COUNT];	/* Read buffer for reading a page. */
 volatile u8 TransmitComplete;
 volatile u8 ReceiveComplete;
 
-uint8_t memsic_read_id()
+void memsic_read(uint8_t startreg, int numregs, uint8_t* buf)
 {
 	int Status;
 	int BusBusy;
-	uint8_t wbuf[4], rbuf[4];
+	uint8_t wbuf[4], rbuf[16];
 	
 	Status = XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
 
@@ -85,8 +86,8 @@ uint8_t memsic_read_id()
 
 	IicInstance.Options = XII_REPEATED_START_OPTION;
 
-	wbuf[0] = 0x20; // ID register
-	Status = XIic_MasterSend(&IicInstance, wbuf, 1); // send register number
+	wbuf[0] = startreg;
+	Status = XIic_MasterSend(&IicInstance, wbuf, 1); // send start register
 
 
 	while (TransmitComplete) { }
@@ -96,29 +97,23 @@ uint8_t memsic_read_id()
 	ReceiveComplete = 1;
 	IicInstance.Options = 0x0;
 
-	Status = XIic_MasterRecv(&IicInstance, rbuf, 1);
+	Status = XIic_MasterRecv(&IicInstance, rbuf, numregs);
 
 	while ((ReceiveComplete) || (XIic_IsIicBusy(&IicInstance) == TRUE)) { }
 
 	Status = XIic_Stop(&IicInstance);
 
-	return(rbuf[0]);	
+	for (int i=0; i<numregs; i++) { buf[i] = rbuf[i]; }
 	
 }
 
-
-// int IicRepeatedStartExample(void)
 int main(void)
 {
 	u8 Index;
 	int Status;
 	XIic_Config *ConfigPtr;	/* Pointer to configuration data */
 
-
-	for (Index = 0; Index < SEND_COUNT; Index++) {
-		WriteBuffer[Index] = Index;
-		ReadBuffer[Index] = 0;
-	}
+	xil_printf("\n\r**** memsic_test ****\n\r");
 
 
 #ifndef SDT
@@ -126,8 +121,8 @@ int main(void)
 #else
 	ConfigPtr = XIic_LookupConfig(XIIC_BASEADDRESS);
 #endif
-	if (ConfigPtr == NULL) {
-		return XST_FAILURE;
+	if (ConfigPtr == NULL) { 
+		return XST_FAILURE; 
 	}
 
 	Status = XIic_CfgInitialize(&IicInstance, ConfigPtr, ConfigPtr->BaseAddress);
@@ -140,8 +135,7 @@ int main(void)
 	Status = SetupInterruptSystem(&IicInstance);
 #else
 	Status = XSetupInterruptSystem(&IicInstance, &XIic_InterruptHandler,
-				       ConfigPtr->IntrId, ConfigPtr->IntrParent,
-				       XINTERRUPT_DEFAULT_PRIORITY);
+				       ConfigPtr->IntrId, ConfigPtr->IntrParent, XINTERRUPT_DEFAULT_PRIORITY); 
 #endif
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
@@ -152,9 +146,20 @@ int main(void)
 	XIic_SetRecvHandler(&IicInstance, &IicInstance, (XIic_Handler) ReceiveHandler);
 	XIic_SetStatusHandler(&IicInstance, &IicInstance, (XIic_StatusHandler) StatusHandler);
 
+	uint32_t whilecount=0;
 	uint8_t memsic_id;
-	memsic_id = memsic_read_id();
-	xil_printf("memsic_id = 0x%02x\n\r", memsic_id);
+	while(1) {
+
+		xil_printf("\n\rwhilecount = 0x%08x\n\r", whilecount);
+		
+		memsic_read(0x20, 1, ReadBuffer);
+		memsic_id = ReadBuffer[0]; 
+		xil_printf("memsic_id = 0x%02x\n\r", memsic_id);
+
+		whilecount++;
+		usleep(1000000);
+
+	}
 
 	return XST_SUCCESS;
 }
@@ -292,22 +297,8 @@ static int ReadData(u8 *BufferPtr, u16 ByteCount)
 }
 
 #ifndef SDT
-/*****************************************************************************/
-/**
-* This function setups the interrupt system so interrupts can occur for the
-* IIC. The function is application-specific since the actual system may or
-* may not have an interrupt controller. The IIC device could be directly
-* connected to a processor without an interrupt controller. The user should
-* modify this function to fit the application.
-*
-* @param	IicInstPtr contains a pointer to the instance of the IIC  which
-*		is going to be connected to the interrupt controller.
-*
-* @return	XST_SUCCESS if successful else XST_FAILURE.
-*
-* @note		None.
-*
-******************************************************************************/
+
+
 static int SetupInterruptSystem(XIic *IicInstPtr)
 {
 	int Status;
@@ -410,56 +401,19 @@ static int SetupInterruptSystem(XIic *IicInstPtr)
 }
 #endif
 
-/*****************************************************************************/
-/**
-* This Send handler is called asynchronously from an interrupt context and
-* indicates that data in the specified buffer has been sent.
-*
-* @param	InstancePtr is a pointer to the IIC driver instance for which
-* 		the handler is being called for.
-*
-* @return	None.
-*
-* @note		None.
-*
-******************************************************************************/
+
 static void SendHandler(XIic *InstancePtr)
 {
 	TransmitComplete = 0;
 }
 
-/*****************************************************************************/
-/**
-* This Receive handler is called asynchronously from an interrupt context and
-* indicates that data in the specified buffer has been Received.
-*
-* @param	InstancePtr is a pointer to the IIC driver instance for which
-* 		the handler is being called for.
-*
-* @return	None.
-*
-* @note		None.
-*
-******************************************************************************/
+
 static void ReceiveHandler(XIic *InstancePtr)
 {
 	ReceiveComplete = 0;
 }
 
-/*****************************************************************************/
-/**
-* This Status handler is called asynchronously from an interrupt
-* context and indicates the events that have occurred.
-*
-* @param	InstancePtr is a pointer to the IIC driver instance for which
-*		the handler is being called for.
-* @param	Event indicates the condition that has occurred.
-*
-* @return	None.
-*
-* @note		None.
-*
-******************************************************************************/
+
 static void StatusHandler(XIic *InstancePtr, int Event)
 {
 
