@@ -71,25 +71,44 @@ u8 ReadBuffer[RECEIVE_COUNT];	/* Read buffer for reading a page. */
 volatile u8 TransmitComplete;
 volatile u8 ReceiveComplete;
 
-
-int main(void)
+uint8_t memsic_read_id()
 {
 	int Status;
-
-	xil_printf("Run the Repeated Start example.\n\r");
+	int BusBusy;
+	uint8_t wbuf[4], rbuf[4];
 	
-	Status = IicRepeatedStartExample();
-	if (Status != XST_SUCCESS) {
-		xil_printf("IIC repeated start Example Failed\r\n");
-		return XST_FAILURE;
-	}
+	Status = XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
 
-	xil_printf("Successfully ran IIC repeated start Example\r\n");
-	return XST_SUCCESS;
+	TransmitComplete = 1;
+
+	Status = XIic_Start(&IicInstance);
+
+	IicInstance.Options = XII_REPEATED_START_OPTION;
+
+	wbuf[0] = 0x20; // ID register
+	Status = XIic_MasterSend(&IicInstance, wbuf, 1); // send register number
+
+
+	while (TransmitComplete) { }
+
+	BusBusy = XIic_IsIicBusy(&IicInstance);
+
+	ReceiveComplete = 1;
+	IicInstance.Options = 0x0;
+
+	Status = XIic_MasterRecv(&IicInstance, rbuf, 1);
+
+	while ((ReceiveComplete) || (XIic_IsIicBusy(&IicInstance) == TRUE)) { }
+
+	Status = XIic_Stop(&IicInstance);
+
+	return(rbuf[0]);	
+	
 }
 
 
-int IicRepeatedStartExample(void)
+// int IicRepeatedStartExample(void)
+int main(void)
 {
 	u8 Index;
 	int Status;
@@ -133,39 +152,14 @@ int IicRepeatedStartExample(void)
 	XIic_SetRecvHandler(&IicInstance, &IicInstance, (XIic_Handler) ReceiveHandler);
 	XIic_SetStatusHandler(&IicInstance, &IicInstance, (XIic_StatusHandler) StatusHandler);
 
-
-	Status = XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-
-	Status = WriteData(SEND_COUNT);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-
-	Status = ReadData(ReadBuffer, RECEIVE_COUNT);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	uint8_t memsic_id;
+	memsic_id = memsic_read_id();
+	xil_printf("memsic_id = 0x%02x\n\r", memsic_id);
 
 	return XST_SUCCESS;
 }
 
-/*****************************************************************************/
-/**
-* This function writes a buffer of data to IIC Slave.
-*
-* @param	ByteCount contains the number of bytes in the buffer to be
-*		written.
-*
-* @return	XST_SUCCESS if successful else XST_FAILURE.
-*
-* @note		None.
-*
-******************************************************************************/
+
 static int WriteData(u16 ByteCount)
 {
 	int Status;
@@ -224,18 +218,7 @@ static int WriteData(u16 ByteCount)
 	return XST_SUCCESS;
 }
 
-/*****************************************************************************/
-/**
-* This function reads a data from the IIC Slave into a specified buffer.
-*
-* @param	BufferPtr contains the address of the data buffer to be filled.
-* @param	ByteCount contains the number of bytes to be read.
-*
-* @return	XST_SUCCESS if successful else XST_FAILURE.
-*
-* @note		None.
-*
-******************************************************************************/
+
 static int ReadData(u8 *BufferPtr, u16 ByteCount)
 {
 	int Status;
