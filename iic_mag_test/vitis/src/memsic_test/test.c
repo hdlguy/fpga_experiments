@@ -44,7 +44,7 @@
 
 #define SLAVE_ADDRESS	0x30 // 7-bit address
 
-#define SEND_COUNT		2
+#define SEND_COUNT		16
 #define RECEIVE_COUNT   16
 
 
@@ -71,6 +71,22 @@ u8 ReadBuffer[RECEIVE_COUNT];	/* Read buffer for reading a page. */
 
 volatile u8 TransmitComplete;
 volatile u8 ReceiveComplete;
+
+#define MemsicXLow 		0x00
+#define MemsicXHigh 	0x01
+#define MemsicYLow 		0x02
+#define MemsicYHigh 	0x03
+#define MemsicZLow 		0x04
+#define MemsicZHigh 	0x05
+#define MemsicStatus 	0x06
+#define MemsicControl0 	0x07
+#define MemsicControl1 	0x08
+#define MemsicR0 		0x1B
+#define MemsicR1 		0x1C
+#define MemsicR2 		0x1D
+#define MemsicR3 		0x1E
+#define MemsicR4 		0x1F
+#define MemsicID 		0x20
 
 void memsic_read(uint8_t startreg, int numregs, uint8_t* buf)
 {
@@ -107,6 +123,32 @@ void memsic_read(uint8_t startreg, int numregs, uint8_t* buf)
 	
 }
 
+void memsic_write(uint8_t startreg, int numregs, uint8_t* buf)
+{
+
+	uint8_t wbuf[4], rbuf[16];
+	
+	XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
+
+	TransmitComplete = 1;
+
+	XIic_Start(&IicInstance);
+
+	IicInstance.Options = 0x0;
+
+	wbuf[0] = startreg;
+	for(int i=0; i<numregs; i++) { wbuf[i+1] = buf[i]; }
+	XIic_MasterSend(&IicInstance, wbuf, numregs+1); // send start register
+
+	while (TransmitComplete) { }
+	
+	XIic_IsIicBusy(&IicInstance); //??
+
+	XIic_Stop(&IicInstance);
+
+}
+
+
 int main(void)
 {
 	u8 Index;
@@ -121,40 +163,57 @@ int main(void)
 #else
 	ConfigPtr = XIic_LookupConfig(XIIC_BASEADDRESS);
 #endif
-	if (ConfigPtr == NULL) { 
-		return XST_FAILURE; 
-	}
+	if (ConfigPtr == NULL) { return XST_FAILURE;  }
 
 	Status = XIic_CfgInitialize(&IicInstance, ConfigPtr, ConfigPtr->BaseAddress);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	if (Status != XST_SUCCESS) { return XST_FAILURE; }
 
 
 #ifndef SDT
 	Status = SetupInterruptSystem(&IicInstance);
 #else
-	Status = XSetupInterruptSystem(&IicInstance, &XIic_InterruptHandler,
-				       ConfigPtr->IntrId, ConfigPtr->IntrParent, XINTERRUPT_DEFAULT_PRIORITY); 
+	Status = XSetupInterruptSystem(&IicInstance, &XIic_InterruptHandler, ConfigPtr->IntrId, ConfigPtr->IntrParent, XINTERRUPT_DEFAULT_PRIORITY); 
 #endif
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	if (Status != XST_SUCCESS) { return XST_FAILURE; }
 
 
 	XIic_SetSendHandler(&IicInstance, &IicInstance, (XIic_Handler) SendHandler);
 	XIic_SetRecvHandler(&IicInstance, &IicInstance, (XIic_Handler) ReceiveHandler);
 	XIic_SetStatusHandler(&IicInstance, &IicInstance, (XIic_StatusHandler) StatusHandler);
+	
+	// configure the memsic
+	WriteBuffer[0] = 0x00;
+	WriteBuffer[1] = 0x00;
+	memsic_write(MemsicControl0, 2, WriteBuffer);	
 
 	uint32_t whilecount=0;
-	uint8_t memsic_id;
+	uint8_t memsic_id, memsic_status, memsic_control0, memsic_control1;
+	int16_t mag_x=0, mag_y=0, mag_z=0;
 	while(1) {
 
 		xil_printf("\n\rwhilecount = 0x%08x\n\r", whilecount);
 		
-		memsic_read(0x20, 1, ReadBuffer);
+		// print ID
+		memsic_read(MemsicID, 1, ReadBuffer);
 		memsic_id = ReadBuffer[0]; 
 		xil_printf("memsic_id = 0x%02x\n\r", memsic_id);
+
+		// print Status
+		memsic_read(MemsicStatus, 1, ReadBuffer);
+		memsic_status = ReadBuffer[0]; 
+		xil_printf("memsic_status = 0x%02x\n\r", memsic_status);
+
+		// print XYZ magnetic field
+		memsic_read(MemsicXLow, 6, ReadBuffer);
+		for(int i=0; i<6; i++) { xil_printf("0x%02x ", ReadBuffer[i]); } xil_printf("\n\r");
+		mag_x = (((uint16_t)ReadBuffer[1]) << 8) | (ReadBuffer[0]);		
+		mag_y = (((uint16_t)ReadBuffer[3]) << 8) | (ReadBuffer[2]);
+		mag_z = (((uint16_t)ReadBuffer[5]) << 8) | (ReadBuffer[4]);
+		xil_printf("mag_x = %05d, mag_y = %05d, mag_z = %05d\n\r", mag_x, mag_y, mag_z);
+		
+		// command the next conversion
+		WriteBuffer[0] = 0x01;
+		memsic_write(MemsicControl0, 1, WriteBuffer);		
 
 		whilecount++;
 		usleep(1000000);
@@ -165,137 +224,6 @@ int main(void)
 }
 
 
-static int WriteData(u16 ByteCount)
-{
-	int Status;
-	int BusBusy;
-
-
-	TransmitComplete = 1;
-
-
-	Status = XIic_Start(&IicInstance);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-
-	IicInstance.Options = XII_REPEATED_START_OPTION;
-
-
-	Status = XIic_MasterSend(&IicInstance, WriteBuffer, ByteCount);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-
-	while (TransmitComplete) {
-
-	}
-
-
-	BusBusy = XIic_IsIicBusy(&IicInstance);
-
-	TransmitComplete = 1;
-	IicInstance.Options = 0x0;
-
-
-	Status = XIic_MasterSend(&IicInstance, WriteBuffer, ByteCount);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	/*
-	 * Wait till data is transmitted.
-	 */
-	while ((TransmitComplete) || (XIic_IsIicBusy(&IicInstance) == TRUE)) {
-
-	}
-
-	/*
-	 * Stop the IIC device.
-	 */
-	Status = XIic_Stop(&IicInstance);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	return XST_SUCCESS;
-}
-
-
-static int ReadData(u8 *BufferPtr, u16 ByteCount)
-{
-	int Status;
-	int BusBusy;
-
-	/*
-	 * Set the defaults.
-	 */
-	ReceiveComplete = 1;
-
-	/*
-	 * Start the IIC device.
-	 */
-	Status = XIic_Start(&IicInstance);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	/*
-	 * Set the Repeated Start option.
-	 */
-	IicInstance.Options = XII_REPEATED_START_OPTION;
-
-	/*
-	 * Receive the data.
-	 */
-	Status = XIic_MasterRecv(&IicInstance, BufferPtr, ByteCount);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	/*
-	 * Wait till all the data is received.
-	 */
-	while (ReceiveComplete) {
-
-	}
-
-	/*
-	 * This is for verification that Bus is not released and still Busy.
-	 */
-	BusBusy = XIic_IsIicBusy(&IicInstance);
-
-	ReceiveComplete = 1;
-	IicInstance.Options = 0x0;
-
-	/*
-	 * Receive the Data.
-	 */
-	Status = XIic_MasterRecv(&IicInstance, BufferPtr, ByteCount);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	/*
-	 * Wait till all the data is received.
-	 */
-	while ((ReceiveComplete) || (XIic_IsIicBusy(&IicInstance) == TRUE)) {
-
-	}
-
-	/*
-	 * Stop the IIC device.
-	 */
-	Status = XIic_Stop(&IicInstance);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
-
-	return XST_SUCCESS;
-}
-
 #ifndef SDT
 
 
@@ -305,96 +233,59 @@ static int SetupInterruptSystem(XIic *IicInstPtr)
 
 #ifdef XPAR_INTC_0_DEVICE_ID
 
-	/*
-	 * Initialize the interrupt controller driver so that it's ready to use.
-	 */
+
 	Status = XIntc_Initialize(&Intc, INTC_DEVICE_ID);
 
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Connect the device driver handler that will be called when an
-	 * interrupt for the device occurs, the handler defined above performs
-	 * the specific interrupt processing for the device.
-	 */
-	Status = XIntc_Connect(&Intc, IIC_INTR_ID,
-			       (XInterruptHandler) XIic_InterruptHandler,
-			       IicInstPtr);
+
+	Status = XIntc_Connect(&Intc, IIC_INTR_ID, (XInterruptHandler) XIic_InterruptHandler, IicInstPtr);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Start the interrupt controller so interrupts are enabled for all
-	 * devices that cause interrupts.
-	 */
+
 	Status = XIntc_Start(&Intc, XIN_REAL_MODE);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Enable the interrupts for the IIC device.
-	 */
+
 	XIntc_Enable(&Intc, IIC_INTR_ID);
 
 #else
 
 	XScuGic_Config *IntcConfig;
 
-	/*
-	 * Initialize the interrupt controller driver so that it is ready to
-	 * use.
-	 */
 	IntcConfig = XScuGic_LookupConfig(INTC_DEVICE_ID);
 	if (NULL == IntcConfig) {
 		return XST_FAILURE;
 	}
 
-	Status = XScuGic_CfgInitialize(&Intc, IntcConfig,
-				       IntcConfig->CpuBaseAddress);
+	Status = XScuGic_CfgInitialize(&Intc, IntcConfig, IntcConfig->CpuBaseAddress);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
 
-	XScuGic_SetPriorityTriggerType(&Intc, IIC_INTR_ID,
-				       0xA0, 0x3);
+	XScuGic_SetPriorityTriggerType(&Intc, IIC_INTR_ID, 0xA0, 0x3);
 
-	/*
-	 * Connect the interrupt handler that will be called when an
-	 * interrupt occurs for the device.
-	 */
-	Status = XScuGic_Connect(&Intc, IIC_INTR_ID,
-				 (Xil_InterruptHandler)XIic_InterruptHandler,
-				 IicInstPtr);
+	Status = XScuGic_Connect(&Intc, IIC_INTR_ID, (Xil_InterruptHandler)XIic_InterruptHandler, IicInstPtr);
 	if (Status != XST_SUCCESS) {
 		return Status;
 	}
 
-	/*
-	 * Enable the interrupt for the IIC device.
-	 */
+
 	XScuGic_Enable(&Intc, IIC_INTR_ID);
 
 #endif
 
-	/*
-	 * Initialize the exception table.
-	 */
+
 	Xil_ExceptionInit();
 
-	/*
-	 * Register the interrupt controller handler with the exception table.
-	 */
-	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-				     (Xil_ExceptionHandler) INTC_HANDLER,
-				     &Intc);
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT, (Xil_ExceptionHandler) INTC_HANDLER, &Intc);
 
-	/*
-	 * Enable non-critical exceptions.
-	 */
 	Xil_ExceptionEnable();
 
 	return XST_SUCCESS;
