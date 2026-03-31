@@ -6,7 +6,8 @@ import os
 import sys
 
 #app_name = sys.argv[1]
-app_name = "hello1"
+#app_name = "hello1"
+app_name = "memsic_test"
 print("app_name = ", app_name)
 
 plat_name = "standalone_plat"

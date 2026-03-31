@@ -84,8 +84,7 @@ module top (
     assign led = reg_val[2][7:0];
 		
 	
-	iic_ila iic_ila_inst(.clk(axi_aclk), .probe0({iic_scl_i, iic_scl_o, iic_scl_t, iic_sda_i, iic_sda_o, iic_sda_t}));  // 6
-	// top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
+	iic_ila iic_ila_inst(.clk(axi_aclk), .probe0({iic_scl_i, iic_scl_t}), .probe1({iic_sda_i, iic_sda_t}));  // 2,2
 
 endmodule
 

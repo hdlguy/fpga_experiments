@@ -64,11 +64,14 @@ set iic_ila [create_ip -name ila -vendor xilinx.com -library ip -version 6.2 -mo
 
 # User Parameters
 set_property -dict [list \
+  CONFIG.ALL_PROBE_SAME_MU_CNT {4} \
   CONFIG.C_ADV_TRIGGER {true} \
-  CONFIG.C_DATA_DEPTH {32768} \
+  CONFIG.C_DATA_DEPTH {131072} \
   CONFIG.C_EN_STRG_QUAL {1} \
   CONFIG.C_INPUT_PIPE_STAGES {2} \
-  CONFIG.C_PROBE0_WIDTH {6} \
+  CONFIG.C_NUM_OF_PROBES {2} \
+  CONFIG.C_PROBE0_WIDTH {2} \
+  CONFIG.C_PROBE1_WIDTH {2} \
 ] [get_ips iic_ila]
 
 # Runtime Parameters
