@@ -49,18 +49,18 @@
 
 
 int IicRepeatedStartExample();
-static int WriteData(u16 ByteCount);
-static int ReadData(u8 *BufferPtr, u16 ByteCount);
+
 
 #ifndef SDT
 static int SetupInterruptSystem(XIic *IicInstPtr);
 #endif
 
-static void SendHandler(XIic *InstancePtr);
-static void ReceiveHandler(XIic *InstancePtr);
-static void StatusHandler(XIic *InstancePtr, int Event);
+static void SendHandler    (XIic *InstancePtr, int Event);
+static void ReceiveHandler (XIic *InstancePtr, int Event);
+static void StatusHandler  (XIic *InstancePtr, int Event);
 
 XIic IicInstance;
+uint8_t GlobalJunk;
 
 #ifndef SDT
 INTC Intc; 	/* The instance of the Interrupt Controller Driver */
@@ -90,34 +90,34 @@ volatile u8 ReceiveComplete;
 
 void memsic_read(uint8_t startreg, int numregs, uint8_t* buf)
 {
-	int Status;
-	int BusBusy;
+	// int Status;
+	// int BusBusy;
 	uint8_t wbuf[4], rbuf[16];
 	
-	Status = XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
+	XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
 
 	TransmitComplete = 1;
 
-	Status = XIic_Start(&IicInstance);
+	XIic_Start(&IicInstance);
 
 	IicInstance.Options = XII_REPEATED_START_OPTION;
 
 	wbuf[0] = startreg;
-	Status = XIic_MasterSend(&IicInstance, wbuf, 1); // send start register
+	XIic_MasterSend(&IicInstance, wbuf, 1); // send start register
 
 
 	while (TransmitComplete) { }
 
-	BusBusy = XIic_IsIicBusy(&IicInstance);
+	XIic_IsIicBusy(&IicInstance);
 
 	ReceiveComplete = 1;
 	IicInstance.Options = 0x0;
 
-	Status = XIic_MasterRecv(&IicInstance, rbuf, numregs);
+	XIic_MasterRecv(&IicInstance, rbuf, numregs);
 
 	while ((ReceiveComplete) || (XIic_IsIicBusy(&IicInstance) == TRUE)) { }
 
-	Status = XIic_Stop(&IicInstance);
+	XIic_Stop(&IicInstance);
 
 	for (int i=0; i<numregs; i++) { buf[i] = rbuf[i]; }
 	
@@ -126,7 +126,7 @@ void memsic_read(uint8_t startreg, int numregs, uint8_t* buf)
 void memsic_write(uint8_t startreg, int numregs, uint8_t* buf)
 {
 
-	uint8_t wbuf[4], rbuf[16];
+	uint8_t wbuf[4];
 	
 	XIic_SetAddress(&IicInstance, XII_ADDR_TO_SEND_TYPE, SLAVE_ADDRESS);
 
@@ -151,7 +151,7 @@ void memsic_write(uint8_t startreg, int numregs, uint8_t* buf)
 
 int main(void)
 {
-	u8 Index;
+	// u8 Index;
 	int Status;
 	XIic_Config *ConfigPtr;	/* Pointer to configuration data */
 
@@ -177,8 +177,8 @@ int main(void)
 	if (Status != XST_SUCCESS) { return XST_FAILURE; }
 
 
-	XIic_SetSendHandler(&IicInstance, &IicInstance, (XIic_Handler) SendHandler);
-	XIic_SetRecvHandler(&IicInstance, &IicInstance, (XIic_Handler) ReceiveHandler);
+	XIic_SetSendHandler  (&IicInstance, &IicInstance, (XIic_Handler) SendHandler);
+	XIic_SetRecvHandler  (&IicInstance, &IicInstance, (XIic_Handler) ReceiveHandler);
 	XIic_SetStatusHandler(&IicInstance, &IicInstance, (XIic_StatusHandler) StatusHandler);
 	
 	// configure the memsic
@@ -187,7 +187,7 @@ int main(void)
 	memsic_write(MemsicControl0, 2, WriteBuffer);	
 
 	uint32_t whilecount=0;
-	uint8_t memsic_id, memsic_status, memsic_control0, memsic_control1;
+	uint8_t memsic_id, memsic_status;
 	int16_t mag_x=0, mag_y=0, mag_z=0;
 	while(1) {
 
@@ -293,19 +293,25 @@ static int SetupInterruptSystem(XIic *IicInstPtr)
 #endif
 
 
-static void SendHandler(XIic *InstancePtr)
+static void SendHandler(XIic *InstancePtr, int Event)
 {
+	if ((InstancePtr==NULL) && (Event==0)) GlobalJunk=0; // to shut up compiler
+	
 	TransmitComplete = 0;
 }
 
 
-static void ReceiveHandler(XIic *InstancePtr)
+static void ReceiveHandler(XIic *InstancePtr, int Event)
 {
+	if ((InstancePtr==NULL) && (Event==0)) GlobalJunk=0; // to shut up compiler
+	
 	ReceiveComplete = 0;
 }
 
 
 static void StatusHandler(XIic *InstancePtr, int Event)
 {
+	
+	if ((InstancePtr==NULL) && (Event==0)) GlobalJunk=0; // to shut up compiler
 
 }
