@@ -1,6 +1,8 @@
 # Script to compile the FPGA with zynq processor system all the way to bit file.
 
 close_project -quiet
+file delete -force results
+file mkdir ./results
 
 open_project proj.xpr
 
@@ -20,8 +22,8 @@ write_debug_probes      -force  ./results/top.ltx
 write_mem_info          -force  ./results/top.mmi
 
 write_bitstream -verbose -force -file ./results/top.bit
-file copy ./results/top.bit ./proj.runs/impl_1/
 
+file copy ./results/top.bit ./proj.runs/impl_1/
 write_hw_platform -fixed -include_bit -force -file ./results/top.xsa
 
 close_project

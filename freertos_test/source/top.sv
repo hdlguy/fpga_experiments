@@ -17,10 +17,13 @@ module top (
     system system_i (
         .clkin(clkin100),
         .resetn(resetn),
+        //
         .axi_aclk(axi_aclk),
         .axi_aresetn(axi_aresetn),
+        //
         .gpio0_tri_o(gpio0_tri_o),
         .gpio1_tri_i(gpio1_tri_i),
+        //
         .usb_uart_rxd(usb_uart_rxd),
         .usb_uart_txd(usb_uart_txd)
     );
