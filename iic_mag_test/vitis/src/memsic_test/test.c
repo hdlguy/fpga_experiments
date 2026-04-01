@@ -182,7 +182,7 @@ int main(void)
 	XIic_SetStatusHandler(&IicInstance, &IicInstance, (XIic_StatusHandler) StatusHandler);
 	
 	// configure the memsic
-	WriteBuffer[0] = 0x00;
+	WriteBuffer[0] = 0x0e;
 	WriteBuffer[1] = 0x00;
 	memsic_write(MemsicControl0, 2, WriteBuffer);	
 
@@ -211,9 +211,9 @@ int main(void)
 		mag_z = (((uint16_t)ReadBuffer[5]) << 8) | (ReadBuffer[4]);
 		xil_printf("mag_x = %05d, mag_y = %05d, mag_z = %05d\n\r", mag_x, mag_y, mag_z);
 		
-		// command the next conversion
-		WriteBuffer[0] = 0x01;
-		memsic_write(MemsicControl0, 1, WriteBuffer);		
+		// // command the next conversion
+		// WriteBuffer[0] = 0x01;
+		// memsic_write(MemsicControl0, 1, WriteBuffer);		
 
 		whilecount++;
 		usleep(1000000);
