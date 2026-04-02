@@ -5,7 +5,8 @@ import vitis
 import os
 import sys
 
-app_name = sys.argv[1]
+#app_name = sys.argv[1]
+app_name = "freertos_test"
 print("app_name = ", app_name)
 
 plat_name = "standalone_plat"
@@ -24,15 +25,14 @@ advanced_options = client.create_advanced_options_dict(dt_overlay="0")
 platform = client.create_platform_component(
     name = plat_name,
     hw_design = hw_xsa,
-    os = "standalone",
+    #os = "standalone",
+    os = "freertos",
     cpu = cpu_name,
     domain_name = "standalone_domain_0",
     generate_dtb = False,
     advanced_options = advanced_options,
     compiler = "gcc"
 )
-
-#platform = client.get_component(name=plat_name)
 
 status = platform.build()
 
