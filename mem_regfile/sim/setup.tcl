@@ -31,7 +31,5 @@ add_files -fileset sim_1 -norecurse ./top_tb_behav.wcfg
 add_files -fileset sim_1 -norecurse ../vitis/workspace/sim_test/build/sim_test.elf
 set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sim_1] {sim_test.elf}]
 set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sim_1] {sim_test.elf}]
-#set_property SCOPED_TO_REF system [get_files -all -of_objects [get_fileset sim_1] {../vitis/workspace/sim_test/build/sim_test.elf}]
-#set_property SCOPED_TO_CELLS { microblaze_0 } [get_files -all -of_objects [get_fileset sim_1] {../vitis/workspace/sim_test/build/sim_test.elf}]
 
 close_project

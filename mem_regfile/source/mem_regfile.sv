@@ -23,28 +23,32 @@ module mem_regfile #(
 
 
     logic[Nregs-1:0][31:0] reg_val_int = init_reg;
+    logic[Nregs-1:0][31:0] pul_val_int = 0;
     always_ff @(posedge clk) begin
 
-        // read
-        if (en) begin
-            rd_data <= read_val[addr];
+        if (rst) begin
+            reg_val_int <= init_reg;
+        end else begin
+            // read
+            if (en) begin
+                rd_data <= read_val[addr];
+            end
+            // write
+            if ((we[0]) && (en)) reg_val_int[addr][ 7: 0] <= wr_data[ 7: 0];
+            if ((we[1]) && (en)) reg_val_int[addr][15: 8] <= wr_data[15: 8];
+            if ((we[2]) && (en)) reg_val_int[addr][23:16] <= wr_data[23:16];
+            if ((we[3]) && (en)) reg_val_int[addr][31:24] <= wr_data[31:24];
+            // pulse
+            if ((we[0]) && (en)) begin pul_val_int[addr][ 7: 0] <= wr_data[ 7: 0]; end else begin pul_val_int[ 7: 0] <= 0; end
+            if ((we[1]) && (en)) begin pul_val_int[addr][15: 8] <= wr_data[15: 8]; end else begin pul_val_int[15: 8] <= 0; end
+            if ((we[2]) && (en)) begin pul_val_int[addr][23:16] <= wr_data[23:16]; end else begin pul_val_int[23:16] <= 0; end
+            if ((we[3]) && (en)) begin pul_val_int[addr][31:24] <= wr_data[31:24]; end else begin pul_val_int[31:24] <= 0; end
         end
-
-        // write
-        if ((we[0]) && (en)) reg_val_int[addr][ 7: 0] <= wr_data[ 7: 0];
-        if ((we[1]) && (en)) reg_val_int[addr][15: 8] <= wr_data[15: 8];
-        if ((we[2]) && (en)) reg_val_int[addr][23:16] <= wr_data[23:16];
-        if ((we[3]) && (en)) reg_val_int[addr][31:24] <= wr_data[31:24];
-    
-        // pulse
-        if ((we[0]) && (en)) begin pul_val[addr][ 7: 0] <= wr_data[ 7: 0]; end else begin pul_val <= 0; end
-        if ((we[1]) && (en)) begin pul_val[addr][15: 8] <= wr_data[15: 8]; end else begin pul_val <= 0; end
-        if ((we[2]) && (en)) begin pul_val[addr][23:16] <= wr_data[23:16]; end else begin pul_val <= 0; end
-        if ((we[3]) && (en)) begin pul_val[addr][31:24] <= wr_data[31:24]; end else begin pul_val <= 0; end
     
     end
 
     assign reg_val = reg_val_int;
+    assign pul_val = pul_val_int;
 
 
 endmodule

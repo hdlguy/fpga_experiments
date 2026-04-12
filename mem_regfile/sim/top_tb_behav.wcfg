@@ -17,14 +17,14 @@
    </db_ref_list>
    <zoom_setting>
       <ZoomStartTime time="0.000000 us"></ZoomStartTime>
-      <ZoomEndTime time="51.000001 us"></ZoomEndTime>
-      <Cursor1Time time="0.000000 us"></Cursor1Time>
+      <ZoomEndTime time="40.000001 us"></ZoomEndTime>
+      <Cursor1Time time="10.065000 us"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
       <NameColumnWidth column_width="352"></NameColumnWidth>
-      <ValueColumnWidth column_width="72"></ValueColumnWidth>
+      <ValueColumnWidth column_width="68"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="44" />
+   <WVObjectSize size="26" />
    <wvobject type="array" fp_name="/top_tb/led">
       <obj_property name="ElementShortName">led[7:0]</obj_property>
       <obj_property name="ObjectShortName">led[7:0]</obj_property>
@@ -81,6 +81,10 @@
       <obj_property name="CustomSignalColor">#FF00FF</obj_property>
       <obj_property name="UseCustomSignalColor">true</obj_property>
    </wvobject>
+   <wvobject type="logic" fp_name="/top_tb/uut/regfile_rst">
+      <obj_property name="ElementShortName">regfile_rst</obj_property>
+      <obj_property name="ObjectShortName">regfile_rst</obj_property>
+   </wvobject>
    <wvobject type="array" fp_name="/top_tb/uut/regfile_we">
       <obj_property name="ElementShortName">regfile_we[3:0]</obj_property>
       <obj_property name="ObjectShortName">regfile_we[3:0]</obj_property>
@@ -131,85 +135,6 @@
    <wvobject type="array" fp_name="/top_tb/uut/system_i/axi_aresetn">
       <obj_property name="ElementShortName">axi_aresetn[0:0]</obj_property>
       <obj_property name="ObjectShortName">axi_aresetn[0:0]</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_ABUS">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_ABUS[0:31]</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_ABUS[0:31]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_ADDRSTROBE">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_ADDRSTROBE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_ADDRSTROBE</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_BE">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_BE[0:3]</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_BE[0:3]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_CE">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_CE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_CE</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_READDBUS">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_READDBUS[0:31]</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_READDBUS[0:31]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_READSTROBE">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_READSTROBE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_READSTROBE</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_READY">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_READY</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_READY</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_UE">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_UE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_UE</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_WAIT">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_WAIT</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_WAIT</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_WRITEDBUS">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_WRITEDBUS[0:31]</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_WRITEDBUS[0:31]</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_dlmb_1_WRITESTROBE">
-      <obj_property name="ElementShortName">microblaze_0_dlmb_1_WRITESTROBE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_dlmb_1_WRITESTROBE</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_ABUS">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_ABUS[0:31]</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_ABUS[0:31]</obj_property>
-      <obj_property name="CustomSignalColor">#FFA500</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="array" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_READDBUS">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_READDBUS[0:31]</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_READDBUS[0:31]</obj_property>
-      <obj_property name="CustomSignalColor">#FFA500</obj_property>
-      <obj_property name="UseCustomSignalColor">true</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_ADDRSTROBE">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_ADDRSTROBE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_ADDRSTROBE</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_CE">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_CE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_CE</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_READSTROBE">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_READSTROBE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_READSTROBE</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_READY">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_READY</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_READY</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_UE">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_UE</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_UE</obj_property>
-   </wvobject>
-   <wvobject type="logic" fp_name="/top_tb/uut/system_i/microblaze_0_ilmb_1_WAIT">
-      <obj_property name="ElementShortName">microblaze_0_ilmb_1_WAIT</obj_property>
-      <obj_property name="ObjectShortName">microblaze_0_ilmb_1_WAIT</obj_property>
+      <obj_property name="isExpanded"></obj_property>
    </wvobject>
 </wave_config>

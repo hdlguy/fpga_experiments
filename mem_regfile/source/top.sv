@@ -9,7 +9,6 @@ module top (
 
 	localparam int Naddr = 6;
     localparam int Nregs = 2**Naddr;
-    //localparam logic[Nregs-1:0][31:0] init_reg = 0;
     localparam logic[Nregs-1:0][31:0] init_reg = {
         32'hffff_ffff, 32'heeee_eeee, 32'hdddd_dddd, 32'hcccc_cccc,
         32'hbbbb_bbbb, 32'haaaa_aaaa, 32'h9999_9999, 32'h8888_8888,
