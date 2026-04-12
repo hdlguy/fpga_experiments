@@ -39,27 +39,28 @@ module top (
         .regfile_din    (regfile_din),
         .regfile_dout   (regfile_dout),
         .regfile_en     (regfile_en),
-        .regfile_rst    (),
+        .regfile_rst    (regfile_rst),
         .regfile_we     (regfile_we)        
     );
 	
 	
     logic[Nregs-1:0][31:0]  reg_val, pul_val, read_val;
-	mem_regfile #(
-	   .Naddr       (Naddr),
-	   .init_reg    (init_reg)
-	) uut (
-	   .clk         (regfile_clk),
-	   .addr        (regfile_addr[Naddr+2-1:2]),
-	   .wr_data     (regfile_din),
-	   .rd_data     (regfile_dout),
-	   .en          (regfile_en),
-	   .we          (regfile_we),
-	   //
-	   .reg_val     (reg_val),
-	   .pul_val     (pul_val),
-	   .read_val    (read_val)
-	);
+    mem_regfile #(
+        .Naddr       (Naddr),
+        .init_reg    (init_reg)
+    ) uut (
+        .clk         (regfile_clk),
+        .addr        (regfile_addr[Naddr+2-1:2]),
+        .wr_data     (regfile_din),
+        .rd_data     (regfile_dout),
+        .en          (regfile_en),
+        .rst         (regfile_rst),
+        .we          (regfile_we),
+        //
+        .reg_val     (reg_val),
+        .pul_val     (pul_val),
+        .read_val    (read_val)
+    );
 	
 	assign read_val[0] = 32'hdeadbeef;
 	assign read_val[1] = 32'h01234567;
