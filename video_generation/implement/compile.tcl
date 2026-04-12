@@ -23,7 +23,7 @@ write_hw_platform -include_bit -fixed -force -file ./results/top.xsa
 report_timing_summary -file ./results/timing.rpt
 report_utilization    -file ./results/utilization.rpt
 
-#set_property BITSTREAM.GENERAL.COMPRESS TRUE [get_designs impl_1]
+set_property BITSTREAM.GENERAL.COMPRESS TRUE [get_designs impl_1]
 
 write_bitstream -verbose -bin_file -force -file ./results/top.bit
 file copy -force ./results/top.bit ./proj.runs/impl_1/ 

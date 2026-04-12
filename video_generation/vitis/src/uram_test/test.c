@@ -10,9 +10,9 @@ int main()
     xil_printf("Hello World\n\r");
     
     // uint32_t *regptr = (uint32_t *)XPAR_M00_AXI_BASEADDR;
-    uint32_t *regptr = (uint32_t *)XPAR_AXI_REGFILE_CTRL_BASEADDR;
-    uint32_t *ramptr = (uint32_t *)XPAR_AXI_BRAM_CTRL_0_BASEADDR;
-    uint32_t ramsize = XPAR_AXI_BRAM_CTRL_0_HIGHADDR - XPAR_AXI_BRAM_CTRL_0_BASEADDR +1;
+    uint32_t *regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
+    uint32_t *ramptr = (uint32_t *)XPAR_XBRAM_0_BASEADDR;
+    uint32_t ramsize = XPAR_XBRAM_0_HIGHADDR - XPAR_XBRAM_0_BASEADDR +1;
     
 
     xil_printf("regptr = %p\n\r", regptr);
