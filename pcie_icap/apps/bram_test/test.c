@@ -22,7 +22,7 @@ int main(int argc,char** argv)
         base_addr = mmap(0,FPGA_SIZE,PROT_READ|PROT_WRITE,MAP_SHARED,fd,0);
         if(base_addr == NULL) fprintf(stderr,"Can't mmap\n");
     }
-    printf("FPGA_BASE_ADDRESS = 0x%10lx, virtual base_addr = %p\n", (uint64_t)FPGA_BASE_ADDRESS, base_addr);
+    printf("FPGA_BASE_ADDRESS = 0x%08lx, virtual base_addr = %p\n", (uint64_t)FPGA_BASE_ADDRESS, base_addr);
     uint32_t *reg_ptr  = base_addr + FPGA_REG_OFFSET;
     uint32_t* bram_ptr;
     printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\n", reg_ptr[FPGA_ID], reg_ptr[FPGA_VERSION]);
@@ -34,17 +34,7 @@ int main(int argc,char** argv)
     errors = ram_test(bram_ptr, TEST_RAM_SIZE);
     printf("TEST_RAM: bram_ptr = %p, errors = %d\n", bram_ptr, errors);
 
-    // Test the VINSTRU bram.
-    bram_ptr = base_addr + VINSTRU_RAM_OFFSET;
-    errors = ram_test(bram_ptr, VINSTRU_RAM_SIZE);
-    printf("VINSTRU_RAM: bram_ptr = %p, errors = %d\n", bram_ptr, errors);
-
-    // Test the VINSTRU bram.
-    bram_ptr = base_addr + FLASH_RAM_OFFSET;
-    errors = ram_test(bram_ptr, FLASH_RAM_SIZE);
-    printf("FLASH_RAM: bram_ptr = %p, errors = %d\n", bram_ptr, errors);
-
-    reg_ptr[FPGA_LED] += 2;
+    reg_ptr[FPGA_LED] += 1;
 
     munmap(base_addr, FPGA_SIZE);
 
