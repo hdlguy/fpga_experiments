@@ -136,6 +136,8 @@ xilinx.com:ip:axi_bram_ctrl:4.1\
 xilinx.com:ip:smartconnect:1.0\
 xilinx.com:ip:xadc_wiz:3.3\
 xilinx.com:inline_hdl:ilconcat:1.0\
+xilinx.com:ip:axi_hwicap:3.0\
+xilinx.com:ip:axi_quad_spi:3.2\
 "
 
    set list_ips_missing ""
@@ -212,17 +214,7 @@ proc create_root_design { parentCell } {
    CONFIG.READ_WRITE_MODE {READ_WRITE} \
    ] $regfile
 
-  set vinstru_bram [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:bram_rtl:1.0 vinstru_bram ]
-  set_property -dict [ list \
-   CONFIG.MASTER_TYPE {BRAM_CTRL} \
-   CONFIG.READ_WRITE_MODE {READ_WRITE} \
-   ] $vinstru_bram
-
-  set flash_bram [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:bram_rtl:1.0 flash_bram ]
-  set_property -dict [ list \
-   CONFIG.MASTER_TYPE {BRAM_CTRL} \
-   CONFIG.READ_WRITE_MODE {READ_WRITE} \
-   ] $flash_bram
+  set qspi [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:spi_rtl:1.0 qspi ]
 
 
   # Create ports
@@ -247,6 +239,7 @@ proc create_root_design { parentCell } {
     CONFIG.pl_link_cap_max_link_speed {5.0_GT/s} \
     CONFIG.pl_link_cap_max_link_width {X1} \
     CONFIG.xdma_axi_intf_mm {AXI_Memory_Mapped} \
+    CONFIG.xdma_num_usr_irq {2} \
     CONFIG.xdma_rnum_chnl {2} \
     CONFIG.xdma_wnum_chnl {2} \
   ] $xdma_0
@@ -262,12 +255,12 @@ proc create_root_design { parentCell } {
   set_property CONFIG.EN_SAFETY_CKT {false} $blk_mem_gen_0
 
 
-  # Create instance: axi_bram_ctrl_0, and set properties
-  set axi_bram_ctrl_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_0 ]
+  # Create instance: scratch_bram_ctrl, and set properties
+  set scratch_bram_ctrl [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 scratch_bram_ctrl ]
   set_property -dict [list \
     CONFIG.DATA_WIDTH {128} \
     CONFIG.SINGLE_PORT_BRAM {1} \
-  ] $axi_bram_ctrl_0
+  ] $scratch_bram_ctrl
 
 
   # Create instance: axi_smc, and set properties
@@ -278,14 +271,9 @@ proc create_root_design { parentCell } {
   ] $axi_smc
 
 
-  # Create instance: axi_bram_ctrl_1, and set properties
-  set axi_bram_ctrl_1 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_1 ]
-  set_property CONFIG.SINGLE_PORT_BRAM {1} $axi_bram_ctrl_1
-
-
-  # Create instance: axi_bram_ctrl_2, and set properties
-  set axi_bram_ctrl_2 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_2 ]
-  set_property CONFIG.SINGLE_PORT_BRAM {1} $axi_bram_ctrl_2
+  # Create instance: regfile_ctrl, and set properties
+  set regfile_ctrl [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 regfile_ctrl ]
+  set_property CONFIG.SINGLE_PORT_BRAM {1} $regfile_ctrl
 
 
   # Create instance: xadc_wiz_0, and set properties
@@ -316,30 +304,41 @@ proc create_root_design { parentCell } {
 
   # Create instance: ilconcat_0, and set properties
   set ilconcat_0 [ create_bd_cell -type inline_hdl -vlnv xilinx.com:inline_hdl:ilconcat:1.0 ilconcat_0 ]
-  set_property CONFIG.NUM_PORTS {1} $ilconcat_0
+  set_property CONFIG.NUM_PORTS {2} $ilconcat_0
 
 
-  # Create instance: axi_bram_ctrl_3, and set properties
-  set axi_bram_ctrl_3 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_bram_ctrl:4.1 axi_bram_ctrl_3 ]
-  set_property CONFIG.SINGLE_PORT_BRAM {1} $axi_bram_ctrl_3
+  # Create instance: axi_hwicap_0, and set properties
+  set axi_hwicap_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_hwicap:3.0 axi_hwicap_0 ]
+  set_property CONFIG.C_INCLUDE_STARTUP {0} $axi_hwicap_0
+
+
+  # Create instance: axi_quad_spi_0, and set properties
+  set axi_quad_spi_0 [ create_bd_cell -type ip -vlnv xilinx.com:ip:axi_quad_spi:3.2 axi_quad_spi_0 ]
+  set_property -dict [list \
+    CONFIG.C_SHARED_STARTUP {0} \
+    CONFIG.C_SPI_MODE {2} \
+  ] $axi_quad_spi_0
 
 
   # Create interface connections
-  connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_pins axi_bram_ctrl_0/BRAM_PORTA] [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTA]
-  connect_bd_intf_net -intf_net axi_bram_ctrl_1_BRAM_PORTA [get_bd_intf_ports regfile] [get_bd_intf_pins axi_bram_ctrl_1/BRAM_PORTA]
-  connect_bd_intf_net -intf_net axi_bram_ctrl_2_BRAM_PORTA [get_bd_intf_ports vinstru_bram] [get_bd_intf_pins axi_bram_ctrl_2/BRAM_PORTA]
-  connect_bd_intf_net -intf_net axi_bram_ctrl_3_BRAM_PORTA [get_bd_intf_ports flash_bram] [get_bd_intf_pins axi_bram_ctrl_3/BRAM_PORTA]
-  connect_bd_intf_net -intf_net axi_smc_M00_AXI [get_bd_intf_pins axi_bram_ctrl_1/S_AXI] [get_bd_intf_pins axi_smc/M00_AXI]
-  connect_bd_intf_net -intf_net axi_smc_M01_AXI [get_bd_intf_pins axi_bram_ctrl_0/S_AXI] [get_bd_intf_pins axi_smc/M01_AXI]
-  connect_bd_intf_net -intf_net axi_smc_M02_AXI [get_bd_intf_pins axi_bram_ctrl_2/S_AXI] [get_bd_intf_pins axi_smc/M02_AXI]
-  connect_bd_intf_net -intf_net axi_smc_M03_AXI [get_bd_intf_pins axi_smc/M03_AXI] [get_bd_intf_pins xadc_wiz_0/s_axi_lite]
-  connect_bd_intf_net -intf_net axi_smc_M04_AXI [get_bd_intf_pins axi_smc/M04_AXI] [get_bd_intf_pins axi_bram_ctrl_3/S_AXI]
+  connect_bd_intf_net -intf_net axi_bram_ctrl_0_BRAM_PORTA [get_bd_intf_pins scratch_bram_ctrl/BRAM_PORTA] [get_bd_intf_pins blk_mem_gen_0/BRAM_PORTA]
+  connect_bd_intf_net -intf_net axi_bram_ctrl_1_BRAM_PORTA [get_bd_intf_ports regfile] [get_bd_intf_pins regfile_ctrl/BRAM_PORTA]
+  connect_bd_intf_net -intf_net axi_quad_spi_0_SPI_0 [get_bd_intf_ports qspi] [get_bd_intf_pins axi_quad_spi_0/SPI_0]
+  connect_bd_intf_net -intf_net axi_smc_M00_AXI [get_bd_intf_pins regfile_ctrl/S_AXI] [get_bd_intf_pins axi_smc/M00_AXI]
+  connect_bd_intf_net -intf_net axi_smc_M01_AXI [get_bd_intf_pins scratch_bram_ctrl/S_AXI] [get_bd_intf_pins axi_smc/M01_AXI]
+  connect_bd_intf_net -intf_net axi_smc_M02_AXI [get_bd_intf_pins axi_smc/M02_AXI] [get_bd_intf_pins xadc_wiz_0/s_axi_lite]
+  connect_bd_intf_net -intf_net axi_smc_M03_AXI [get_bd_intf_pins axi_smc/M03_AXI] [get_bd_intf_pins axi_hwicap_0/S_AXI_LITE]
+  connect_bd_intf_net -intf_net axi_smc_M04_AXI [get_bd_intf_pins axi_smc/M04_AXI] [get_bd_intf_pins axi_quad_spi_0/AXI_LITE]
   connect_bd_intf_net -intf_net diff_clock_rtl_0_1 [get_bd_intf_ports pcie_clkin] [get_bd_intf_pins util_ds_buf/CLK_IN_D]
   connect_bd_intf_net -intf_net xdma_0_M_AXI [get_bd_intf_pins xdma_0/M_AXI] [get_bd_intf_pins axi_smc/S00_AXI]
   connect_bd_intf_net -intf_net xdma_0_M_AXI_LITE [get_bd_intf_pins axi_smc/S01_AXI] [get_bd_intf_pins xdma_0/M_AXI_BYPASS]
   connect_bd_intf_net -intf_net xdma_0_pcie_mgt [get_bd_intf_ports pcie_mgt] [get_bd_intf_pins xdma_0/pcie_mgt]
 
   # Create port connections
+  connect_bd_net -net axi_hwicap_0_ip2intc_irpt  [get_bd_pins axi_hwicap_0/ip2intc_irpt] \
+  [get_bd_pins ilconcat_0/In1]
+  connect_bd_net -net axi_quad_spi_0_eos  [get_bd_pins axi_quad_spi_0/eos] \
+  [get_bd_pins axi_hwicap_0/eos_in]
   connect_bd_net -net ilconcat_0_dout  [get_bd_pins ilconcat_0/dout] \
   [get_bd_pins xdma_0/usr_irq_req]
   connect_bd_net -net reset_rtl_0_1  [get_bd_ports pcie_reset] \
@@ -350,31 +349,33 @@ proc create_root_design { parentCell } {
   [get_bd_pins ilconcat_0/In0]
   connect_bd_net -net xdma_0_axi_aclk  [get_bd_pins xdma_0/axi_aclk] \
   [get_bd_pins axi_smc/aclk] \
-  [get_bd_pins axi_bram_ctrl_0/s_axi_aclk] \
+  [get_bd_pins scratch_bram_ctrl/s_axi_aclk] \
   [get_bd_ports axi_aclk] \
-  [get_bd_pins axi_bram_ctrl_1/s_axi_aclk] \
-  [get_bd_pins axi_bram_ctrl_2/s_axi_aclk] \
+  [get_bd_pins regfile_ctrl/s_axi_aclk] \
   [get_bd_pins xadc_wiz_0/s_axi_aclk] \
-  [get_bd_pins axi_bram_ctrl_3/s_axi_aclk]
+  [get_bd_pins axi_hwicap_0/s_axi_aclk] \
+  [get_bd_pins axi_hwicap_0/icap_clk] \
+  [get_bd_pins axi_quad_spi_0/s_axi_aclk] \
+  [get_bd_pins axi_quad_spi_0/ext_spi_clk]
   connect_bd_net -net xdma_0_axi_aresetn  [get_bd_pins xdma_0/axi_aresetn] \
-  [get_bd_pins axi_bram_ctrl_0/s_axi_aresetn] \
+  [get_bd_pins scratch_bram_ctrl/s_axi_aresetn] \
   [get_bd_pins axi_smc/aresetn] \
   [get_bd_ports axi_aresetn] \
-  [get_bd_pins axi_bram_ctrl_1/s_axi_aresetn] \
-  [get_bd_pins axi_bram_ctrl_2/s_axi_aresetn] \
+  [get_bd_pins regfile_ctrl/s_axi_aresetn] \
   [get_bd_pins xadc_wiz_0/s_axi_aresetn] \
-  [get_bd_pins axi_bram_ctrl_3/s_axi_aresetn]
+  [get_bd_pins axi_hwicap_0/s_axi_aresetn] \
+  [get_bd_pins axi_quad_spi_0/s_axi_aresetn]
 
   # Create address segments
-  assign_bd_address -offset 0x00010000 -range 0x00001000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] -force
-  assign_bd_address -offset 0x00000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs axi_bram_ctrl_1/S_AXI/Mem0] -force
-  assign_bd_address -offset 0x00020000 -range 0x00004000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs axi_bram_ctrl_2/S_AXI/Mem0] -force
-  assign_bd_address -offset 0x00040000 -range 0x00001000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs axi_bram_ctrl_3/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x00010000 -range 0x00001000 -with_name SEG_axi_bram_ctrl_0_Mem0 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs scratch_bram_ctrl/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x00000000 -range 0x00001000 -with_name SEG_axi_bram_ctrl_1_Mem0 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs regfile_ctrl/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x00040000 -range 0x00010000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs axi_hwicap_0/S_AXI_LITE/Reg] -force
+  assign_bd_address -offset 0x00050000 -range 0x00010000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs axi_quad_spi_0/AXI_LITE/Reg] -force
   assign_bd_address -offset 0x00030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI] [get_bd_addr_segs xadc_wiz_0/s_axi_lite/Reg] -force
-  assign_bd_address -offset 0x00010000 -range 0x00001000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs axi_bram_ctrl_0/S_AXI/Mem0] -force
-  assign_bd_address -offset 0x00000000 -range 0x00001000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs axi_bram_ctrl_1/S_AXI/Mem0] -force
-  assign_bd_address -offset 0x00020000 -range 0x00004000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs axi_bram_ctrl_2/S_AXI/Mem0] -force
-  assign_bd_address -offset 0x00040000 -range 0x00001000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs axi_bram_ctrl_3/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x00010000 -range 0x00001000 -with_name SEG_axi_bram_ctrl_0_Mem0 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs scratch_bram_ctrl/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x00000000 -range 0x00001000 -with_name SEG_axi_bram_ctrl_1_Mem0 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs regfile_ctrl/S_AXI/Mem0] -force
+  assign_bd_address -offset 0x00040000 -range 0x00010000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs axi_hwicap_0/S_AXI_LITE/Reg] -force
+  assign_bd_address -offset 0x00050000 -range 0x00010000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs axi_quad_spi_0/AXI_LITE/Reg] -force
   assign_bd_address -offset 0x00030000 -range 0x00010000 -target_address_space [get_bd_addr_spaces xdma_0/M_AXI_BYPASS] [get_bd_addr_segs xadc_wiz_0/s_axi_lite/Reg] -force
 
 

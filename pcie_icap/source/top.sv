@@ -16,7 +16,10 @@ module top #(
     output  logic[0:0]  pcie_mgt_txn,
     output  logic[0:0]  pcie_mgt_txp,
     input   logic       pcie_reset,
-    output  logic       pcie_clkreq_l
+    output  logic       pcie_clkreq_l,
+    // QSPI to config flash, sclk not shown because dedicated CCLK pin is used.
+    inout   logic[3:0]  qspi_data,
+    inout   logic       qspi_ss
 );
 
     assign pcie_clkreq_l = 1'b0;
@@ -30,8 +33,12 @@ module top #(
     logic [3:0]     regfile_we;          
 
     logic axi_aclk, axi_aresetn;
-
+ 
     logic[3:0] led;
+
+    logic[3:0] qspi_io_i, qspi_io_o, qspi_io_t; 
+    logic qspi_ss_i, qspi_ss_o, qspi_ss_t;       
+    logic startup_cfgclk, startup_cfgmclk, startup_preq;
     
     // block diagram containing PCIe interface
     system system_i(
@@ -52,10 +59,34 @@ module top #(
         .regfile_we         (regfile_we),  
         //
         .axi_aclk           (axi_aclk),
-        .axi_aresetn        (axi_aresetn)
+        .axi_aresetn        (axi_aresetn),
+        //
+        .qspi_io0_i         (qspi_io_i[0]),
+        .qspi_io0_o         (qspi_io_o[0]),
+        .qspi_io0_t         (qspi_io_t[0]),
+        .qspi_io1_i         (qspi_io_i[1]),
+        .qspi_io1_o         (qspi_io_o[1]),
+        .qspi_io1_t         (qspi_io_t[1]),
+        .qspi_io2_i         (qspi_io_i[2]),
+        .qspi_io2_o         (qspi_io_o[2]),
+        .qspi_io2_t         (qspi_io_t[2]),
+        .qspi_io3_i         (qspi_io_i[3]),
+        .qspi_io3_o         (qspi_io_o[3]),
+        .qspi_io3_t         (qspi_io_t[3]),
+        .qspi_ss_i          (qspi_ss_i),
+        .qspi_ss_o          (qspi_ss_o),
+        .qspi_ss_t          (qspi_ss_t)
+//        //
+//        .startup_cfgclk     (startup_cfgclk),
+//        .startup_cfgmclk    (startup_cfgmclk),
+//        .startup_preq       (startup_preq)
     );
-        
-    logic startup_cfgclk, startup_cfgmclk, startup_eos, startup_preq;
+
+    IOBUF qspi_io0_iobuf (.I(qspi_io_o[0]), .IO(qspi_data[0]), .O(qspi_io_i[0]), .T(qspi_io_t[0]));
+    IOBUF qspi_io1_iobuf (.I(qspi_io_o[1]), .IO(qspi_data[1]), .O(qspi_io_i[1]), .T(qspi_io_t[1]));
+    IOBUF qspi_io2_iobuf (.I(qspi_io_o[2]), .IO(qspi_data[2]), .O(qspi_io_i[2]), .T(qspi_io_t[2]));
+    IOBUF qspi_io3_iobuf (.I(qspi_io_o[3]), .IO(qspi_data[3]), .O(qspi_io_i[3]), .T(qspi_io_t[3]));
+    IOBUF qspi_ss_iobuf  (.I(qspi_ss_o),    .IO(qspi_ss),      .O(qspi_ss_i),    .T(qspi_ss_t));        
     
     logic[27:0] led_count;
     always_ff @(posedge axi_aclk) begin
@@ -64,7 +95,7 @@ module top #(
         end else begin
             led_count <= led_count + 1;
         end
-        led[3] <= led_count[27];
+        led[3] <= led_count[23];
     end    
     assign ledn = ~led;
     
