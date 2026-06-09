@@ -3,6 +3,7 @@
 #define     FPGA_SIZE               0x00100000
 
 #define     FPGA_REG_OFFSET         0x00000000
+#define     FPGA_ICAP_OFFSET        0x40200000
 
 // register numbers
 #define     FPGA_ID                 0
