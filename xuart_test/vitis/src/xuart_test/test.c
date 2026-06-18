@@ -1,41 +1,3 @@
-/******************************************************************************
-* Copyright (C) 2002 - 2021 Xilinx, Inc.  All rights reserved.
-* Copyright (c) 2022 - 2025 Advanced Micro Devices, Inc. All Rights Reserved.
-* SPDX-License-Identifier: MIT
-******************************************************************************/
-
-/******************************************************************************/
-/**
-*
-* @file xuartlite_intr_example.c
-*
-* This file contains a design example using the UartLite driver (XUartLite) and
-* hardware device using the interrupt mode.
-*
-* @note
-*
-* The user must provide a physical loopback such that data which is
-* transmitted will be received.
-*
-* MODIFICATION HISTORY:
-* <pre>
-* Ver   Who  Date     Changes
-* ----- ---- -------- -----------------------------------------------
-* 1.00a jhl  02/13/02 First release
-* 1.00b rpm  10/01/03 Made XIntc declaration global
-* 1.00b sv   06/09/05 Minor changes to comply to Doxygen and coding guidelines
-* 2.00a ktn  10/20/09 Updated to use HAL Processor APIs and minor changes
-*		      for coding guidelnes.
-* 3.2   ms   01/23/17 Added xil_printf statement in main function to
-*                     ensure that "Successfully ran" and "Failed" strings
-*                     are available in all examples. This is a fix for
-*                     CR-965028.
-* 3.9   gm   07/08/23 Added SDT support
-* 3.12  bkv  07/07/25 Fixed GCC Warnings.
-*
-* </pre>
-******************************************************************************/
-
 /***************************** Include Files *********************************/
 
 #include "xparameters.h"
@@ -73,10 +35,6 @@
 #define XUARTLITE_BASEADDRESS	XPAR_XUARTLITE_0_BASEADDR
 #endif
 
-/*
- * The following constant controls the length of the buffers to be sent
- * and received with the UartLite device.
- */
 #define TEST_BUFFER_SIZE        100
 
 /**************************** Type Definitions *******************************/
@@ -94,16 +52,13 @@
 
 /************************** Function Prototypes ******************************/
 #ifndef SDT
-int UartLiteIntrExample(INTC *IntcInstancePtr, XUartLite *UartLiteInstancePtr,
-			u16 UartLiteDeviceId, u16 UartLiteIntrId);
+int UartLiteIntrExample(INTC *IntcInstancePtr, XUartLite *UartLiteInstancePtr, u16 UartLiteDeviceId, u16 UartLiteIntrId);
 #else
-int UartLiteIntrExample(XUartLite *UartLiteInstancePtr,
-			UINTPTR BaseAddress);
+int UartLiteIntrExample(XUartLite *UartLiteInstancePtr, UINTPTR BaseAddress);
 #endif
 
 #ifndef SDT
-static int SetupInterruptSystem(INTC *IntcInstancePtr,
-				XUartLite *UartLiteInstancePtr, u16 UartLiteIntrId);
+static int SetupInterruptSystem(INTC *IntcInstancePtr, XUartLite *UartLiteInstancePtr, u16 UartLiteIntrId);
 #endif
 
 void SendHandler(void *CallBackRef, unsigned int EventData);
@@ -136,29 +91,13 @@ u8 ReceiveBuffer[TEST_BUFFER_SIZE];
 static volatile int TotalReceivedCount;
 static volatile int TotalSentCount;
 
-/******************************************************************************/
-/**
- *
- * Main function to call the UartLite interrupt example.
- *
- *
- * @return	XST_SUCCESS if successful, XST_FAILURE if unsuccessful
- *
- * @note		None
- *
- *******************************************************************************/
 int main(void)
 {
 	int Status;
 
-	/*
-	 * Run the UartLite Interrupt example, specify the Device ID that is
-	 * generated in xparameters.h.
-	 */
+	 //* Run the UartLite Interrupt example, specify the Device ID that is * generated in xparameters.h.
 #ifndef SDT
-	Status = UartLiteIntrExample(&IntcInstance, &UartLite,
-				     UARTLITE_DEVICE_ID,
-				     UARTLITE_IRPT_INTR);
+	Status = UartLiteIntrExample(&IntcInstance, &UartLite, UARTLITE_DEVICE_ID, UARTLITE_IRPT_INTR);
 #else
 	Status = UartLiteIntrExample(&UartLite, XUARTLITE_BASEADDRESS);
 #endif
@@ -198,11 +137,9 @@ int main(void)
 *
 ****************************************************************************/
 #ifndef SDT
-int UartLiteIntrExample(INTC *IntcInstancePtr, XUartLite *UartLiteInstPtr,
-			u16 DeviceId, u16 UartLiteIntrId)
+int UartLiteIntrExample(INTC *IntcInstancePtr, XUartLite *UartLiteInstPtr, u16 DeviceId, u16 UartLiteIntrId)
 #else
-int UartLiteIntrExample(XUartLite *UartLiteInstPtr,
-			UINTPTR BaseAddress)
+int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
 #endif
 {
 	int Status;
@@ -238,12 +175,9 @@ int UartLiteIntrExample(XUartLite *UartLiteInstPtr,
 	 * occur. This function is application specific.
 	 */
 #ifndef SDT
-	Status = SetupInterruptSystem(IntcInstancePtr, UartLiteInstPtr,
-				      UartLiteIntrId);
+	Status = SetupInterruptSystem(IntcInstancePtr, UartLiteInstPtr, UartLiteIntrId);
 #else
-	Status = XSetupInterruptSystem(&UartLite, &XUartLite_InterruptHandler,
-				       CfgPtr->IntrId, CfgPtr->IntrParent,
-				       XINTERRUPT_DEFAULT_PRIORITY);
+	Status = XSetupInterruptSystem(&UartLite, &XUartLite_InterruptHandler, CfgPtr->IntrId, CfgPtr->IntrParent, XINTERRUPT_DEFAULT_PRIORITY);
 #endif
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
@@ -258,9 +192,7 @@ int UartLiteIntrExample(XUartLite *UartLiteInstPtr,
 	XUartLite_SetSendHandler(&UartLite, SendHandler, &UartLite);
 	XUartLite_SetRecvHandler(&UartLite, RecvHandler, &UartLite);
 
-	/*
-	 * Enable the interrupt of the UartLite so that interrupts will occur.
-	 */
+	//* Enable the interrupt of the UartLite so that interrupts will occur.
 	XUartLite_EnableInterrupt(&UartLite);
 
 	/*
@@ -273,9 +205,7 @@ int UartLiteIntrExample(XUartLite *UartLiteInstPtr,
 		ReceiveBuffer[Index] = 0;
 	}
 
-	/*
-	 * Start receiving data before sending it since there is a loopback.
-	 */
+	//* Start receiving data before sending it since there is a loopback.
 	XUartLite_Recv(&UartLite, ReceiveBuffer, TEST_BUFFER_SIZE);
 
 	/*
@@ -292,9 +222,7 @@ int UartLiteIntrExample(XUartLite *UartLiteInstPtr,
 	       || (TotalSentCount != TEST_BUFFER_SIZE)) {
 	}
 
-	/*
-	 * Verify the entire receive buffer was successfully received.
-	 */
+	// * Verify the entire receive buffer was successfully received.
 	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
 		if (ReceiveBuffer[Index] != SendBuffer[Index]) {
 			return XST_FAILURE;
@@ -331,6 +259,8 @@ void SendHandler(void *CallBackRef, unsigned int EventData)
 	TotalSentCount = EventData;
 }
 
+
+
 /****************************************************************************/
 /**
 *
@@ -360,6 +290,8 @@ void RecvHandler(void *CallBackRef, unsigned int EventData)
 	TotalReceivedCount = EventData;
 }
 
+
+
 #ifndef SDT
 /****************************************************************************/
 /**
@@ -379,8 +311,7 @@ void RecvHandler(void *CallBackRef, unsigned int EventData)
 * @note     None.
 *
 ****************************************************************************/
-static int SetupInterruptSystem(INTC *IntcInstancePtr,
-				XUartLite *UartLiteInstancePtr, u16 UartLiteIntrId)
+static int SetupInterruptSystem(INTC *IntcInstancePtr, XUartLite *UartLiteInstancePtr, u16 UartLiteIntrId)
 {
 	int Status;
 
@@ -402,9 +333,7 @@ static int SetupInterruptSystem(INTC *IntcInstancePtr,
 	 * for the device occurs, the device driver handler performs the specific
 	 * interrupt processing for the device.
 	 */
-	Status = XIntc_Connect(IntcInstancePtr, UartLiteIntrId,
-			       (XInterruptHandler)XUartLite_InterruptHandler,
-			       (void *)UartLiteInstancePtr);
+	Status = XIntc_Connect(IntcInstancePtr, UartLiteIntrId, (XInterruptHandler)XUartLite_InterruptHandler, (void *)UartLiteInstancePtr);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
@@ -421,26 +350,20 @@ static int SetupInterruptSystem(INTC *IntcInstancePtr,
 	}
 #endif
 
-	/*
-	 * Enable the interrupt for the UartLite.
-	 */
+	// * Enable the interrupt for the UartLite.
 	XIntc_Enable(IntcInstancePtr, UartLiteIntrId);
 #else
 
 #ifndef TESTAPP_GEN
 	XScuGic_Config *IntcConfig;
 
-	/*
-	 * Initialize the interrupt controller driver so that it is ready to
-	 * use.
-	 */
+	// * Initialize the interrupt controller driver so that it is ready to * use.
 	IntcConfig = XScuGic_LookupConfig(INTC_DEVICE_ID);
 	if (NULL == IntcConfig) {
 		return XST_FAILURE;
 	}
 
-	Status = XScuGic_CfgInitialize(IntcInstancePtr, IntcConfig,
-				       IntcConfig->CpuBaseAddress);
+	Status = XScuGic_CfgInitialize(IntcInstancePtr, IntcConfig, IntcConfig->CpuBaseAddress);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
@@ -448,41 +371,26 @@ static int SetupInterruptSystem(INTC *IntcInstancePtr,
 
 	XScuGic_SetPriorityTriggerType(IntcInstancePtr, UartLiteIntrId, 0xA0, 0x3);
 
-	/*
-	 * Connect the interrupt handler that will be called when an
-	 * interrupt occurs for the device.
-	 */
-	Status = XScuGic_Connect(IntcInstancePtr, UartLiteIntrId,
-				 (Xil_ExceptionHandler) XUartLite_InterruptHandler,
-				 UartLiteInstancePtr);
+	// * Connect the interrupt handler that will be called when an * interrupt occurs for the device.
+	Status = XScuGic_Connect(IntcInstancePtr, UartLiteIntrId, (Xil_ExceptionHandler) XUartLite_InterruptHandler, UartLiteInstancePtr);
 	if (Status != XST_SUCCESS) {
 		return Status;
 	}
 
-	/*
-	 * Enable the interrupt for the Timer device.
-	 */
+	// * Enable the interrupt for the Timer device.
 	XScuGic_Enable(IntcInstancePtr, UartLiteIntrId);
 #endif /* XPAR_INTC_0_DEVICE_ID */
 
 #ifndef TESTAPP_GEN
 
-	/*
-	 * Initialize the exception table.
-	 */
+	// * Initialize the exception table.
 	Xil_ExceptionInit();
 
-	/*
-	 * Register the interrupt controller handler with the exception table.
-	 */
-	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
-				     (Xil_ExceptionHandler) INTC_HANDLER, IntcInstancePtr);
+	// * Register the interrupt controller handler with the exception table.
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT, (Xil_ExceptionHandler) INTC_HANDLER, IntcInstancePtr);
 
-	/*
-	 * Enable exceptions.
-	 */
-	Xil_ExceptionEnable()
-	;
+	// * Enable exceptions.
+	Xil_ExceptionEnable();
 
 #endif /* TESTAPP_GEN */
 
