@@ -21,6 +21,7 @@ module top (
     logic [31:0]regfile_din;
     logic [31:0]regfile_dout;
     logic regfile_en;
+    logic regfile_rst;
     logic [3:0]regfile_we;
     
     system system_i (
