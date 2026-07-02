@@ -7,7 +7,7 @@ module top (
     output  logic       usb_uart_txd
 );
 
-	localparam int Naddr = 6;
+	localparam int Naddr = 4;
     localparam int Nregs = 2**Naddr;
     localparam logic[Nregs-1:0][31:0] init_reg = {
         32'hffff_ffff, 32'heeee_eeee, 32'hdddd_dddd, 32'hcccc_cccc,
