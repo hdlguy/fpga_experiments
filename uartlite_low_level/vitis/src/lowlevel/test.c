@@ -1,4 +1,4 @@
-
+// low level uart control with non-blocking send and receive functions.
 #include "xparameters.h"
 #include "xstatus.h"
 #include "xuartlite_l.h"
@@ -7,7 +7,6 @@
 #include <sleep.h>
 
 #define TEST_BUFFER_SIZE 10
-
 
 u8 SendBuffer[TEST_BUFFER_SIZE]; /* Buffer for Transmitting Data */
 u8 RecvBuffer[TEST_BUFFER_SIZE]; /* Buffer for Receiving Data */
@@ -51,26 +50,16 @@ int main()
 		uart_sendchar(uartptr, SendBuffer[Index]);
 	}
 
+	uint32_t whilecount=0;
 	while(1) {
 		numrx = uart_receivechar(uartptr, RecvBuffer);
 		regptr[FPGA_LED_CONTROL] += numrx;
 
-		uart_sendchar(uartptr, 'H'); uart_sendchar(uartptr, 'Q'); uart_sendchar(uartptr, '\n'); uart_sendchar(uartptr, '\r');
+		xil_printf("%d\n\r", whilecount);
 
+		whilecount++;
 		usleep(1000000);		
 	}
-
-	// // Check for a character and send it out
-	// uart_sendchar(uartptr, '\n'); uart_sendchar(uartptr, '\r');
-	// uint8_t rxchar;
-	// while(1) {
-		
-	// 	if (((uartptr[XUL_STATUS_REG_OFFSET/4])&0x01) != 0) {
-	// 		rxchar = uartptr[XUL_RX_FIFO_OFFSET];
-	// 		uart_sendchar(uartptr, rxchar);
-	// 		regptr[FPGA_LED_CONTROL] += 1;
-	// 	}		
-	// }
 
 	return XST_SUCCESS;
 }
