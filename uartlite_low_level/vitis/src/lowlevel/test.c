@@ -55,7 +55,12 @@ int main()
 		numrx = uart_receivechar(uartptr, RecvBuffer);
 		regptr[FPGA_LED_CONTROL] += numrx;
 
-		xil_printf("%d\n\r", whilecount);
+		xil_printf("%d: %u\n\r", whilecount, numrx);
+
+		if (numrx > 0) {
+			for (int i=0; i<numrx; i++) uart_sendchar(uartptr, RecvBuffer[i]);
+			uart_sendchar(uartptr, '\n'); uart_sendchar(uartptr, '\r');
+		}
 
 		whilecount++;
 		usleep(1000000);		
