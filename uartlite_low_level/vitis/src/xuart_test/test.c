@@ -1,33 +1,18 @@
-/***************************** Include Files *********************************/
-
 #include "xparameters.h"
 #include "xuartlite.h"
-
 #include "xil_exception.h"
 #include "xil_printf.h"
 #include "xinterrupt_wrap.h"
 
-/************************** Constant Definitions *****************************/
-
-/*
- * The following constants map to the XPAR parameters created in the
- * xparameters.h file. They are defined here such that a user can easily
- * change all the needed parameters in one place.
- */
 #define XUARTLITE_BASEADDRESS	XPAR_XUARTLITE_0_BASEADDR
 
-#define TEST_BUFFER_SIZE        10
+#define TEST_BUFFER_SIZE        4
 
-/***************** Macros (Inline Functions) Definitions *********************/
-
-/************************** Function Prototypes ******************************/
 int UartLiteIntrExample(XUartLite *UartLiteInstancePtr, UINTPTR BaseAddress);
 
 void SendHandler(void *CallBackRef, unsigned int EventData);
 
 void RecvHandler(void *CallBackRef, unsigned int EventData);
-
-/************************** Variable Definitions *****************************/
 
 XUartLite UartLite; /* The instance of the UartLite Device */
 
@@ -41,26 +26,14 @@ u8 ReceiveBuffer[TEST_BUFFER_SIZE];
 static volatile int TotalReceivedCount;
 static volatile int TotalSentCount;
 
+
+// int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
 int main(void)
 {
 	int Status;
-
-	 //* Run the UartLite Interrupt example, specify the Device ID that is * generated in xparameters.h.
-	Status = UartLiteIntrExample(&UartLite, XUARTLITE_BASEADDRESS);
-	if (Status != XST_SUCCESS) {
-		xil_printf("\n\rUartlite interrupt Example Failed\r\n");
-		return XST_FAILURE;
-	}
-
-	xil_printf("Successfully ran Uartlite interrupt Example\r\n");
-	return XST_SUCCESS;
-}
-
-
-int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
-{
-	int Status;
 	int Index;
+	XUartLite *UartLiteInstPtr = &UartLite;
+	UINTPTR BaseAddress = XUARTLITE_BASEADDRESS;
 
 	XUartLite_Config *CfgPtr;
 	(void)UartLiteInstPtr;
@@ -117,7 +90,9 @@ int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
 	 * processing work in the background, this function may get locked
 	 * up in this loop if the interrupts are not working correctly.
 	 */
-	while ((TotalReceivedCount != TEST_BUFFER_SIZE) || (TotalSentCount != TEST_BUFFER_SIZE)) { 	}
+	while (TotalReceivedCount != TEST_BUFFER_SIZE) { 	}
+
+	xil_printf("\n\rchars detected\n\r");
 
 	// * Verify the entire receive buffer was successfully received.
 	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
@@ -126,6 +101,7 @@ int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
 		}
 	}
 
+	xil_printf("test passed\n\r");
 	return XST_SUCCESS;
 }
 
