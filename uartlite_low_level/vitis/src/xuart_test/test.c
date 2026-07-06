@@ -3,12 +3,12 @@
 #include "xil_exception.h"
 #include "xil_printf.h"
 #include "xinterrupt_wrap.h"
+#include "sleep.h"
 
 #define XUARTLITE_BASEADDRESS	XPAR_XUARTLITE_0_BASEADDR
 
-#define TEST_BUFFER_SIZE        4
+#define TEST_BUFFER_SIZE       4
 
-int UartLiteIntrExample(XUartLite *UartLiteInstancePtr, UINTPTR BaseAddress);
 
 void SendHandler(void *CallBackRef, unsigned int EventData);
 
@@ -25,6 +25,7 @@ u8 ReceiveBuffer[TEST_BUFFER_SIZE];
 // * The following counters are used to determine when the entire buffer has been sent and received.
 static volatile int TotalReceivedCount;
 static volatile int TotalSentCount;
+static volatile int global_junk;
 
 
 // int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
@@ -57,39 +58,51 @@ int main(void)
 		return XST_FAILURE;
 	}
 
-	/*
-	 * Setup the handlers for the UartLite that will be called from the
+	/* Setup the handlers for the UartLite that will be called from the
 	 * interrupt context when data has been sent and received, specify a
 	 * pointer to the UartLite driver instance as the callback reference so
-	 * that the handlers are able to access the instance data.
-	 */
+	 * that the handlers are able to access the instance data. */
 	XUartLite_SetSendHandler(&UartLite, SendHandler, &UartLite);
 	XUartLite_SetRecvHandler(&UartLite, RecvHandler, &UartLite);
 
 	//* Enable the interrupt of the UartLite so that interrupts will occur.
 	XUartLite_EnableInterrupt(&UartLite);
 
-	/*
-	 * Initialize the send buffer bytes with a pattern to send and the
+	/* Initialize the send buffer bytes with a pattern to send and the
 	 * the receive buffer bytes to zero to allow the receive data to be
-	 * verified.
-	 */
+	 * verified.	 */
 	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
 		SendBuffer[Index] = Index+0x30;
 		ReceiveBuffer[Index] = 0;
 	}
 
+	global_junk = 0;
 	//* Start receiving data before sending it since there is a loopback.
 	XUartLite_Recv(&UartLite, ReceiveBuffer, TEST_BUFFER_SIZE);
 
 	//  * Send the buffer using the UartLite.
-	XUartLite_Send(&UartLite, SendBuffer, TEST_BUFFER_SIZE);
+	//XUartLite_Send(&UartLite, SendBuffer, TEST_BUFFER_SIZE);
+	xil_printf("type 0123\n\r");
 
-	/*
-	 * Wait for the entire buffer to be received, letting the interrupt
+// 	uint32_t whilecount = 0;
+// 	while(1) {
+
+// 		xil_printf("0x%08x\n\r", whilecount);
+
+// 		xil_printf("TotalReceivedCount = %d, global_junk = %d\n\r", TotalReceivedCount, global_junk);
+// 		TotalReceivedCount = 0;
+// 		global_junk = 0;
+
+// 		whilecount++;
+// 		usleep(1000000);
+// 	}
+
+// }
+
+
+	/* Wait for the entire buffer to be received, letting the interrupt
 	 * processing work in the background, this function may get locked
-	 * up in this loop if the interrupts are not working correctly.
-	 */
+	 * up in this loop if the interrupts are not working correctly.	 */
 	while (TotalReceivedCount != TEST_BUFFER_SIZE) { 	}
 
 	xil_printf("\n\rchars detected\n\r");
@@ -161,6 +174,7 @@ void RecvHandler(void *CallBackRef, unsigned int EventData)
 {
 	(void)CallBackRef;
 	TotalReceivedCount = EventData;
+	global_junk++;
 }
 
 
