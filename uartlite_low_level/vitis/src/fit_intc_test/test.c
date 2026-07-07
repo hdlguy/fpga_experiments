@@ -131,6 +131,7 @@ int IntcLowLevelExample(u32 IntcBaseAddress)
 	 * Wait for the interrupt to be processed, if the interrupt does not
 	 * occur this loop will wait forever.
 	 */
+	uint32_t intcount=0;
 	while (1) {
 		/*
 		 * If the interrupt occurred which is indicated by the global
@@ -138,7 +139,9 @@ int IntcLowLevelExample(u32 IntcBaseAddress)
 		 * stop waiting.
 		 */
 		if (InterruptProcessed) {
-			break;
+			InterruptProcessed = 0;
+			xil_printf("intcount = %u\n\r", intcount);
+			intcount++;
 		}
 	}
 
