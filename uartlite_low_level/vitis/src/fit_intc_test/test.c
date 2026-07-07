@@ -5,6 +5,7 @@
 #include "xil_exception.h"
 #include "xil_printf.h"
 #include "xinterrupt_wrap.h"
+#include "fpga.h"
 
 
 #define INTC_BASEADDR		XPAR_XINTC_0_BASEADDR
@@ -18,62 +19,18 @@ int IntcLowLevelExample(u32 IntcBaseAddress);
 void SetupInterruptSystem();
 void DeviceDriverHandler(void *CallbackRef);
 
-/*
- * Create a shared variable to be used by the main thread of processing and
- * the interrupt processing
- */
+// Create a shared variable to be used by the main thread of processing and the interrupt processing
 static volatile int InterruptProcessed = FALSE;
 static XIntc_Config *CfgPtr;
 
-#if defined(XPAR_SCUGIC)
-XScuGic InterruptController;
-static XScuGic_Config *GicConfig;
-#endif
 
 int main(void)
 {
-	int Status;
-
-	/*
-	 * Run the low level example of Interrupt Controller, specify the Base
-	 * Address generated in xparameters.h.
-	 */
-	Status = IntcLowLevelExample(INTC_BASEADDR);
-	if (Status != XST_SUCCESS) {
-		xil_printf("Intc lowlevel Example Failed\r\n");
-		return XST_FAILURE;
-	}
-
-	xil_printf("Successfully ran Intc lowlevel Example\r\n");
-	return XST_SUCCESS;
-
-}
-
-/*****************************************************************************/
-/**
-*
-* This function is an example of how to use the interrupt controller driver
-* component (XIntc) and the hardware device.  This function is designed to
-* work without any hardware devices to cause interrupts. It may not return
-* if the interrupt controller is not properly connected to the processor in
-* either software or hardware.
-*
-* This function relies on the fact that the interrupt controller hardware
-* has come out of the reset state such that it will allow interrupts to be
-* simulated by the software.
-*
-* @param	IntcBaseAddress is Base Address of the the Interrupt Controller
-*		Device.
-*
-* @return	XST_SUCCESS to indicate success, otherwise XST_FAILURE.
-*
-* @note		None.
-*
-******************************************************************************/
-int IntcLowLevelExample(u32 IntcBaseAddress)
-{
 	UINTPTR vector_base;
 	u8 Id;
+	u32 IntcBaseAddress = INTC_BASEADDR;
+
+	uint32_t *regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
 
 	xil_printf("\n\r*** running fit_intc_test ***\n\r");
 
@@ -142,6 +99,7 @@ int IntcLowLevelExample(u32 IntcBaseAddress)
 			InterruptProcessed = 0;
 			xil_printf("intcount = %u\n\r", intcount);
 			intcount++;
+			regptr[FPGA_LED_CONTROL]++;
 		}
 	}
 
