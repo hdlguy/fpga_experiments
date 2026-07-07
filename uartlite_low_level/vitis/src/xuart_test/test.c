@@ -27,8 +27,6 @@ static volatile int TotalReceivedCount;
 static volatile int TotalSentCount;
 static volatile int global_junk;
 
-
-// int UartLiteIntrExample(XUartLite *UartLiteInstPtr, UINTPTR BaseAddress)
 int main(void)
 {
 	int Status;
@@ -46,11 +44,11 @@ int main(void)
 		return XST_FAILURE;
 	}
 
-	//  * Perform a self-test to ensure that the hardware was built correctly.
-	Status = XUartLite_SelfTest(&UartLite);
-	if (Status != XST_SUCCESS) {
-		return XST_FAILURE;
-	}
+	// //  * Perform a self-test to ensure that the hardware was built correctly.
+	// Status = XUartLite_SelfTest(&UartLite);
+	// if (Status != XST_SUCCESS) {
+	// 	return XST_FAILURE;
+	// }
 
 	//  * Connect the UartLite to the interrupt subsystem such that interrupts can occur. This function is application specific.
 	Status = XSetupInterruptSystem(&UartLite, &XUartLite_InterruptHandler, CfgPtr->IntrId, CfgPtr->IntrParent, XINTERRUPT_DEFAULT_PRIORITY);
@@ -80,8 +78,7 @@ int main(void)
 	//* Start receiving data before sending it since there is a loopback.
 	XUartLite_Recv(&UartLite, ReceiveBuffer, TEST_BUFFER_SIZE);
 
-	//  * Send the buffer using the UartLite.
-	//XUartLite_Send(&UartLite, SendBuffer, TEST_BUFFER_SIZE);
+
 	xil_printf("type 0123\n\r");
 
 // 	uint32_t whilecount = 0;

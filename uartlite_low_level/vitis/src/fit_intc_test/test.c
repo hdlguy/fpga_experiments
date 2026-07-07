@@ -10,12 +10,16 @@
 
 #define INTC_BASEADDR		XPAR_XINTC_0_BASEADDR
 // interrupt 1 is the FIT
-#define INTC_DEVICE_INTR_ID		0x1U
-#define INTC_DEVICE_INT_MASK	0x2U
+#define FIT_INTR_ID		0x1U
+#define FIT_INT_MASK	0x2U
+// interrupt 0 is the uart
+#define UART_INTR_ID 			XPAR_FABRIC_AXI_UARTLITE_0_INTR
+#define UART_INT_MASK			0x01U
 
 
 void SetupInterruptSystem();
-void DeviceDriverHandler(void *CallbackRef);
+void FitIntrHandler(void *CallbackRef);
+void UartIntrHandler(void *CallbackRef);
 
 // Create a shared variable to be used by the main thread of processing and the interrupt processing
 static volatile int InterruptProcessed = FALSE;
@@ -26,17 +30,18 @@ int main(void)
 {
 	UINTPTR vector_base;
 	u32 IntcBaseAddress = INTC_BASEADDR;
-
-	uint32_t *regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
+	uint32_t *intcptr = (uint32_t *)INTC_BASEADDR;
+	uint32_t *regptr  = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
 
 	xil_printf("\n\r*** running fit_intc_test ***\n\r");
 	xil_printf("FPGA_ID = 0x%08x, FPGA_VERSION = 0x%08x\n\r", regptr[FPGA_ID], regptr[FPGA_VERSION]);
 
 	// Connect a device driver handler 
-	XIntc_RegisterHandler(IntcBaseAddress, INTC_DEVICE_INTR_ID, (XInterruptHandler)DeviceDriverHandler, (void *)0);
+	XIntc_RegisterHandler(IntcBaseAddress, FIT_INTR_ID, (XInterruptHandler)FitIntrHandler, (void *)0);
+	XIntc_RegisterHandler(IntcBaseAddress, UART_INTR_ID, (XInterruptHandler)UartIntrHandler, (void *)0);
 
 	// Enable interrupts for all devices that cause interrupts, and enable the INTC master enable bit.
-	XIntc_EnableIntr(IntcBaseAddress, INTC_DEVICE_INT_MASK);
+	XIntc_EnableIntr(IntcBaseAddress, FIT_INT_MASK);
 
 	// Set the master enable bit and enable hardware interrupts
 	XIntc_Out32(IntcBaseAddress + XIN_MER_OFFSET, XIN_INT_MASTER_ENABLE_MASK|XIN_INT_HARDWARE_ENABLE_MASK);
@@ -44,10 +49,10 @@ int main(void)
     vector_base = 0x10;
 	//vector_base = XIL_EXCEPTION_ID_INT;
 
-	// write the interrupt vector table
+	// write the interrupt vector table, all entries point to vector_base.
 	CfgPtr = LookupConfigByBaseAddress(IntcBaseAddress);
 	for (u8 Id = 0; Id < 32 ; Id++) {
-		XIntc_Out32(IntcBaseAddress + XIN_IVAR_OFFSET + (Id * 4), vector_base);
+		intcptr[XIN_IVAR_OFFSET/4+Id] = vector_base;
 	}
 
 	/* This step is processor specific, connect the handler for the interrupt controller to the interrupt source for the processor.*/
@@ -120,11 +125,16 @@ void SetupInterruptSystem()
 * @note		None.
 *
 ******************************************************************************/
-void DeviceDriverHandler(void *CallbackRef)
+void FitIntrHandler(void *CallbackRef)
 {
 	(void)CallbackRef;
 	InterruptProcessed = TRUE;
 
 	uint32_t *regptr = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
 	regptr[FPGA_LED_CONTROL]++;
+}
+
+void UartIntrHandler(void *CallbackRef)
+{
+	(void)CallbackRef;
 }
