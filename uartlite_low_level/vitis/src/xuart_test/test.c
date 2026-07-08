@@ -4,10 +4,11 @@
 #include "xil_printf.h"
 #include "xinterrupt_wrap.h"
 #include "sleep.h"
+#include <stdbool.h>
 
 #define XUARTLITE_BASEADDRESS	XPAR_XUARTLITE_0_BASEADDR
 
-#define TEST_BUFFER_SIZE       4
+#define TEST_BUFFER_SIZE       20
 
 
 void SendHandler(void *CallBackRef, unsigned int EventData);
@@ -25,7 +26,6 @@ u8 ReceiveBuffer[TEST_BUFFER_SIZE];
 // * The following counters are used to determine when the entire buffer has been sent and received.
 static volatile int TotalReceivedCount;
 static volatile int TotalSentCount;
-static volatile int global_junk;
 
 int main(void)
 {
@@ -74,46 +74,69 @@ int main(void)
 		ReceiveBuffer[Index] = 0;
 	}
 
-	global_junk = 0;
 	//* Start receiving data before sending it since there is a loopback.
-	XUartLite_Recv(&UartLite, ReceiveBuffer, TEST_BUFFER_SIZE);
+	XUartLite_Recv(&UartLite, ReceiveBuffer, 1);
 
 
-	xil_printf("type 0123\n\r");
+	uint32_t whilecount = 0;
+	char rxchar;
+	bool ui_active = FALSE;
+	while(1) {
 
-// 	uint32_t whilecount = 0;
-// 	while(1) {
-
-// 		xil_printf("0x%08x\n\r", whilecount);
-
-// 		xil_printf("TotalReceivedCount = %d, global_junk = %d\n\r", TotalReceivedCount, global_junk);
-// 		TotalReceivedCount = 0;
-// 		global_junk = 0;
-
-// 		whilecount++;
-// 		usleep(1000000);
-// 	}
-
-// }
-
-
-	/* Wait for the entire buffer to be received, letting the interrupt
-	 * processing work in the background, this function may get locked
-	 * up in this loop if the interrupts are not working correctly.	 */
-	while (TotalReceivedCount != TEST_BUFFER_SIZE) { 	}
-
-	xil_printf("\n\rchars detected\n\r");
-
-	// * Verify the entire receive buffer was successfully received.
-	for (Index = 0; Index < TEST_BUFFER_SIZE; Index++) {
-		if (ReceiveBuffer[Index] != SendBuffer[Index]) {
-			return XST_FAILURE;
+		// print the periodic status message
+		if (!ui_active) {
+			xil_printf("0x%08x\n\r", whilecount);
 		}
+
+		// a character is recieved from the console
+		if (TotalReceivedCount > 0) {
+
+			rxchar = ReceiveBuffer[0];
+			switch(rxchar) {
+
+				case 'h':
+				case 'H':
+				case '?':
+					ui_active = TRUE;
+					xil_printf(
+						"Help:\n\r\th or H or ? = this help message\n\r" 
+						"\tm or M = set MAC address, format: \"m 00:d8:61:59:63:7a\"\n\r"
+						"\ti or I = set IP address\n\r"
+						"\te or E = exit menu\n\r"
+					);
+					break;
+
+				case 'm':
+				case 'M':
+					xil_printf("set MAC address: format 00:d8:61:59:63:7a\n\r");
+					break;
+
+				case 'i':
+				case 'I':
+					xil_printf("set IP address: format 192.168.1.197\n\r");
+					break;
+
+				case 'e':
+				case 'E':
+					ui_active = FALSE;
+					xil_printf("Exit Menu\n\r");
+					break;
+
+			}
+			
+			TotalReceivedCount = 0;
+			XUartLite_Recv(&UartLite, ReceiveBuffer, 1);
+		}
+
+		// this code corresponds to the normal operations that we don't want blocked.
+		whilecount++;
+		usleep(1000000);
 	}
 
-	xil_printf("test passed\n\r");
-	return XST_SUCCESS;
 }
+
+
+
 
 /*****************************************************************************/
 /**
@@ -171,7 +194,6 @@ void RecvHandler(void *CallBackRef, unsigned int EventData)
 {
 	(void)CallBackRef;
 	TotalReceivedCount = EventData;
-	global_junk++;
 }
 
 
