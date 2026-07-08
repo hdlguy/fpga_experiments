@@ -1,10 +1,12 @@
 #include "xparameters.h"
 #include "xuartlite.h"
+#include "xuartlite_l.h"
 #include "xil_exception.h"
 #include "xil_printf.h"
 #include "xinterrupt_wrap.h"
 #include "sleep.h"
 #include <stdbool.h>
+#include "fpga.h"
 
 #define XUARTLITE_BASEADDRESS	XPAR_XUARTLITE_0_BASEADDR
 
@@ -99,27 +101,27 @@ int main(void)
 				case '?':
 					ui_active = TRUE;
 					xil_printf(
-						"Help:\n\r\th or H or ? = this help message\n\r" 
+						"\n\rHelp:\n\r\th or H or ? = this help message\n\r" 
 						"\tm or M = set MAC address, format: \"m 00:d8:61:59:63:7a\"\n\r"
-						"\ti or I = set IP address\n\r"
+						"\ti or I = set IP address, format: \"i 16.0.0.128\"\n\r"
 						"\te or E = exit menu\n\r"
 					);
 					break;
 
 				case 'm':
 				case 'M':
-					xil_printf("set MAC address: format 00:d8:61:59:63:7a\n\r");
+					xil_printf("MAC address = 00:d8:61:59:63:7a\n\r");
 					break;
 
 				case 'i':
 				case 'I':
-					xil_printf("set IP address: format 192.168.1.197\n\r");
+					xil_printf("IP address = 16.0.0.128\n\r");
 					break;
 
 				case 'e':
 				case 'E':
 					ui_active = FALSE;
-					xil_printf("Exit Menu\n\r");
+					xil_printf("Exit Menu\n\r\n\r");
 					break;
 
 			}
@@ -172,7 +174,7 @@ void SendHandler(void *CallBackRef, unsigned int EventData)
 *
 * This function is the handler which performs processing to receive data from
 * the UartLite. It is called from an interrupt context such that the amount of
-* processing performed should be minimized.  It is called data is present in
+* processing performed should be minimized.  It is called when data is present in
 * the receive FIFO of the UartLite such that the data can be retrieved from
 * the UartLite. The size of the data present in the FIFO is not known when
 * this function is called.
@@ -194,6 +196,13 @@ void RecvHandler(void *CallBackRef, unsigned int EventData)
 {
 	(void)CallBackRef;
 	TotalReceivedCount = EventData;
+	uint32_t *regptr  = (uint32_t *)XPAR_REGFILE_CTRL_BASEADDR;
+	//uint32_t *uartptr = (uint32_t *)XPAR_AXI_UARTLITE_0_BASEADDR;
+
+	regptr[FPGA_LED_CONTROL]++;
+	// regptr[FPGA_LED_CONTROL] = uartptr[XUL_RX_FIFO_OFFSET/4];
+	// regptr[FPGA_LED_CONTROL] = TotalReceivedCount & 0x00ff;
+	
 }
 
 
