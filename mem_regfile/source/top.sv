@@ -7,7 +7,7 @@ module top (
     output  logic       usb_uart_txd
 );
 
-	localparam int Naddr = 6;
+	localparam int Naddr = 4;
     localparam int Nregs = 2**Naddr;
     localparam logic[Nregs-1:0][31:0] init_reg = {
         32'hffff_ffff, 32'heeee_eeee, 32'hdddd_dddd, 32'hcccc_cccc,
@@ -68,7 +68,7 @@ module top (
     assign led = reg_val[2][7:0];
 		
 	
-	top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
+	//top_ila ila_inst (.clk(regfile_clk), .probe0({regfile_addr, regfile_din, regfile_dout, regfile_en, 1'b0, regfile_we, pul_val[3]})); // 114
 
 endmodule
 

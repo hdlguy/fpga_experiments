@@ -1,4 +1,4 @@
-#define     N_REGS              64
+#define     N_REGS              16
 #define     BRAM_SIZE           4096
 
 #define		FPGA_ID		        0
