@@ -11,7 +11,9 @@ set_property default_lib work [current_project]
 load_features ipintegrator
 tclapp::install ultrafast -quiet
 
-read_ip ../source/top_ila/top_ila.xci
+#read_ip ../source/top_ila/top_ila.xci
+
+source ../source/top_ila.tcl
 
 upgrade_ip -quiet  [get_ips *]
 generate_target {all} [get_ips *]
