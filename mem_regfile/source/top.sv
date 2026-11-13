@@ -16,12 +16,13 @@ module top (
         32'h3333_3030, 32'h2222_2222, 32'h1111_1111, 32'h0000_0000
     };
 	    
-    logic [11:0]regfile_addr;
-    logic regfile_clk;
-    logic [31:0]regfile_din;
-    logic [31:0]regfile_dout;
-    logic regfile_en;
-    logic [3:0]regfile_we;
+    logic [11:0]    regfile_addr;
+    logic           regfile_clk;
+    logic [31:0]    regfile_din;
+    logic [31:0]    regfile_dout;
+    logic           regfile_en;
+    logic           regfile_rst;
+    logic [3:0]     regfile_we;
     
     system system_i (
         .clkin(clkin100),
